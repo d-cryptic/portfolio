@@ -4,7 +4,8 @@ draft: false
 permalink: barun-debnath-intro-about-me
 tags:
     - intro
-    - index
+    - home-page
+    - about-me
 alias:
     - about-me
     - intro
