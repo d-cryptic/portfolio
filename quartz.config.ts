@@ -8,28 +8,30 @@ import * as Plugin from "./quartz/plugins"
  */
 const config: QuartzConfig = {
   configuration: {
-    pageTitle: "🪴 Quartz 4.0",
-    pageTitleSuffix: "",
+    pageTitle: "🤠 Barun Debnath",
+    pageTitleSuffix: "Welcome to my site!",
     enableSPA: true,
     enablePopovers: true,
     analytics: {
-      provider: "plausible",
+      provider: "google",
+      tagId: "G-Y2PDE1XSGV",
     },
     locale: "en-US",
     baseUrl: "barundebnath.com",
     ignorePatterns: ["private", "templates", ".obsidian"],
     defaultDateType: "created",
-    generateSocialImages: false,
+    generateSocialImages: true,
     theme: {
       fontOrigin: "googleFonts",
       cdnCaching: true,
       typography: {
-        header: "Atkinson Hyperlegible",
-        body: "Atkinson Hyperlegible",
-        code: "Atkinson Hyperlegible",
+        header: "Recursive",
+        body: "Recursive",
+        code: "Recursive",
       },
       colors: {
         lightMode: {
+          // using green instead of gray
           light: "#faf8f8",
           lightgray: "#e5e5e5",
           gray: "#b8b8b8",
