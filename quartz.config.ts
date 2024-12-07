@@ -9,7 +9,7 @@ import * as Plugin from "./quartz/plugins"
 const config: QuartzConfig = {
   configuration: {
     pageTitle: "🕹 Barun Debnath",
-    pageTitleSuffix: " Welcome to my site!",
+    pageTitleSuffix: "",
     enableSPA: true,
     enablePopovers: true,
     analytics: {
@@ -43,15 +43,15 @@ const config: QuartzConfig = {
           textHighlight: "#fff23688",
         },
         darkMode: {
-          light: "#24283b",
-          lightgray: "#414868",
-          gray: "#646464",
-          darkgray: "#d4d4d4",
-          dark: "#ebebec",
-          secondary: "#bb9af7",
-          tertiary: "#9B6BF3",
-          highlight: "#8f9fa926",
-          textHighlight: "#26283b",
+          light: "#f9f4ee",
+          lightgray: "#ebe6e0",
+          gray: "#c0b8b0",
+          darkgray: "#5a534d",
+          dark: "#074D3B",
+          secondary: "#0E9B77",
+          tertiary: "#0A674F",
+          highlight: "#c4d7c472",
+          textHighlight: "#fff23688",
         },
       },
     },
@@ -64,7 +64,7 @@ const config: QuartzConfig = {
       }),
       Plugin.SyntaxHighlighting({
         theme: {
-          light: "catppuccin-macchiato",
+          light: "catppuccin-latte",
           dark: "catppuccin-macchiato",
         },
         keepBackground: false,

@@ -6,12 +6,26 @@ import * as Component from "./quartz/components"
 export const sharedPageComponents: SharedLayout = {
   head: Component.Head(),
   header: [],
-  afterBody: [],
+  afterBody: [
+    Component.MobileOnly(
+      Component.RecentNotes({
+        showTags: false,
+        limit: 5,
+        title: "Recent writing",
+      }),
+    ),
+  ],
   footer: Component.Footer({
     links: {
       GitHub: "https://github.com/d-cryptic",
       Twitter: "https://twitter.com/heydensetsu",
       Linkedin: "https://linkedin.com/in/barundebnath",
+    },
+    shortcuts: {
+      Blogs: "https://barundebnath.com/Blogs",
+      Notes: "https://barundebnath.com/Notes",
+      Projects: "https://barundebnath.com/Projects",
+      Tags: "https://barundebnath.com/tags",
     },
   }),
 }
