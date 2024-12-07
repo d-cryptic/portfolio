@@ -20,6 +20,7 @@ export const sharedPageComponents: SharedLayout = {
       GitHub: "https://github.com/d-cryptic",
       Twitter: "https://twitter.com/heydensetsu",
       Linkedin: "https://linkedin.com/in/barundebnath",
+      Email: "mailto:barundebnath91@gmail.com",
     },
     shortcuts: {
       Blogs: "https://barundebnath.com/Blogs",
@@ -50,6 +51,13 @@ export const defaultContentPageLayout: PageLayout = {
     Component.Graph(),
     Component.DesktopOnly(Component.TableOfContents()),
     Component.Backlinks(),
+    Component.DesktopOnly(
+      Component.RecentNotes({
+        showTags: false,
+        limit: 5,
+        title: "Recent writing",
+      }),
+    ),
   ],
 }
 
