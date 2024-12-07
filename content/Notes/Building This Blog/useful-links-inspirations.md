@@ -35,3 +35,8 @@ tags:
   2. Emoji to PNG - [Link](https://emoji.aranja.com/)
 
 - Color Wheel - [Link](https://www.canva.com/colors/color-wheel/)
+
+# Hosting
+
+- The code is hosted on private github repo
+- The site is deployed using cloudflare pages under free plan
