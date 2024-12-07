@@ -9,7 +9,7 @@ Hi, I am Barun Debnath
 
 ![My inspiration](./attachments/about-me.png)
 
-
+#### Random code snippet for testing
 ```js
 export interface FullPageLayout {
   head: QuartzComponent // single component
