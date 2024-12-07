@@ -40,3 +40,9 @@ tags:
 
 - The code is hosted on private github repo
 - The site is deployed using cloudflare pages under free plan
+
+# Tools used
+
+- [DeepAI](https://deepai.org/)
+  - image generation - samurai coder
+  - background remover
