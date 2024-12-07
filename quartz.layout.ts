@@ -23,11 +23,11 @@ export const sharedPageComponents: SharedLayout = {
       Email: "mailto:barundebnath91@gmail.com",
     },
     shortcuts: {
-      Blogs: "https://barundebnath.com/Blogs",
-      Notes: "https://barundebnath.com/Notes",
-      Projects: "https://barundebnath.com/Projects",
-      Tags: "https://barundebnath.com/tags",
-      Shelf: "https://barundebnath.com/Shelf",
+      Blogs: "/Blogs",
+      Notes: "/Notes",
+      Projects: "/Projects",
+      Tags: "/tags",
+      Shelf: "/Shelf",
     },
   }),
 }
