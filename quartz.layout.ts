@@ -26,6 +26,7 @@ export const sharedPageComponents: SharedLayout = {
       Notes: "https://barundebnath.com/Notes",
       Projects: "https://barundebnath.com/Projects",
       Tags: "https://barundebnath.com/tags",
+      Shelf: "https://barundebnath.com/Shelf",
     },
   }),
 }
