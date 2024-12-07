@@ -10,7 +10,6 @@ alias:
     - about-me
     - intro
     - home-page
-date: 2024-12-04
 ---
 
-This is my about me page
+![Home Page Hero Image](quartz/static/about-me.jpeg)
