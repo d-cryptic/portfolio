@@ -8,13 +8,14 @@
   }
 
   & > .search-button {
-    background-color: var(--lightgray);
+    background-color: #ebe6e0;
     border: none;
     border-radius: 4px;
     font-family: inherit;
     font-size: inherit;
     height: 2rem;
-    padding: 0;
+    padding: 1.3rem 0;
+    /* padding: 0; */
     display: flex;
     align-items: center;
     text-align: inherit;

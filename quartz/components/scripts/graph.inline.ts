@@ -181,6 +181,7 @@ async function renderGraph(container: string, fullSlug: FullSlug) {
     "--dark",
     "--darkgray",
     "--bodyFont",
+    "--searchbar",
   ] as const
   const computedStyleMap = cssVars.reduce(
     (acc, key) => {
