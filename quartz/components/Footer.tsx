@@ -14,8 +14,8 @@ export default ((opts?: Options) => {
     return (
       <footer class={`${displayClass ?? ""}`}>
         <p>
-          {i18n(cfg.locale).components.footer.createdWith}{" "}
-          <a href="https://barundebnath.com">Quartz v{version}</a> © {year}
+          {i18n(cfg.locale).components.footer.createdWith} <a href="https://barundebnath.com"></a>{" "}
+          © {year}
           <p>Follow me at: </p>
         </p>
         <ul>
