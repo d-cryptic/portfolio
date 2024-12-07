@@ -12,4 +12,4 @@ alias:
     - home-page
 ---
 
-![Home Page Hero Image](./attachments/about-me.jpeg)
+Hi, I am Barun Debnath
