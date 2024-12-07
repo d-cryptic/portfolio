@@ -12,4 +12,4 @@ alias:
     - home-page
 ---
 
-![Home Page Hero Image](quartz/static/about-me.jpeg)
+![Home Page Hero Image](../quartz/static/about-me.jpeg)
