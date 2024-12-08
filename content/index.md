@@ -42,8 +42,8 @@ The goal? Build a digital playground where blogs, projects, and knowledge collid
 Think of it as my personal **command center** 🛠️ with: 
 
 1. [[/Blogs]] - Personal reflections, tech rants, and lessons from the trenches.
-2. [[/Garden]] [**Garden**](/Garden) - A curated collection of links, resources, and ideas – my digital greenhouse 🌱.  
-3. [[/Projects]] [**Projects**](/Projects) - A sneak peek into what I’m tinkering with.
+2. [[/Garden]] - A curated collection of links, resources, and ideas – my digital greenhouse 🌱.  
+3. [[/Projects]] - A sneak peek into what I’m tinkering with.
 4. [[/Notes]] - Quick summaries of books, papers, and videos – all the wisdom without the fluff.
 5. [[/Shelf]] - Research papers, books, and blogs I’ve devoured (and recommend).
 6. [[/Snippets]] - My day-to-day code hacks and helpful tricks, ready at my fingertips.
