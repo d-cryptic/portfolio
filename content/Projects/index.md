@@ -1,5 +1,5 @@
 ---
-title: 📚 Shelf - Coming Soon
+title: 📚 Projects - Coming Soon
 draft: false
 permalink: blogs-coming-soon
 ---
