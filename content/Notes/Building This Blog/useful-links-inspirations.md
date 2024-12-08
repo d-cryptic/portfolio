@@ -24,6 +24,7 @@ tags:
   8. [Airbyte glossary](https://glossary.airbyte.com/)
   9. [Benjamin Dickenn](https://benjdd.com/)
   10. [Sam Julien](https://www.samjulien.com/writing/)
+  11. [Vineeth](https://vineeth.io/)
 
 # Static Resources
 - Fonts used:
