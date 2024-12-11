@@ -21,7 +21,7 @@ When I'm not debugging or building, you’ll find me buried in mangas, sipping c
 > | ----------------| ---------------- | ------------ |
 > | SRE | [One2N](https://one2n.io/) | Jun'24 - Present |
 > | SRE | [Media.Net](https://www.media.net/) | Jul'23 - Jun'24 |
-> | SRE Intern | [Media.Net](https://www.media.net/) | Jul'23 - Jun'24 |
+> | SRE Intern | [Media.Net](https://www.media.net/) | Jan'23 - Jun'23 |
 > 
 > From firefighting production issues to building scalable platforms, the journey’s been a wild ride!  
 > Know more about my work experience from my **[RESUME](https://drive.google.com/file/d/1kEe29ZLiOqxdEV0eDXisdqvwei3Fn4zh/view?usp=sharing)**
