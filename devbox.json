@@ -1,0 +1,13 @@
+{
+  "packages": ["nodejs_20", "typescript"],
+  "shell": {
+    "init_hook": ["npm install"],
+    "scripts": {
+      "docs": "npm run docs",
+      "build": "npm run build",
+      "check": "npm run check",
+      "format": "npm run format",
+      "test": "npm run test"
+    }
+  }
+}

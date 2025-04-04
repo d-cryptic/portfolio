@@ -1,0 +1,17 @@
+{
+  "lockfile_version": "1",
+  "packages": {
+    "github:NixOS/nixpkgs/nixpkgs-unstable": {
+      "resolved": "github:NixOS/nixpkgs/2bfc080955153be0be56724be6fa5477b4eefabb?lastModified=1743689281&narHash=sha256-y7Hg5lwWhEOgflEHRfzSH96BOt26LaYfrYWzZ%2BVoVdg%3D"
+    },
+    "nodejs_20": {
+      "plugin_version": "0.0.2",
+      "resolved": "github:NixOS/nixpkgs/2bfc080955153be0be56724be6fa5477b4eefabb?narHash=sha256-y7Hg5lwWhEOgflEHRfzSH96BOt26LaYfrYWzZ%2BVoVdg%3D#nodejs_20",
+      "source": "nixpkg"
+    },
+    "typescript": {
+      "resolved": "github:NixOS/nixpkgs/75a52265bda7fd25e06e3a67dee3f0354e73243c#typescript",
+      "source": "nixpkg"
+    }
+  }
+}
