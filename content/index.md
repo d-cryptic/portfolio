@@ -1,5 +1,5 @@
 ---
-title: 👋 Welcome to my Digital Garden
+title: 👋 Welcome to my Digital Garden (Coming Soon)
 draft: false
 permalink: barun-debnath-intro-about-me
 ---
