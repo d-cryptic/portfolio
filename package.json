@@ -48,7 +48,7 @@
     "cli-spinner": "^0.2.10",
     "d3": "^7.9.0",
     "esbuild-sass-plugin": "^3.3.1",
-    "flexsearch": "0.8.149",
+    "flexsearch": "0.8.151",
     "github-slugger": "^2.0.0",
     "globby": "^14.1.0",
     "gray-matter": "^4.0.3",
@@ -64,7 +64,7 @@
     "mermaid": "^11.6.0",
     "micromorph": "^0.4.5",
     "pixi.js": "^8.9.1",
-    "preact": "^10.26.4",
+    "preact": "^10.26.5",
     "preact-render-to-string": "^6.5.13",
     "pretty-bytes": "^6.1.1",
     "pretty-time": "^1.1.0",
@@ -113,6 +113,6 @@
     "esbuild": "^0.25.2",
     "prettier": "^3.5.3",
     "tsx": "^4.19.3",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.3"
   }
 }
