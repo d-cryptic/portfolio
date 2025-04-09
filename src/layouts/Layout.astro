@@ -5,10 +5,7 @@ import Footer from "@components/Footer.astro";
 import Pagefind from "@components/PageFind.astro";
 import { SITE } from "@consts";
 
-type Props = {
-  title: string;
-  description: string;
-};
+type Props = { title: string; description: string };
 
 const { title, description } = Astro.props;
 ---
@@ -17,6 +14,28 @@ const { title, description } = Astro.props;
 <html lang="en">
   <head>
     <Head title={`${title} | ${SITE.TITLE}`} description={description} />
+    <script is:inline>
+      // Check for saved theme preference or use system preference
+      const getTheme = () => {
+        if (
+          typeof localStorage !== "undefined" &&
+          localStorage.getItem("theme")
+        ) {
+          return localStorage.getItem("theme");
+        }
+        return window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light";
+      };
+
+      // Apply theme immediately to prevent flash
+      const theme = getTheme();
+      if (theme === "dark") {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+    </script>
   </head>
   <body>
     <Header />
