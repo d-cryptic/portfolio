@@ -2,26 +2,29 @@ import type { Metadata, Site, Socials } from "@types";
 
 export const SITE: Site = {
   TITLE: "Barun Debnath",
-  DESCRIPTION: "Astro Micro is an accessible and lightweight blog.",
+  DESCRIPTION:
+    "SRE by day, manga enthusiast by night. Exploring systems, technology, and life with a beginner's mindset (Shoshin).",
   EMAIL: "barundebnath91@gmail.com",
   NUM_POSTS_ON_HOMEPAGE: 6,
   NUM_PROJECTS_ON_HOMEPAGE: 3,
 };
 
 export const HOME: Metadata = {
-  TITLE: "Home",
-  DESCRIPTION: "Astro Micro is an accessible theme for Astro.",
+  TITLE: "Barun Debnath | SRE & Systems Explorer",
+  DESCRIPTION:
+    "🚀 Exploring the world of SRE, Systems, and Platform Engineering, one incident at a time. When not debugging, you'll find me with mangas, coffee, and that perfect setup quest.",
 };
 
 export const BLOG: Metadata = {
-  TITLE: "Blog",
-  DESCRIPTION: "A collection of articles on topics I am passionate about.",
+  TITLE: "Systems & Beyond | Shoshin",
+  DESCRIPTION:
+    "Exploring systems, technology, and life with a beginner's mindset. From SRE adventures to manga musings, coffee experiments to setup tweaks.",
 };
 
 export const PROJECTS: Metadata = {
-  TITLE: "Projects",
+  TITLE: "Projects & Experiments",
   DESCRIPTION:
-    "A collection of my projects with links to repositories and live demos.",
+    "A collection of my adventures in code, infrastructure, and everything in between. From production systems to personal experiments.",
 };
 
 export const SOCIALS: Socials = [
