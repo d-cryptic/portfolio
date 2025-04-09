@@ -25,16 +25,8 @@ export const PROJECTS: Metadata = {
 };
 
 export const SOCIALS: Socials = [
-  {
-    NAME: "X (formerly Twitter)",
-    HREF: "https://twitter.com/heydensetsu",
-  },
-  {
-    NAME: "GitHub",
-    HREF: "https://github.com/d-cryptic",
-  },
-  {
-    NAME: "Website",
-    HREF: "https://barundebnath.com",
-  },
+  { NAME: "X (formerly Twitter)", HREF: "https://twitter.com/heydensetsu" },
+  { NAME: "GitHub", HREF: "https://github.com/d-cryptic" },
+  { NAME: "LinkedIn", HREF: "https://www.linkedin.com/in/barundebnath" },
+  { NAME: "Website", HREF: "https://barundebnath.com" },
 ];

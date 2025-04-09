@@ -1,6 +1,6 @@
 ---
 interface Props {
-  type?: "default" | "info" | "warning" | "error";
+  type?: "default" | "info" | "warning" | "error" | "work" | "hi" | "chat";
 }
 const { type = "default" } = Astro.props;
 let emoji = "💡";
@@ -10,6 +10,12 @@ if (type === "info") {
   emoji = "⚠️";
 } else if (type === "error") {
   emoji = "🚨";
+} else if (type === "work") {
+  emoji = "💼";
+} else if (type === "hi") {
+  emoji = "👋";
+} else if (type === "chat") {
+  emoji = "💬";
 }
 
 const baseClasses = "relative my-4 flex rounded border p-3";
@@ -21,6 +27,9 @@ const typeClasses = {
     "border-yellow-800 bg-yellow-100 text-yellow-950 dark:border-yellow-200/20 dark:bg-yellow-950/20 dark:text-yellow-200",
   error:
     "border-red-800 bg-red-100 text-red-950 dark:border-red-200/20 dark:bg-red-950/20 dark:text-red-200",
+  work: "border-green-800 bg-green-100 text-green-950 dark:border-green-200/20 dark:bg-green-950/20 dark:text-green-200",
+  hi: "border-purple-800 bg-purple-100 text-purple-950 dark:border-purple-200/20 dark:bg-purple-950/20 dark:text-purple-200",
+  chat: "border-green-800 bg-green-100 text-green-950 dark:border-green-200/20 dark:bg-green-950/20 dark:text-green-200",
 };
 ---
 
