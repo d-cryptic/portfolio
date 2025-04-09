@@ -16,14 +16,16 @@
 @layer base {
   :root {
     /* Green-based color palette */
-    --color-primary: #0e9b77; /* Secondary green */
-    --color-secondary: #074d3b; /* Dark green */
-    --color-accent: #2fb492; /* Light green */
-    --color-background: #f9f4ee; /* Light cream */
-    --color-text: #5a534d; /* Dark gray */
+    --color-primary: #0e9b77; /* Secondary */
+    --color-secondary: #074d3b; /* Dark */
+    --color-accent: #2fb492; /* Lightgray */
+    --color-background: #f9f4ee; /* Light */
+    --color-text: #5a534d; /* Darkgray */
     --color-muted: #c0b8b0; /* Gray */
-    --color-highlight: #c4d7c4; /* Highlight green */
-    --color-text-highlight: #fff236; /* Text highlight */
+    --color-highlight: #c4d7c472; /* Highlight */
+    --color-text-highlight: #fff23688; /* Text highlight */
+    --color-searchbar: #ebe6e0; /* Searchbar */
+    --color-tertiary: #0a674f; /* Tertiary */
   }
 
   .dark {
