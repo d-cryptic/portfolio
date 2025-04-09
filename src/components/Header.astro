@@ -112,7 +112,7 @@ import { SITE } from "@consts";
             </svg>
           </button>
           <nav
-            class="flex translate-y-[-100%] transform flex-col items-center gap-6 bg-[var(--color-background)] pb-10 text-lg shadow-md transition-transform duration-300 ease-in-out"
+            class="flex translate-y-[-100%] transform flex-col items-center gap-6 rounded-b-3xl bg-[var(--color-background)] pb-10 text-lg shadow-md transition-transform duration-300 ease-in-out"
             id="mobile-nav"
           >
             <Link href="/blog">blog</Link>
@@ -132,6 +132,7 @@ import { SITE } from "@consts";
   const magnifyingGlass = document.getElementById("magnifying-glass");
   const mobileNav = document.getElementById("mobile-nav");
   const mobileNavLinks = mobileNav?.querySelectorAll("a");
+  const mainContent = document.querySelector("main");
 
   function toggleMenu() {
     if (mobileMenu?.classList.contains("hidden")) {
@@ -141,10 +142,16 @@ import { SITE } from "@consts";
       mobileMenu.offsetHeight;
       mobileMenu.classList.remove("opacity-0");
       mobileNav?.classList.remove("translate-y-[-100%]");
+      mainContent?.classList.add(
+        "blur-[2px]",
+        "transition-all",
+        "duration-300",
+      );
     } else {
       // Closing the menu
       mobileMenu?.classList.add("opacity-0");
       mobileNav?.classList.add("translate-y-[-100%]");
+      mainContent?.classList.remove("blur-[2px]");
       // Wait for animation to complete before hiding
       setTimeout(() => {
         mobileMenu?.classList.add("hidden");
@@ -156,6 +163,7 @@ import { SITE } from "@consts";
   function closeMenu() {
     mobileMenu?.classList.add("opacity-0");
     mobileNav?.classList.add("translate-y-[-100%]");
+    mainContent?.classList.remove("blur-[2px]");
     setTimeout(() => {
       mobileMenu?.classList.add("hidden");
       document.body.classList.remove("overflow-hidden");
