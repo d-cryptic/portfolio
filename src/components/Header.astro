@@ -89,34 +89,34 @@ import { SITE } from "@consts";
         <!-- Mobile Menu -->
         <div
           id="mobile-menu"
-          class="fixed inset-0 z-50 hidden bg-[var(--color-background)]/95 pt-20 pb-10 shadow-lg backdrop-blur-sm"
+          class="fixed inset-0 z-50 hidden bg-[var(--color-background)]/95 pt-20 pb-10 opacity-0 shadow-lg backdrop-blur-sm transition-opacity duration-300 ease-in-out"
         >
+          <button
+            id="mobile-menu-close"
+            aria-label="Close Menu"
+            class="absolute top-[1.125rem] right-6 flex items-center rounded-sm border border-black/15 bg-neutral-100 px-2 py-1 text-xs transition-colors duration-300 ease-in-out hover:bg-black/5 hover:text-black focus-visible:bg-black/5 focus-visible:text-black dark:border-white/20 dark:bg-neutral-900 dark:hover:bg-white/5 dark:hover:text-white dark:focus-visible:bg-white/5 dark:focus-visible:text-white"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
           <nav
-            class="flex flex-col items-center gap-6 bg-[var(--color-background)] pb-10 text-lg shadow-md"
+            class="flex translate-y-[-100%] transform flex-col items-center gap-6 bg-[var(--color-background)] pb-10 text-lg shadow-md transition-transform duration-300 ease-in-out"
             id="mobile-nav"
           >
             <Link href="/blog">blog</Link>
             <Link href="/projects">projects</Link>
-            <button
-              id="mobile-menu-close"
-              aria-label="Close Menu"
-              class="absolute top-6 right-6 p-2"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </button>
           </nav>
         </div>
       </div>
@@ -134,13 +134,32 @@ import { SITE } from "@consts";
   const mobileNavLinks = mobileNav?.querySelectorAll("a");
 
   function toggleMenu() {
-    mobileMenu?.classList.toggle("hidden");
+    if (mobileMenu?.classList.contains("hidden")) {
+      // Opening the menu
+      mobileMenu.classList.remove("hidden");
+      // Force a reflow
+      mobileMenu.offsetHeight;
+      mobileMenu.classList.remove("opacity-0");
+      mobileNav?.classList.remove("translate-y-[-100%]");
+    } else {
+      // Closing the menu
+      mobileMenu?.classList.add("opacity-0");
+      mobileNav?.classList.add("translate-y-[-100%]");
+      // Wait for animation to complete before hiding
+      setTimeout(() => {
+        mobileMenu?.classList.add("hidden");
+      }, 300);
+    }
     document.body.classList.toggle("overflow-hidden");
   }
 
   function closeMenu() {
-    mobileMenu?.classList.add("hidden");
-    document.body.classList.remove("overflow-hidden");
+    mobileMenu?.classList.add("opacity-0");
+    mobileNav?.classList.add("translate-y-[-100%]");
+    setTimeout(() => {
+      mobileMenu?.classList.add("hidden");
+      document.body.classList.remove("overflow-hidden");
+    }, 300);
   }
 
   mobileMenuButton?.addEventListener("click", toggleMenu);
