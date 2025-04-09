@@ -24,33 +24,42 @@ const projects: CollectionEntry<"projects">[] = (
 <Layout title={HOME.TITLE} description={HOME.DESCRIPTION}>
   <Container>
     <aside data-pagefind-ignore>
-      <Callout type="hi">
-        <h1 class="font-semibold text-black dark:text-white">
-          Hi, I am <b>Barun Debnath</b>
-        </h1>
-      </Callout>
-      <div class="space-y-16"></div>
+      <div class="space-y-8">
+        <div class="space-y-4">
+          <Callout type="hi">
+            <h1 class="font-semibold text-black dark:text-white">
+              Hi, I am <b>Barun Debnath</b>
+            </h1>
+          </Callout>
+          <p>
+            🚀 Exploring the world of <b>SRE</b>, <b>Systems</b>, and <b
+              >Platform Engineering</b
+            >, one system crash (oops, <b>incident</b>) at a time.
+          </p>
+          <p>
+            When I'm not debugging or building, you'll find me buried in mangas,
+            sipping coffee, and obsessing over *that one perfect setup*.
+          </p>
+        </div>
+        <div class="flex w-full justify-center">
+          <img
+            src="https://assets.barundebnath.com/about-me%20(1).png"
+            alt="Ninja coding on laptop - Barun's digital avatar"
+            class="h-auto w-full max-w-[800px] rounded-lg"
+            width="800"
+            height="800"
+          />
+        </div>
+      </div>
       <div class="space-y-16">
         <section>
           <article class="space-y-4">
-            <span>
-              <p>
-                🚀 Exploring the world of <b>SRE</b>, <b>Systems</b>, and <b
-                  >Platform Engineering</b
-                >, one system crash (oops, <b>incident</b>) at a time.
-              </p>
-              <p>
-                When I'm not debugging or building, you'll find me buried in
-                mangas, sipping coffee, and obsessing over *that one perfect
-                setup*.
-              </p>
-              <p>
-                <Callout type="work">
-                  <b>What I've Been Up To</b>
-                </Callout>
-                <b>Here's my highlight reel so far:</b>
-              </p>
-            </span>
+            <p>
+              <Callout type="work">
+                <b>What I've Been Up To</b>
+              </Callout>
+              <b>Here's my highlight reel so far:</b>
+            </p>
             <div class="animate -mt-10">
               <div class="overflow-x-auto">
                 <table class="w-full border-collapse">

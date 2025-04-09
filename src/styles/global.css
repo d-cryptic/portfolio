@@ -1,31 +1,36 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @plugin '@tailwindcss/typography';
 
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --font-sans: Geist Sans, ui-sans-serif, system-ui, sans-serif,
-    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-  --font-mono: Geist Mono, ui-monospace, SFMono-Regular, Menlo, Monaco,
-    Consolas, 'Liberation Mono', 'Courier New', monospace;
+  --font-sans:
+    Geist Sans, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-mono:
+    Geist Mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
 }
 
-/*
-  The default border color has changed to `currentColor` in Tailwind CSS v4,
-  so we've added these compatibility styles to make sure everything still
-  looks the same as it did with Tailwind CSS v3.
-
-  If we ever want to remove these styles, we need to add an explicit border
-  color utility to any element that depends on these defaults.
-*/
 @layer base {
-  *,
-  ::after,
-  ::before,
-  ::backdrop,
-  ::file-selector-button {
-    border-color: var(--color-gray-200, currentColor);
+  :root {
+    /* Anime-inspired color palette */
+    --color-primary: #ff4b82; /* Sakura pink */
+    --color-secondary: #00b4d8; /* Ocean blue */
+    --color-accent: #ffd700; /* Gold */
+    --color-background: #f5f0ff; /* Soft lavender background */
+    --color-text: #2d3436; /* Dark text */
+    --color-muted: #636e72; /* Muted text */
+  }
+
+  .dark {
+    --color-primary: #ff8da1; /* Softer sakura pink */
+    --color-secondary: #7ad7f0; /* Softer ocean blue */
+    --color-accent: #ffe55c; /* Softer gold */
+    --color-background: #1e1e2e; /* Softer dark navy */
+    --color-text: #cdd6f4; /* Softer light text */
+    --color-muted: #a6adc8; /* Softer muted text */
   }
 }
 
@@ -53,7 +58,7 @@
   }
 
   header {
-    @apply fixed left-0 right-0 top-0 z-50 py-6;
+    @apply fixed top-0 right-0 left-0 z-50 py-6;
     @apply bg-neutral-100/75 dark:bg-neutral-900/75;
     @apply saturate-200 backdrop-blur-xs;
   }
@@ -67,7 +72,7 @@
   }
 
   article {
-    @apply prose prose-neutral max-w-full dark:prose-invert prose-img:mx-auto prose-img:my-auto;
+    @apply prose prose-neutral dark:prose-invert prose-img:mx-auto prose-img:my-auto max-w-full;
     @apply prose-headings:font-semibold;
     @apply prose-headings:text-black dark:prose-headings:text-white;
   }
@@ -137,7 +142,7 @@ pre {
 
 /* copy code button on codeblocks */
 .copy-code {
-  @apply absolute right-3 top-3 grid size-9 place-content-center rounded-sm border border-black/15 bg-neutral-100 text-center duration-300 ease-in-out dark:border-white/20 dark:bg-neutral-900;
+  @apply absolute top-3 right-3 grid size-9 place-content-center rounded-sm border border-black/15 bg-neutral-100 text-center duration-300 ease-in-out dark:border-white/20 dark:bg-neutral-900;
 }
 
 .copy-code:hover {
