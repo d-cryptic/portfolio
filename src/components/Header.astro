@@ -93,6 +93,7 @@ import { SITE } from "@consts";
         >
           <nav
             class="flex flex-col items-center gap-6 bg-[var(--color-background)] pb-10 text-lg shadow-md"
+            id="mobile-nav"
           >
             <Link href="/blog">blog</Link>
             <Link href="/projects">projects</Link>
@@ -129,14 +130,26 @@ import { SITE } from "@consts";
   const mobileMenuClose = document.getElementById("mobile-menu-close");
   const mobileSearchButton = document.getElementById("mobile-search-button");
   const magnifyingGlass = document.getElementById("magnifying-glass");
+  const mobileNav = document.getElementById("mobile-nav");
+  const mobileNavLinks = mobileNav?.querySelectorAll("a");
 
   function toggleMenu() {
     mobileMenu?.classList.toggle("hidden");
     document.body.classList.toggle("overflow-hidden");
   }
 
+  function closeMenu() {
+    mobileMenu?.classList.add("hidden");
+    document.body.classList.remove("overflow-hidden");
+  }
+
   mobileMenuButton?.addEventListener("click", toggleMenu);
   mobileMenuClose?.addEventListener("click", toggleMenu);
+
+  // Close menu when clicking on navigation links
+  mobileNavLinks?.forEach((link) => {
+    link.addEventListener("click", closeMenu);
+  });
 
   // Ensure search functionality works on mobile
   mobileSearchButton?.addEventListener("click", () => {
