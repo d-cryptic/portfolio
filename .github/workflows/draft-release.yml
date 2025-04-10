@@ -1,4 +1,4 @@
-name: Olake Draft Release and Changelog
+name: Portfolio Draft Release and Changelog
 
 on:
   pull_request:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   create_draft_release:
-    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main' && github.event.pull_request.head.ref == 'staging'
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
     name: Create Draft Release
     runs-on: ubuntu-latest
     permissions:
