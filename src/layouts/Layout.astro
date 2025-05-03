@@ -13,21 +13,26 @@ const { title, description } = Astro.props;
 <!doctype html>
 <html lang="en">
   <head>
-    <Head title={`${title} | ${SITE.TITLE}`} description={description} />
     <!-- Google Tag Manager -->
-    <script>
+    <script is:inline>
       (function (w, d, s, l, i) {
         w[l] = w[l] || [];
         w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
-        var f = d.getElementsByTagName(s)[0],
-          j = d.createElement(s),
-          dl = l != "dataLayer" ? "&l=" + l : "";
+
+        const f = d.getElementsByTagName(s)[0];
+        const j = d.createElement(s);
+        const dl = l !== "dataLayer" ? "&l=" + l : "";
         j.async = true;
         j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
-        f.parentNode.insertBefore(j, f);
+
+        if (f?.parentNode) {
+          f.parentNode.insertBefore(j, f);
+        }
       })(window, document, "script", "dataLayer", "GTM-NWW6TLLD");
     </script>
     <!-- End Google Tag Manager -->
+
+    <Head title={`${title} | ${SITE.TITLE}`} description={description} />
     <script is:inline>
       // Check for saved theme preference or use system preference
       const getTheme = () => {
