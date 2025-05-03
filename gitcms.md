@@ -18,7 +18,7 @@ collections:
         type: boolean
       - name: tags
         required: true
-        type: multiline
+        type: multi_select
     name: Blogs
   - file_extension: .mdx
     filename_pattern: ''
@@ -41,7 +41,7 @@ collections:
         type: singleline
       - name: repoURL
         required: false
-        type: singleline
+        type: multi_select
     name: Projects
 media_path: /public
 repo: d-cryptic/portfolio
