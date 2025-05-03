@@ -1,51 +1,51 @@
 ---
-repo: d-cryptic/portfolio
-media_path: /public
-website_url: https://barundebnath.com
 collections:
-  - name: Blogs
+  - file_extension: .mdx
+    filename_pattern: ''
     git_path: /src/content/blog
-    filename_pattern: ''
-    file_extension: .md
     metadata_schema:
       - name: title
+        required: true
         type: title
-        required: true
       - name: description
+        required: true
         type: singleline
-        required: true
       - name: date
+        required: true
         type: datetime
-        required: true
       - name: draft
-        type: boolean
         required: true
+        type: boolean
       - name: tags
-        type: multiline
         required: true
-  - name: Projects
-    git_path: /src/content/projects
+        type: multiline
+    name: Blogs
+  - file_extension: .mdx
     filename_pattern: ''
-    file_extension: .md
+    git_path: /src/content/projects
     metadata_schema:
       - name: title
+        required: true
         type: title
-        required: true
       - name: description
-        type: singleline
         required: true
+        type: singleline
       - name: date
+        required: true
         type: datetime
-        required: true
       - name: draft
-        type: boolean
         required: true
+        type: boolean
       - name: demoURL
-        type: singleline
         required: false
+        type: singleline
       - name: repoURL
-        type: singleline
         required: false
+        type: singleline
+    name: Projects
+media_path: /public
+repo: d-cryptic/portfolio
+website_url: https://barundebnath.com
 ---
 # GitCMS Configuration File
 > [!WARNING]
