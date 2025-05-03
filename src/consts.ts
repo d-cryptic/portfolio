@@ -31,5 +31,6 @@ export const SOCIALS: Socials = [
   { NAME: "X (formerly Twitter)", HREF: "https://twitter.com/heydensetsu" },
   { NAME: "GitHub", HREF: "https://github.com/d-cryptic" },
   { NAME: "LinkedIn", HREF: "https://www.linkedin.com/in/barundebnath" },
+  { NAME: "Medium", HREF: "https://medium.barundebnath.com" },
   { NAME: "Website", HREF: "https://barundebnath.com" },
 ];

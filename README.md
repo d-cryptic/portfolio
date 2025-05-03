@@ -25,6 +25,7 @@ Whether it's about DevOps musings, system design discussions, or just sharing me
 - Portfolio: [barundebnath.com](https://barundebnath.com)
 - Twitter: [@heydensetsu](https://twitter.com/heydensetsu)
 - LinkedIn: [Barun Debnath](https://www.linkedin.com/in/barundebnath)
+- Medium: [Barun Debnath](https://barundebnath.medium.com)
 - Email: barundebnath91@gmail.com
 
 Grab a coffee, poke around, and don't forget to say hi!
