@@ -7,7 +7,14 @@ import tailwindcss from "@tailwindcss/vite";
 // https://astro.build/config
 export default defineConfig({
   site: "https://barundebnath.com",
-  integrations: [sitemap(), mdx(), pagefind(), sitemap()],
+  integrations: [
+    sitemap({
+      xslURL: "/sitemap.xsl",
+    }),
+    mdx(),
+    pagefind(),
+    sitemap(),
+  ],
   vite: {
     plugins: [tailwindcss()],
   },
