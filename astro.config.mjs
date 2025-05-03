@@ -9,7 +9,7 @@ export default defineConfig({
   site: "https://barundebnath.com",
   integrations: [
     sitemap({
-      xslURL: "/sitemap.xsl",
+      xslURL: "/sitemap.xml",
     }),
     mdx(),
     pagefind(),
