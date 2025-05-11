@@ -1,0 +1,100 @@
+---
+import { type CollectionEntry, getCollection, render } from "astro:content";
+import Layout from "@layouts/Layout.astro";
+import Container from "@components/Container.astro";
+import FormattedDate from "@components/FormattedDate.astro";
+import { readingTime } from "@lib/utils";
+import BackToPrevious from "@components/BackToPrevious.astro";
+import PostNavigation from "@components/PostNavigation.astro";
+import TableOfContents from "@components/TableOfContents.astro";
+import Giscus from "@components/Giscus.astro";
+
+export async function getStaticPaths() {
+  const snippets = (await getCollection("snippets"))
+    .filter((post) => !post.data.draft)
+    .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+  return snippets.map((post) => ({
+    params: { id: post.id },
+    props: post,
+  }));
+}
+type Props = CollectionEntry<"snippets">;
+
+const snippets = (await getCollection("snippets"))
+  .filter((post) => !post.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+function getNextSnippet() {
+  let snippetIndex;
+  for (const snippet of snippets) {
+    if (snippet.id === Astro.params.id) {
+      snippetIndex = snippets.indexOf(snippet);
+      return snippets[snippetIndex + 1];
+    }
+  }
+}
+
+function getPrevSnippet() {
+  let snippetIndex;
+  for (const snippet of snippets) {
+    if (snippet.id === Astro.params.id) {
+      snippetIndex = snippets.indexOf(snippet);
+      return snippets[snippetIndex - 1];
+    }
+  }
+}
+
+const nextSnippet = getNextSnippet();
+const prevSnippet = getPrevSnippet();
+
+const snippet = Astro.props;
+const { Content, headings } = await render(snippet);
+---
+
+<Layout title={snippet.data.title} description={snippet.data.description}>
+  <Container>
+    <div class="animate">
+      <BackToPrevious href="/snippets">Back to snippets</BackToPrevious>
+    </div>
+    <div class="my-10 space-y-1">
+      <div class="animate flex items-center gap-1.5">
+        <div class="font-base text-sm">
+          <FormattedDate date={snippet.data.date} />
+        </div>
+        &bull;
+        {snippet.body && (
+          <div class="font-base text-sm">
+            {readingTime(snippet.body)}
+          </div>
+        )}        
+      </div>
+      <h1 class="animate text-3xl font-semibold text-black dark:text-white">
+        {snippet.data.title}
+      </h1>
+      {
+        snippet.data.tags && snippet.data.tags?.length > 0 ? (
+          <div class="animate flex gap-2 pt-1">
+            {snippet.data.tags.map((tag) => (
+              <a
+                href={`/tags/${tag}`}
+                class="rounded-sm border border-black/15 px-2 py-1 text-sm transition-colors duration-300 ease-in-out hover:bg-black/5 hover:text-black focus-visible:bg-black/5 focus-visible:text-black dark:border-white/20 dark:hover:bg-white/5 dark:hover:text-white dark:focus-visible:bg-white/5 dark:focus-visible:text-white"
+              >
+                {tag}
+              </a>
+            ))}
+          </div>
+        ) : null
+      }
+    </div>
+    {headings.length > 0 && <TableOfContents headings={headings} />}
+    <article class="animate">
+      <Content />
+      <div class="mt-24">
+        <PostNavigation prevPost={prevSnippet} nextPost={nextSnippet} />
+      </div>
+      <div class="mt-24">
+        <Giscus />
+      </div>
+    </article>
+  </Container>
+</Layout>

@@ -1,0 +1,248 @@
+---
+title: "All I Wanted Was A Signed Commit - Git Said \"LOL NO\""
+description: "Signing a weeks old commit may seem an easy task. Well what should have been a simple task, took me hours, lots of LLM prompts and an everlasting frustration to complete. This blog documents the frustration fueled journey of rewriting the commit history the hard way!!"
+date: "2025-05-02"
+tags:
+  - git
+  - oss
+---
+
+---
+
+## Prologue
+
+I started my open source journey few weeks back. Took a beginner friendly issue, contributed it, created a PR in couple of days. Everything was going great, all tests cases passed. Felt good!
+
+But the ignorant me, forgot to set the `git config` properly on my local, and what's rolled after made me question my developer journey. 
+
+Two weeks passed since I raised the PR, the maintainer asked me to sign those commits. It seemed easy at first (referred stackoverflow, ChatGPT, etc.): use `rebase`, `amend` and then `--continue` my way through all the commits. Guess what! All lead to lots of merge conflicts and many lots of `reset`ting my rebase commits.
+
+![My imagination of Git sometimes](https://assets.barundebnath.com/blogs/git-devil.png)
+
+This blog is a documentation to all those commands that made this task easy for me, with a little bit showcase of my frustration throughout this journey!
+
+---
+
+## Level 0: What the heck is `gpg`?
+
+Before moving forward to original commands, let's understand what actually gpg is? The first time ChatGPT suggested to setup gpg, I ignored it. 
+
+I thought just adding `user` and `email` to `git config` will make my life easier. But gpg seemed to be an important thing while signing commits.
+
+`GPG` stands for `Gnu Privacy Guard`. It allows one to encrypt and decrypt things using public private key.
+
+**Basically:**
+1. You generate a private and public key
+2. You create a password
+3. Private key stays with yourself and public key you add it to github
+4. Everytime you try to sign a commit, gpg will ask for password and use the keys to sign the commits.
+
+It's basically saying - the one who did this commit is `Barun Debnath` and here is kinda proof of his identity!
+
+Enough with the theoretical stuffs, let's create a gpg key pair!
+
+### Step 1: Install GPG
+
+- For macOS:
+
+```bash
+brew install gpg
+```
+
+- For Linux
+
+```bash
+sudo apt install gpg
+```
+
+### Step 2: Generate GPG key
+
+```bash 
+gpg --full-generate-key
+```
+
+- Follow the prompts to create your key. Note: Use strong password.
+- To retrieve your GPG key ID:
+
+```bash
+gpg --list-secret-keys --keyid-format=long
+```
+
+- Look for the line starting with sec, and note the 16 character hexadecimal string which is your key ID.
+
+### Step 3: Configure Git
+
+```bash
+git config --global user.signingkey YOUR_KEY_ID
+git config --global commit.gpgsign true
+```
+
+- remove `--global` to only add the gpg key at repo level
+- to remove gpg sign for any repo, run:
+
+```bash
+git config --global commit.gpgsign false
+```
+
+
+### Step 4: Add GPG public key to Github
+
+- Export the public key by running:
+
+```bash
+gpg --armor --export YOUR_KEY_ID
+```
+
+- Copy the output
+  - navigate to `Github GPG Keys Settings`
+  - Click on `New GPG Key`
+  - Add the copied public key
+
+---
+
+## Level 1: Finally got the right `git` commands to work
+
+![Finally I got it right](https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExZDAwZ2s0Mml5dXcycnRpc2tsdmJ6ZGUyd2VpemxwcWE3NGVwNm9mdSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/CkqpoOOS0BCQU/giphy.gif)
+
+Enough with `gpg`, let's move to the main web of chaos - `git`
+Git can make developers life easy as well as hard if not done correctly! 
+
+Let's be honest, we all had tried closing/deleting a PR if it gets complicated due to merge conflict or similar issue, and raise a new fresh PR. Even if you are `THE 100X CODER` who will create AGI and bring the doom of the world, 99% of chance is there you have done it.
+
+But this approach is only good for personal projects, or somewhat in low priority projects/orgs. But in OSS contributions or in your full time work, this doesn't leave a good impression.
+
+Real git skills can make your (or atleast it did mine) life easier than it had been. Enough chitchat, let's get into the commands.
+
+### Step 1: Configure git to use correct Author Information
+
+- The very first step here will be to configure correct author name and email
+
+```bash
+git config --global user.name "Barun Debnath"
+git config --global user.name "barundebnath91@gmail.com"
+```
+
+- Remove `--global` if you are setting config for current repo only.
+
+### Step 2: Use interactive Rebase to Modify Past Commits 
+
+- Interactive Rebase will help you to choose what commits you want to edit and what to skip. 
+
+- If not done correctly, can shake your entire commit history or result into merge conflicts which your three generations won't be able to solve!
+
+Very first step is to determine the number of commits to modify. Let's say you want to modify the last 3 commits:
+
+```bash
+git rebase -i HEAD~3
+```
+
+
+### Step 3: Mark the commits for editing 
+
+- In the editor, change `pick` to `edit` for the commits that you want to modify
+- e.g.
+
+```bash
+edit abc123 Commit message 1
+edit def456 Commit message 2
+edit ghi789 Commit message 3
+```
+
+### Step 4: Amend each commit
+
+- For each commit which you marked to edit, Git will pause so that you can run `amend`.
+- `git commit --amend` takes the commit and add the new staged changes to it. The changes also includes, editing commit messages and signing information.
+
+```bash 
+git commit --amend --author="Your Correct Name <your.correct.email@example.com>" --no-edit
+git rebase --continue
+```
+
+- Repeat the process for each commit.
+- Two important rebase subcommands to keep handy:
+  1. `git rebase --skip`: completely skip the commit
+  2. `git rebase --abort`: completely undo the rebase
+
+### Step 5: Force push the updated history
+
+- Force push the changes to remote repository
+
+```bash
+git push --force
+```
+
+---
+
+## Level 2: Undo your mistakes
+
+![There is always an option to Go Back!](https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExczMxZDJvZm5ja25obGRxaWJjcnFnM2c3a203cTdoN3FzdG9yNzcwcyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/2q6vbarzJtWXEiJ6T8/giphy.gif)
+
+It might happen that you want to reset the rebased commits that you did in the previous step. Well worry not! Git already have the solution developed for noob developers like us.
+ 
+- `git reflog` - Record when the tips of branches and other references were updated in local repository
+
+- `git reset` - Rewind history without changing the contents of your local files
+
+First view the reflog for the current branch:
+
+```bash
+git reflog show origin/<branch-name>
+```
+
+- output will be like this 
+
+```bash
+0265956 HEAD@{0}: push: updated to 0265956
+5be59e3 HEAD@{1}: push: updated to 5be59e3
+```
+
+- Let's say you want to restore `5be59e3`. Run:
+
+```bash
+git checkout <branch-name>
+git reset --hard 5be59e3
+```
+
+- Force push the reset branch:
+```bash
+git push origin <branch-name> --force
+```
+
+---
+
+## Level 3: More `Git`: Why not?
+
+![Yes there are more git commands](https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExZHA3cnc4eXA5dWllenR0YmM3NWliYjdsNjZpemhieDNtaHFqbDl0ayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l0Exdm9UbTHAFcJi0/giphy.gif)
+
+Now we are almost near the end of this blog. So let's get to know more about less know + widely used git commands.
+
+1. `git push --force-with-lease` - safer alternative to `--force`
+  - This makes sure that you don't overwrite other's work
+  
+2. Update branch with `main/master`
+
+  A. Using `merge` - safe and keeps the history
+  ```bash
+  git checkout <branch>
+  git fetch origin
+  git merge origin/main
+  ```
+  
+  B. Using `rebase` - clean history but rewrite commits
+  ```bash
+  git checkout <branch>
+  git fetch origin
+  git rebase origin/main
+  ```
+
+---
+
+## May The Git Be With You!
+
+![What Git Merge really feels like!](https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExaHpqNXB5OGhkd25vd3Q4bTB5dGdtcW9lZDk3NGkxMGg4c2Uwa2UxcSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/cFkiFMDg3iFoI/giphy.gif)
+
+In this blog, I only touched tip of the iceberg of `Git`. It's okay to not know Git like you know your JS or Go syntax (or C++ standard libraries), but it's not okay to take Git lightly. 
+
+Its better to learn a little bit of Git now and then then to enter a never ending `Merge Conflict Hell`.
+
+---

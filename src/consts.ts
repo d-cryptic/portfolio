@@ -21,6 +21,16 @@ export const BLOG: Metadata = {
     "Exploring systems, technology, and life with a beginner's mindset. From SRE adventures to manga musings, coffee experiments to setup tweaks.",
 };
 
+export const NOTES: Metadata = {
+  TITLE: "Digital Garden",
+  DESCRIPTION: "Contains all the notes, journals, daily learnings which are important but blog won't do justice",
+}
+
+export const SNIPPETS: Metadata = {
+  TITLE: "My Ninja Snippets",
+  DESCRIPTION: "Contains all the useful snippets that I need now and then!!",
+}
+
 export const PROJECTS: Metadata = {
   TITLE: "Projects & Experiments",
   DESCRIPTION:
