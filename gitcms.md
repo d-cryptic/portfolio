@@ -19,6 +19,9 @@ collections:
       - name: tags
         required: true
         type: multi_select
+        allowed_values:
+          - git
+          - oss
     name: Blogs
   - file_extension: .mdx
     filename_pattern: ''
@@ -42,7 +45,29 @@ collections:
       - name: repoURL
         required: false
         type: multi_select
+        allowed_values: []
     name: Projects
+  - name: Notes
+    git_path: /src/content
+    filename_pattern: ''
+    file_extension: .mdx
+    metadata_schema:
+      - name: title
+        type: title
+        required: true
+      - name: description
+        type: singleline
+        required: true
+      - name: date
+        type: datetime
+        required: true
+      - name: draft
+        type: boolean
+        required: true
+      - name: tags
+        type: multi_select
+        required: true
+        allowed_values: []
 media_path: /public
 repo: d-cryptic/portfolio
 website_url: https://barundebnath.com
