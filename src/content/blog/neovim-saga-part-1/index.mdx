@@ -1,0 +1,408 @@
+---
+title: "Neovim Saga Part 1: Getting Started"
+description: "In this blog series, I will be moving to Neovim completely. This part will cover Neovim keybindings, tricks and introduction to Lua"
+date: "2025-05-11"
+draft: false
+tags:
+  - neovim
+  - productivity
+  - ide
+  - dotfiles
+
+---
+
+## What this blog is about??
+
+I have tried multiple times in past to completely move to Neovim, but everytime due to learning curve (or my skill issue), the idea never got fulfilled successfully.
+
+Now since last month, I have been switching between [LunarVim](https://www.lunarvim.org/) and [Zed](https://zed.dev/), sometimes playing with [Cursor](https://www.cursor.com/) in between. I could have just keep on continuing using the above editors/IDE, but I wanted the following things in my developer journey:
+  - Fully customization editor, I should know what and why of editor
+  - I don't want any IDE or huge chunky editor with lots of extensions taking minutes to load
+  - I do want AI support, but I want them as an extension of my editor, not an editor/IDE solely built for AI usecase.
+  - And most of all, I want to brag in front of others whenever I code.
+
+Hence I finally decided to build my own Neovim configuration, each and every keybinding will be set by me and at last add an AI plugin on top of it.
+
+This is Part 1 of the series and this part will cover all the basics neovim motions and intro to [Lua](https://www.lua.org/) language.
+
+---
+
+## Why Neovim, and not Vim?
+
+- I did my own research on which one to use and decided to use neovim because:
+  1. better lsp integration
+  2. uses lua scripting for configuration (Vim uses Vimscript which is another hell of a learning curve)
+  3. Better plugin system
+  4. I found neovim community more active
+
+## Installation
+
+- Let's quickly install neovim on our system. Below commands are for MacOS, you can find your commands from [here](https://github.com/neovim/neovim/blob/master/INSTALL.md)
+
+```bash
+curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim-macos-arm64.tar.gz
+tar xzf nvim-macos-arm64.tar.gz
+./nvim-macos-arm64/bin/nvim
+```
+
+Running the above commands will display this beautiful screen which we will make more beautiful in coming blogs!!
+![Neovim Screen without any config](https://assets.barundebnath.com/blogs/neovim-window-blank.png) 
+
+---
+
+## (Neo)Vim Motions
+
+Vim/Neovim Motions are commands that allow us to move the cursor around the screen without any mouse or arrow keys. To use Neovim efficiently, one must know/master these keybindings.
+
+I am not covering each and every keybindings, I am just covering the ones which I will be referring more and more in future. Show please go through `:Tutor` on Neovim to learn about vim motions.
+
+> As Neovim is highly customizable, one can create their own custom keybindings as need arises.
+
+### Moving around the window
+
+1. `h` - move left
+2. `j` - move down
+3. `k` - move up
+4. `l` - move right
+5. `i` - insert after line
+6. `shift + i` - insert before line
+7. `a` - append after line
+8. `A` - append before line
+9. `w` - next word
+10. `b` - back word
+11. `e` - end of next word
+12. `$` - end of line
+13. `0` - 0th point of line, very first location of line
+14. `^` - first character of line
+15. `fs` - find first `s` it sees 
+16. `;` - represents the last find command
+17. `,` - backwards to previous target
+18. `shift + f + s` - find first s behind the target
+19. `4ft` - 4th occurrence of t
+20. `gg` - goes to the first character of the page
+21. `shift + g` - goes to last line
+22. `shift + m` - middle of the desktop
+23. `zz` - scroll the document to the center
+
+### Text Objects
+
+1. `diw` - delete in word
+2. `dip` - delete in paragraph
+3. `daw` - delete around word
+4. `da + Shift + w` - remove everything between two spaces
+5. `ci(` - change in bracket
+6. `di(` - delete in bracket
+7. `di"` - delete in ""
+8. `.` - repeat the last operator
+9. `shift + v` - highlight the visual line
+
+### Command mode
+
+1. `:` - start a command
+
+
+### Macros
+
+Macros lets you record a series of keystrokes (includes movements, matching, replacing, copy, paste, etc.). It helps to automate repetitive tasks, hence an important tool for Neovim productivity.
+
+1. <b>Recording a macro</b>
+- Press `q` + `<register-name>`, e.g. `q+v` to start recording.
+- Perform a sequence a character
+- Press `q` again to stop the recording
+
+2. <b>Playing the macro</b>
+- Use `@` followed by `<register-name>`, e.g. `@+v` to replay the recorded macro
+- Use last used macro using `@@`.
+- Repeat macro multiple times `100@v`
+
+3. <b>Viewing and editing macros</b>
+- Run `:reg` to view registers
+- To edit, paste the content into the buffer using `"vp`, modify it, yank it into the same buffer `"yp`.
+
+### Misc
+
+1. `*` - Matches everything under the cursor
+2. `Shift + n` - move to previous matched character or word
+3. `n` - move to next matched character or word 
+4. `ciw` - change in word
+5. `.` - replay the last action
+  - e.g. `*` -> `n` -> `ciw` -> `n` -> `.`
+    - Above will first move to next matched character, do the change in word, and then whenever doing `.`, `ciw` will be applied
+6. `%s/<word1>/<word2>/g` - replace word1 with word2 globally
+7. `%s/<word1>/<word2>/gc` - ask each time before replacing word1 with word2 globally
+8. `y` - yanking means copying the content
+9. `viw` - visual highlight in word
+10. `p` - paste
+11. `:reg`- show all registers and their content
+12. `"3p` - paste the content in the third register
+13. `"7p` - yank content into 7th register
+14. Special registers:
+  - system clipboard in mac - `*`
+  - `"*y` - yank into system clipboard
+  - `"*p` - paste from system clipboard
+15. one could also reassign the registers
+  - `:let @+=@%` - making + register as % register
+16. `==` - fix indentation
+17. `dw` - delete word
+18. `u` - undo
+19. `yw` - yank a word
+20. `dd` - deletes entire line
+21. `yy` - yanks entire line
+22. `p` - paste after the cursor
+23. `shift + p` - paste before the cursor 
+24. `shift + r` - replace mode, replace everything in this way
+25. `%` - matching counterpart of bracket
+26. `:set rnu` - set relative number
+27. `/` - search for word
+28. `shift + /` or `?` - search for a word in previous order
+29. `ctrl + v` - mark vertically across line
+30. `ctrl + d` - half a screen down
+31. `ctrl + u` - half a screen up
+32. `zb` - moves the cursor by one page
+33. `ctrl + e` - moves the cursor up by one line
+34. `ctrl + y` - moves the cursor down by one line
+
+---
+
+## Intro to Lua
+
+To write configs and scripts for Neovim, we will be using `Lua` language which is a scripting language easier than bash and faster than python. Most of the plugins that we will use are mostly written in Lua, and I am pretty sure you will write your first Neovim plugin in Lua too.
+
+### Commenting
+
+```lua
+-- single line comment
+
+-- [[
+multi line comment
+]]
+```
+
+### Variables
+
+```lua
+local x = 1
+local a = "a"
+local b = true
+local c = nil
+x = x + 1
+print(x)
+
+local name = "Barun"
+print("I am".." ".. name)
+```
+
+### Comparison
+
+```lua
+== equal
+< less than
+<= less than or equal to
+> greater than
+>= greater than or equal to
+~= not equal
+```
+
+### Conditionals
+
+```lua
+local age = 24
+if age > 20 then
+  print("over 20")
+elseif age == 20 then
+  print("20")
+else
+  print("below 20")
+end
+```
+
+### Combining statements
+
+- use `and`, `or` and `not`
+
+### Functions
+
+```lua
+local function func1(a)
+  print(a)
+end
+
+local func2 = function(a)
+  print(a)
+end
+
+function sum(a, b)
+  return a + b
+end
+```
+
+### Scope
+
+```lua
+function func()
+  local x = 1
+end
+
+print(x) -- nil
+```
+
+### Loops
+
+```lua
+local i = 1
+while i<=3 do
+  print(i)
+  i = i + 1
+end
+
+for i = 1,3 do
+  print(i)
+end
+```
+
+### Tables
+- tables includes - arrays/lists and dicts (key, value)
+
+```lua
+local a = {"a1", "a2", "a3"}
+print(a[1])
+
+-- #a is the length of the table
+for i = 1, #a do
+  print(a[1])
+end
+
+-- ipairs
+for index, value in ipairs(a) do
+  print(a[index])
+  print(value)
+end
+
+for _, value in ipairs(a) do
+  print(value)
+end
+```
+
+### Dictionaries
+
+```lua
+local a = {
+  name = "Barun"
+  age = 24
+  isAlive = true
+}
+
+print(a["name"])
+print(a.age)
+
+for key, value in pairs[a] do
+  print(key .. " " .. tostring(value))
+end
+
+local b = {
+  { "b1", 20 },
+  { "b2", 22 }
+}
+
+for i = 1, #b do
+  print(a[i][1] .. " is " .. a[i][2] .. " years old")
+end
+
+local c = {
+  c1 = {age = 20},
+  c2 = {age = 22}
+}
+```
+
+### Modules
+
+```lua
+require("path")
+
+-- for example in ~/.config/nvim/lua , all dirs and files are accessable via require
+-- Do note that all files in that lua folder are in path!
+-- ~/.config/nvim/lua/abc.lua 
+-- ~/.config/nvim/lua/abc/init.lua
+
+require "abc"
+
+```
+
+### `vim.tbl_deep_extend`
+
+- neovim function used for merging tables and their values recursively. Generally used by plugins for merging config tables.
+
+```lua
+-- table 1
+local person = {
+    name = "joe",
+    age = 19,
+    skills = {"python", "html"},
+}
+
+-- table 2
+local someone = {
+    name = "siduck",
+    skills = {"js", "lua"},
+}
+
+-- "force" will overwrite equal values from the someone table over the person table
+local result = vim.tbl_deep_extend("force", person, someone)
+
+-- result : 
+{
+    name = "siduck",
+    age = 19,
+    skills = {"js", "lua"},
+}
+
+-- The list tables wont merge cuz they dont have keys
+```
+
+- check `:h vim.tbl_deep_extend` for more info
+
+### `pcall`
+
+- Requiring a nonexistent module or a module which contains syntax errors aborts the currently executing script. pcall() may be used to prevent errors.
+
+```lua
+local ok, _ = pcall(require, 'module_with_error')
+if not ok then
+  -- not loaded
+end
+```
+
+### `Vim` namespace
+
+- Neovim exposes a global `vim` variable which can be used to interact with its API via Lua. It exposes it as a standard library.
+- Some useful modules and functions:
+  1. `vim.inspect`
+  2. `vim.regex`
+  3. `vim.api`
+  4. `vim.ui`
+  5. `vim.loop`
+  6. `vim.lsp`
+  7. `vim.treesitter`
+
+---
+
+## What's next?
+
+In next part of this series, we will finally start configuring our Neovim to give us IDE like feel.
+
+![Neovim Meme](https://assets.barundebnath.com/blogs/neovim-meme.png)
+<center>[image src](https://x.com/teej_dv/status/1552993843766853633)</center>
+
+I don't know how many blogs will be there in this neovim series. But my goal is to build a most perfect IDE like editor from scratch.
+
+
+---
+
+## References
+
+- [NvChad Learn Lua](https://nvchad.com/docs/quickstart/learn-lua/)
+- [Neovim Lua Guide](https://neovim.io/doc/user/lua-guide.html)
+- [Neovim Lua](https://neovim.io/doc/user/lua.html#_lua-vimscript-bridge)
+- [nvim-lua-guide](https://github.com/nanotee/nvim-lua-guide?tab=readme-ov-file)
+
+---
