@@ -90,7 +90,7 @@ const { Content, headings } = await render(note);
     <article class="animate">
       <Content />
       <div class="mt-24">
-        <PostNavigation prevPost={prevNote} nextPost={nextNote} />
+        <PostNavigation prevPost={prevNote} nextPost={nextNote} path={"notes"} />
       </div>
       <div class="mt-24">
         <Giscus />

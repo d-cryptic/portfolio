@@ -90,7 +90,7 @@ const { Content, headings } = await render(snippet);
     <article class="animate">
       <Content />
       <div class="mt-24">
-        <PostNavigation prevPost={prevSnippet} nextPost={nextSnippet} />
+        <PostNavigation prevPost={prevSnippet} nextPost={nextSnippet} path={"snippets"} />
       </div>
       <div class="mt-24">
         <Giscus />

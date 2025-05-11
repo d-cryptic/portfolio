@@ -90,7 +90,7 @@ const { Content, headings } = await render(post);
     <article class="animate">
       <Content />
       <div class="mt-24">
-        <PostNavigation prevPost={prevPost} nextPost={nextPost} />
+        <PostNavigation prevPost={prevPost} nextPost={nextPost} path={"blog"}/>
       </div>
       <div class="mt-24">
         <Giscus />
