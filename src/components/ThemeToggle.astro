@@ -44,57 +44,162 @@
 </button>
 
 <script>
-  function initTheme() {
+  // Use a single RAF call to batch DOM updates
+  let rafId = null;
+  
+  // Immediately invoked function to ensure proper scoping
+  (function() {
+    // Check if we're in a browser environment
+    if (typeof document === 'undefined') return;
+
+    // Get all theme toggle buttons once
     const themeToggles = document.querySelectorAll("#theme-toggle");
+    if (!themeToggles.length) return;
 
-    // Check for saved theme preference, otherwise use system preference
+    // Debounce function to prevent rapid theme toggles
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
+
+    // Function to get the current theme
     const getTheme = (): "dark" | "light" => {
-      if (
-        typeof localStorage !== "undefined" &&
-        localStorage.getItem("theme")
-      ) {
-        return localStorage.getItem("theme") as "dark" | "light";
+      try {
+        // Check for saved theme preference first
+        if (typeof localStorage !== 'undefined' && localStorage.theme) {
+          return localStorage.theme;
+        }
+        // Fall back to system preference
+        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      } catch (e) {
+        return "light"; // Default to light if there's an error
       }
-      return window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? "dark"
-        : "light";
     };
 
-    // Apply theme
-    const applyTheme = (theme: "dark" | "light"): void => {
-      if (theme === "dark") {
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-      }
-      localStorage.setItem("theme", theme);
-    };
-
-    // Initial theme
-    const currentTheme = getTheme();
-    applyTheme(currentTheme);
-
-    // Add click handlers to all theme toggle buttons
-    themeToggles.forEach((toggle) => {
-      toggle.addEventListener("click", () => {
-        const isDark = document.documentElement.classList.toggle("dark");
-        applyTheme(isDark ? "dark" : "light");
-      });
-    });
-
-    // Watch for system theme changes
-    window
-      .matchMedia("(prefers-color-scheme: dark)")
-      .addEventListener("change", (e) => {
-        if (!localStorage.getItem("theme")) {
-          applyTheme(e.matches ? "dark" : "light");
+    // Batch DOM updates using requestAnimationFrame
+    const batchThemeUpdates = (theme) => {
+      if (rafId) cancelAnimationFrame(rafId);
+      
+      rafId = requestAnimationFrame(() => {
+        try {
+          // Batch DOM updates
+          const updates = [];
+          
+          // Update theme class
+          updates.push(() => {
+            if (theme === 'dark') {
+              document.documentElement.classList.add('dark');
+              document.documentElement.style.colorScheme = 'dark';
+            } else {
+              document.documentElement.classList.remove('dark');
+              document.documentElement.style.colorScheme = 'light';
+            }
+            document.documentElement.setAttribute('data-theme', theme);
+          });
+          
+          // Execute all updates in a single frame
+          updates.forEach(update => update());
+          
+          // Save to localStorage (don't block rendering)
+          requestIdleCallback(() => {
+            try {
+              localStorage.setItem('theme', theme);
+            } catch (e) {
+              console.warn('Could not save theme preference:', e);
+            }
+          });
+          
+        } catch (e) {
+          console.error('Error applying theme:', e);
+        } finally {
+          rafId = null;
         }
       });
-  }
+    };
 
-  // Initialize theme functionality
-  initTheme();
+    // Toggle between light and dark theme
+    const toggleTheme = debounce(() => {
+      const currentTheme = getTheme();
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      batchThemeUpdates(newTheme);
+    }, 100); // 100ms debounce time
 
-  // Re-initialize when the page is loaded through Astro's view transitions
-  document.addEventListener("astro:after-swap", initTheme);
+    // Initialize theme on page load
+    const initTheme = () => {
+      const currentTheme = getTheme();
+      batchThemeUpdates(currentTheme);
+    };
+    
+    // Handle Astro view transitions
+    const handlePageTransition = () => {
+      const theme = getTheme();
+      batchThemeUpdates(theme);
+    };
+
+    // Watch for system theme changes (only if no explicit preference is set)
+    const setupSystemThemeListener = () => {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleSystemThemeChange = (e) => {
+        if (!localStorage.theme) {
+          batchThemeUpdates(e.matches ? 'dark' : 'light');
+        }
+      };
+      
+      if (mediaQuery.addEventListener) {
+        mediaQuery.addEventListener('change', handleSystemThemeChange);
+      } else if (mediaQuery.addListener) {
+        mediaQuery.addListener(handleSystemThemeChange);
+      }
+      
+      return () => {
+        if (mediaQuery.removeEventListener) {
+          mediaQuery.removeEventListener('change', handleSystemThemeChange);
+        } else if (mediaQuery.removeListener) {
+          mediaQuery.removeListener(handleSystemThemeChange);
+        }
+      };
+    };
+
+    // Initialize everything
+    const init = () => {
+      initTheme();
+      const cleanupSystemTheme = setupSystemThemeListener();
+      
+      // Add click event listeners to all theme toggle buttons
+      themeToggles.forEach((toggle) => {
+        toggle.addEventListener('click', (e) => {
+          e.preventDefault();
+          toggleTheme();
+        });
+      });
+      
+      // Handle Astro view transitions
+      document.addEventListener('astro:after-swap', handlePageTransition);
+      
+      // Cleanup function
+      return () => {
+        cleanupSystemTheme();
+        document.removeEventListener('astro:after-swap', handlePageTransition);
+        if (rafId) {
+          cancelAnimationFrame(rafId);
+          rafId = null;
+        }
+      };
+    };
+    
+    // Start initialization
+    const cleanup = init();
+    
+    // Cleanup on component unmount
+    return () => {
+      if (cleanup) cleanup();
+    };
+  })();
 </script>

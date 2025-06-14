@@ -15,28 +15,47 @@ const { title, description } = Astro.props;
   <head>
     <link rel="sitemap" href="/sitemap.xml" />
     <Head title={`${title} | ${SITE.TITLE}`} description={description} />
-    <script is:inline>
-      // Check for saved theme preference or use system preference
-      const getTheme = () => {
-        if (
-          typeof localStorage !== "undefined" &&
-          localStorage.getItem("theme")
-        ) {
-          return localStorage.getItem("theme");
-        }
-        return window.matchMedia("(prefers-color-scheme: dark)").matches
-          ? "dark"
-          : "light";
-      };
+    <script is:inline define:vars={{ isSSR: import.meta.env.SSR }}>
+      // This script runs before the page renders to prevent FOUC
+      (function() {
+        // Only run on client-side
+        if (typeof document === 'undefined') return;
 
-      // Apply theme immediately to prevent flash
-      const theme = getTheme();
-      if (theme === "dark") {
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-      }
+        // Check for saved theme preference or use system preference
+        const getTheme = () => {
+          try {
+            if (typeof localStorage !== 'undefined' && localStorage.theme) {
+              return localStorage.theme;
+            }
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          } catch (e) {
+            return 'light'; // Default to light if there's an error
+          }
+        };
+
+        // Apply theme immediately to prevent flash
+        const theme = getTheme();
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+          document.documentElement.style.colorScheme = 'dark';
+        } else {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.style.colorScheme = 'light';
+        }
+
+        // Store the theme in a data attribute for CSS to use
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
     </script>
+    <style>
+      /* Prevent flash of light theme */
+      :root:not([data-theme]) {
+        visibility: hidden;
+      }
+      :root[data-theme] {
+        visibility: visible;
+      }
+    </style>
 
     <script is:inline>
       !(function (t, e) {
