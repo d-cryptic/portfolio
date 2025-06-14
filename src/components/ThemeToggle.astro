@@ -59,7 +59,7 @@
     // Debounce function to prevent rapid theme toggles
     function debounce<T extends any[]>(
       func: (...args: T) => void,
-      wait: number
+      wait: number,
     ) {
       let timeout: ReturnType<typeof setTimeout> | null = null;
       return function executedFunction(...args: T) {

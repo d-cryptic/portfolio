@@ -24,7 +24,8 @@ const projects: CollectionEntry<"projects">[] = (
 <Layout title={HOME.TITLE} description={HOME.DESCRIPTION}>
   <Container>
     <aside data-pagefind-ignore>
-      <div class="space-y-8">
+      <!-- Hero Section with progressive load -->
+      <div class="progressive-load space-y-8" style="--load-order: 1">
         <div class="space-y-4">
           <Callout type="hi">
             <h1 class="font-semibold text-black dark:text-white">
@@ -48,11 +49,17 @@ const projects: CollectionEntry<"projects">[] = (
             class="h-auto w-full max-w-[800px] rounded-lg"
             width="800"
             height="800"
+            loading="lazy"
+            fetchpriority="low"
+            decoding="async"
+            sizes="(max-width: 800px) 100vw, 800px"
           />
         </div>
       </div>
+
       <div class="space-y-16">
-        <section>
+        <!-- Work Experience Section -->
+        <section class="progressive-load" style="--load-order: 2">
           <article class="space-y-4">
             <p>
               <Callout type="work">
@@ -150,51 +157,51 @@ const projects: CollectionEntry<"projects">[] = (
             }
           </ul>
         </section>
-
-        <section class="animate space-y-4">
-          <div class="space-y-4">
-            <Callout type="chat">
-              <h2 class="font-semibold text-black dark:text-white">
-                Want to Chat?
-              </h2>
-            </Callout>
-            <article class="space-y-2">
-              <p>
-                Whether it's about DevOps musings, system design discussions, or
-                just sharing memes - I'm always up for a good conversation!
-              </p>
-              <p>
-                Grab a coffee, poke around, and don't forget to say hi! You can
-                find me at:
-              </p>
-            </article>
-            <ul class="not-prose flex flex-wrap gap-2">
-              {
-                SOCIALS.map((SOCIAL) => (
-                  <li class="flex gap-x-2 text-nowrap">
-                    <Link
-                      href={SOCIAL.HREF}
-                      external
-                      aria-label={`${SITE.TITLE} on ${SOCIAL.NAME}`}
-                    >
-                      {SOCIAL.NAME}
-                    </Link>
-                    {"/"}
-                  </li>
-                ))
-              }
-              <li class="line-clamp-1">
-                <Link
-                  href={`mailto:${SITE.EMAIL}`}
-                  aria-label={`Email ${SITE.TITLE}`}
-                >
-                  {SITE.EMAIL}
-                </Link>
-              </li>
-            </ul>
-          </div>
-        </section>
       </div>
+
+      <section class="progressive-load space-y-4" style="--load-order: 5">
+        <div class="space-y-4">
+          <Callout type="chat">
+            <h2 class="font-semibold text-black dark:text-white">
+              Want to Chat?
+            </h2>
+          </Callout>
+          <article class="space-y-2">
+            <p>
+              Whether it's about DevOps musings, system design discussions, or
+              just sharing memes - I'm always up for a good conversation!
+            </p>
+            <p>
+              Grab a coffee, poke around, and don't forget to say hi! You can
+              find me at:
+            </p>
+          </article>
+          <ul class="not-prose flex flex-wrap gap-2">
+            {
+              SOCIALS.map((SOCIAL) => (
+                <li class="flex gap-x-2 text-nowrap">
+                  <Link
+                    href={SOCIAL.HREF}
+                    external
+                    aria-label={`${SITE.TITLE} on ${SOCIAL.NAME}`}
+                  >
+                    {SOCIAL.NAME}
+                  </Link>
+                  {"/"}
+                </li>
+              ))
+            }
+            <li class="line-clamp-1">
+              <Link
+                href={`mailto:${SITE.EMAIL}`}
+                aria-label={`Email ${SITE.TITLE}`}
+              >
+                {SITE.EMAIL}
+              </Link>
+            </li>
+          </ul>
+        </div>
+      </section>
     </aside>
   </Container>
 </Layout>

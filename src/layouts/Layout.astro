@@ -47,6 +47,8 @@ const { title, description } = Astro.props;
         document.documentElement.setAttribute('data-theme', theme);
       })();
     </script>
+    <!-- Progressive loading script -->
+    <script src="/utils/progressiveLoad.js" type="module" defer></script>
     <style>
       /* Prevent flash of light theme */
       :root:not([data-theme]) {
