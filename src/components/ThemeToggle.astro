@@ -45,26 +45,31 @@
 
 <script>
   // Use a single RAF call to batch DOM updates
-  let rafId = null;
-  
+  let rafId: number | null = null;
+
   // Immediately invoked function to ensure proper scoping
-  (function() {
+  (function () {
     // Check if we're in a browser environment
-    if (typeof document === 'undefined') return;
+    if (typeof document === "undefined") return;
 
     // Get all theme toggle buttons once
     const themeToggles = document.querySelectorAll("#theme-toggle");
     if (!themeToggles.length) return;
 
     // Debounce function to prevent rapid theme toggles
-    function debounce(func, wait) {
-      let timeout;
-      return function executedFunction(...args) {
+    function debounce<T extends any[]>(
+      func: (...args: T) => void,
+      wait: number
+    ) {
+      let timeout: ReturnType<typeof setTimeout> | null = null;
+      return function executedFunction(...args: T) {
         const later = () => {
-          clearTimeout(timeout);
+          timeout = null;
           func(...args);
         };
-        clearTimeout(timeout);
+        if (timeout !== null) {
+          clearTimeout(timeout);
+        }
         timeout = setTimeout(later, wait);
       };
     }
@@ -73,51 +78,45 @@
     const getTheme = (): "dark" | "light" => {
       try {
         // Check for saved theme preference first
-        if (typeof localStorage !== 'undefined' && localStorage.theme) {
+        if (typeof localStorage !== "undefined" && localStorage.theme) {
           return localStorage.theme;
         }
         // Fall back to system preference
-        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        return window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light";
       } catch (e) {
         return "light"; // Default to light if there's an error
       }
     };
 
     // Batch DOM updates using requestAnimationFrame
-    const batchThemeUpdates = (theme) => {
+    const batchThemeUpdates = (theme: string) => {
       if (rafId) cancelAnimationFrame(rafId);
-      
+
       rafId = requestAnimationFrame(() => {
         try {
           // Batch DOM updates
           const updates = [];
-          
+
           // Update theme class
           updates.push(() => {
-            if (theme === 'dark') {
-              document.documentElement.classList.add('dark');
-              document.documentElement.style.colorScheme = 'dark';
+            if (theme === "dark") {
+              document.documentElement.classList.add("dark");
+              document.documentElement.style.colorScheme = "dark";
             } else {
-              document.documentElement.classList.remove('dark');
-              document.documentElement.style.colorScheme = 'light';
+              document.documentElement.classList.remove("dark");
+              document.documentElement.style.colorScheme = "light";
             }
-            document.documentElement.setAttribute('data-theme', theme);
+            document.documentElement.setAttribute("data-theme", theme);
           });
-          
+
           // Execute all updates in a single frame
-          updates.forEach(update => update());
-          
-          // Save to localStorage (don't block rendering)
-          requestIdleCallback(() => {
-            try {
-              localStorage.setItem('theme', theme);
-            } catch (e) {
-              console.warn('Could not save theme preference:', e);
-            }
-          });
-          
+          updates.forEach((update) => update());
+
+          // Don't save theme to localStorage here, only save on explicit user action
         } catch (e) {
-          console.error('Error applying theme:', e);
+          console.error("Error applying theme:", e);
         } finally {
           rafId = null;
         }
@@ -127,16 +126,24 @@
     // Toggle between light and dark theme
     const toggleTheme = debounce(() => {
       const currentTheme = getTheme();
-      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      const newTheme = currentTheme === "dark" ? "light" : "dark";
+
+      // Only save to localStorage when user explicitly toggles
+      try {
+        localStorage.setItem("theme", newTheme);
+      } catch (e) {
+        console.warn("Could not save theme preference:", e);
+      }
+
       batchThemeUpdates(newTheme);
     }, 100); // 100ms debounce time
 
     // Initialize theme on page load
     const initTheme = () => {
-      const currentTheme = getTheme();
-      batchThemeUpdates(currentTheme);
+      const theme = getTheme();
+      batchThemeUpdates(theme);
     };
-    
+
     // Handle Astro view transitions
     const handlePageTransition = () => {
       const theme = getTheme();
@@ -145,22 +152,23 @@
 
     // Watch for system theme changes (only if no explicit preference is set)
     const setupSystemThemeListener = () => {
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      const handleSystemThemeChange = (e) => {
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      const handleSystemThemeChange = (e: { matches: any }) => {
+        // Only update if user hasn't set a preference
         if (!localStorage.theme) {
-          batchThemeUpdates(e.matches ? 'dark' : 'light');
+          batchThemeUpdates(e.matches ? "dark" : "light");
         }
       };
-      
+
       if (mediaQuery.addEventListener) {
-        mediaQuery.addEventListener('change', handleSystemThemeChange);
+        mediaQuery.addEventListener("change", handleSystemThemeChange);
       } else if (mediaQuery.addListener) {
         mediaQuery.addListener(handleSystemThemeChange);
       }
-      
+
       return () => {
         if (mediaQuery.removeEventListener) {
-          mediaQuery.removeEventListener('change', handleSystemThemeChange);
+          mediaQuery.removeEventListener("change", handleSystemThemeChange);
         } else if (mediaQuery.removeListener) {
           mediaQuery.removeListener(handleSystemThemeChange);
         }
@@ -171,32 +179,32 @@
     const init = () => {
       initTheme();
       const cleanupSystemTheme = setupSystemThemeListener();
-      
+
       // Add click event listeners to all theme toggle buttons
       themeToggles.forEach((toggle) => {
-        toggle.addEventListener('click', (e) => {
+        toggle.addEventListener("click", (e) => {
           e.preventDefault();
           toggleTheme();
         });
       });
-      
+
       // Handle Astro view transitions
-      document.addEventListener('astro:after-swap', handlePageTransition);
-      
+      document.addEventListener("astro:after-swap", handlePageTransition);
+
       // Cleanup function
       return () => {
         cleanupSystemTheme();
-        document.removeEventListener('astro:after-swap', handlePageTransition);
+        document.removeEventListener("astro:after-swap", handlePageTransition);
         if (rafId) {
           cancelAnimationFrame(rafId);
           rafId = null;
         }
       };
     };
-    
+
     // Start initialization
     const cleanup = init();
-    
+
     // Cleanup on component unmount
     return () => {
       if (cleanup) cleanup();
