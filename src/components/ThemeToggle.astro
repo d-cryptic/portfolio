@@ -181,20 +181,36 @@
       const cleanupSystemTheme = setupSystemThemeListener();
 
       // Add click event listeners to all theme toggle buttons
-      themeToggles.forEach((toggle) => {
-        toggle.addEventListener("click", (e) => {
-          e.preventDefault();
-          toggleTheme();
+      const attachEventListeners = () => {
+        const currentToggles = document.querySelectorAll("#theme-toggle");
+        currentToggles.forEach((toggle) => {
+          // Remove any existing listeners to prevent duplicates
+          const newToggle = toggle.cloneNode(true);
+          toggle.parentNode?.replaceChild(newToggle, toggle);
+          
+          newToggle.addEventListener("click", (e) => {
+            e.preventDefault();
+            toggleTheme();
+          });
         });
-      });
+      };
+      
+      // Initial attachment
+      attachEventListeners();
 
       // Handle Astro view transitions
-      document.addEventListener("astro:after-swap", handlePageTransition);
+      const handleViewTransition = () => {
+        handlePageTransition();
+        // Reattach event listeners after DOM is updated
+        setTimeout(attachEventListeners, 0);
+      };
+      
+      document.addEventListener("astro:after-swap", handleViewTransition);
 
       // Cleanup function
       return () => {
         cleanupSystemTheme();
-        document.removeEventListener("astro:after-swap", handlePageTransition);
+        document.removeEventListener("astro:after-swap", handleViewTransition);
         if (rafId) {
           cancelAnimationFrame(rafId);
           rafId = null;
