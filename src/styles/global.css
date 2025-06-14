@@ -49,6 +49,32 @@
     --progressive-delay: 0.1s;
   }
   
+  /* Inline code styling */
+  :not(pre) > code {
+    font-family: var(--font-mono);
+    background-color: var(--color-highlight, #f3f4f6);
+    color: var(--color-primary, #0e9b77);
+    padding: 0.2em 0.4em;
+    border-radius: 0.25em;
+    font-size: 0.875em;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    position: relative;
+  }
+  
+  /* Hide backticks in inline code */
+  :not(pre) > code::before,
+  :not(pre) > code::after {
+    content: '';
+    display: none;
+  }
+  
+  .dark :not(pre) > code {
+    background-color: rgba(79, 70, 229, 0.15);
+    color: var(--color-secondary, #7ad7f0);
+  }
+  
   /* Link animations */
   a {
     @apply relative inline-block transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)];
