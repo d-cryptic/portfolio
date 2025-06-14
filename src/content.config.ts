@@ -1,49 +1,51 @@
 import { defineCollection, z } from "astro:content";
-import { glob } from 'astro/loaders';
 
 const blog = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: "./src/content/blog" }),
+  type: 'content',
   schema: z.object({
     title: z.string(),
     description: z.string(),
     date: z.coerce.date(),
-    draft: z.boolean().optional(),
-    tags: z.array(z.string()).optional(),
+    draft: z.boolean().optional().default(false),
+    tags: z.array(z.string()).optional().default([]),
+    redirected: z.boolean().optional().default(false),
+    redirectedUrl: z.string().url().optional(),
   }),
 });
 
 const notes = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: "./src/content/notes" }),
+  type: 'content',
   schema: z.object({
     title: z.string(),
     description: z.string(),
     date: z.coerce.date(),
-    draft: z.boolean().optional(),
-    tags: z.array(z.string()).optional(),
+    draft: z.boolean().optional().default(false),
+    tags: z.array(z.string()).optional().default([]),
   }),
 });
 
 const snippets = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: "./src/content/snippets" }),
+  type: 'content',
   schema: z.object({
     title: z.string(),
     description: z.string(),
     date: z.coerce.date(),
-    draft: z.boolean().optional(),
-    tags: z.array(z.string()).optional(),
+    draft: z.boolean().optional().default(false),
+    tags: z.array(z.string()).optional().default([]),
   }),
 });
 
 const projects = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: "./src/content/projects" }),
+  type: 'content',
   schema: z.object({
     title: z.string(),
     description: z.string(),
     date: z.coerce.date(),
-    draft: z.boolean().optional(),
-    demoURL: z.string().optional(),
-    repoURL: z.string().optional(),
+    draft: z.boolean().optional().default(false),
+    demoURL: z.string().url().optional(),
+    repoURL: z.string().url().optional(),
+    tags: z.array(z.string()).optional().default([]),
   }),
 });
 
-export const collections = { blog, projects, notes, snippets};
+export const collections = { blog, projects, notes, snippets };

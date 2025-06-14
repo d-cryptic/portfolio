@@ -1,28 +1,38 @@
 ---
-import { type CollectionEntry, getCollection } from "astro:content";
+import { getCollection } from "astro:content";
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/Container.astro";
 import ArrowCard from "@components/ArrowCard.astro";
 import { BLOG } from "@consts";
 
-const data = (await getCollection("blog"))
-  .filter((post) => !post.data.draft)
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+// Get all blog posts
+const allBlogPosts = await getCollection("blog", ({ data }) => !data.draft);
 
-type Acc = {
-  [year: string]: CollectionEntry<"blog">[];
-};
+// Sort all posts by date (newest first)
+const sortedPosts = allBlogPosts
+  .map(post => ({
+    ...post,
+    data: {
+      ...post.data,
+      // Add any additional processing here if needed
+    }
+  }))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
-const posts = data.reduce((acc: Acc, post) => {
+// Group by year
+const postsByYear = sortedPosts.reduce((acc: { [key: string]: typeof sortedPosts }, post) => {
   const year = post.data.date.getFullYear().toString();
   if (!acc[year]) {
     acc[year] = [];
   }
-  acc[year].push(post);
+  acc[year].push({
+    ...post,
+    // Add any additional properties needed by ArrowCard
+  });
   return acc;
 }, {});
 
-const years = Object.keys(posts).sort((a, b) => parseInt(b) - parseInt(a));
+const years = Object.keys(postsByYear).sort((a, b) => parseInt(b) - parseInt(a));
 ---
 
 <Layout title={BLOG.TITLE} description={BLOG.DESCRIPTION}>
@@ -38,9 +48,21 @@ const years = Object.keys(posts).sort((a, b) => parseInt(b) - parseInt(a));
                 </div>
                 <div>
                   <ul class="not-prose flex flex-col gap-4">
-                    {posts[year].map((post) => (
+                    {postsByYear[year].map((post) => (
                       <li>
-                        <ArrowCard entry={post} />
+                        <ArrowCard entry={{
+                          id: post.id,
+                          slug: post.slug,
+                          collection: post.collection,
+                          data: {
+                            ...post.data,
+                            // Ensure all required fields are present
+                            body: post.body,
+                            // Handle redirected posts
+                            redirected: post.data.redirected || false,
+                            redirectedUrl: post.data.redirectedUrl
+                          }
+                        }} />
                       </li>
                     ))}
                   </ul>
