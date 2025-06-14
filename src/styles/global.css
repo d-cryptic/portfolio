@@ -26,9 +26,14 @@
     --color-text-highlight: #fff23688; /* Text highlight */
     --color-searchbar: #ebe6e0; /* Searchbar */
     --color-tertiary: #0a674f; /* Tertiary */
-    
+
     /* Theme transition properties - exclude color for instant text changes */
-    --transition-theme: background-color 0.3s ease, border-color 0.3s ease, fill 0.3s ease, stroke 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease, filter 0.3s ease, backdrop-filter 0.3s ease, -webkit-box-shadow 0.3s ease, -webkit-filter 0.3s ease, -webkit-backdrop-filter 0.3s ease;
+    --transition-theme:
+      background-color 0.3s ease, border-color 0.3s ease, fill 0.3s ease,
+      stroke 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease,
+      transform 0.3s ease, filter 0.3s ease, backdrop-filter 0.3s ease,
+      -webkit-box-shadow 0.3s ease, -webkit-filter 0.3s ease,
+      -webkit-backdrop-filter 0.3s ease;
   }
 
   .dark {
@@ -48,7 +53,7 @@
     scroll-padding-top: 100px;
     --progressive-delay: 0.1s;
   }
-  
+
   /* Inline code styling */
   :not(pre) > code {
     font-family: var(--font-mono);
@@ -62,63 +67,67 @@
     white-space: nowrap;
     position: relative;
   }
-  
+
   /* Hide backticks in inline code */
   :not(pre) > code::before,
   :not(pre) > code::after {
-    content: '';
+    content: "";
     display: none;
   }
-  
+
   .dark :not(pre) > code {
     background-color: rgba(79, 70, 229, 0.15);
     color: var(--color-secondary, #7ad7f0);
   }
-  
+
   /* Link animations */
   a {
     @apply relative inline-block transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)];
     text-decoration: none;
   }
-  
+
   /* Underline animation */
   a:not(.no-underline)::after {
-    content: '';
+    content: "";
     position: absolute;
     width: 0;
     height: 2px;
     bottom: -2px;
     left: 0;
     background-color: var(--color-primary);
-    transition: width 0.3s ease, background-color 0.3s ease;
+    transition:
+      width 0.3s ease,
+      background-color 0.3s ease;
   }
-  
+
   a:not(.no-underline):hover::after {
     width: 100%;
   }
-  
+
   a:active {
     transform: scale(0.97);
   }
-  
+
   /* Icon animations */
   svg {
     @apply transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)];
   }
-  
-  button:hover svg, a:hover svg {
+
+  button:hover svg,
+  a:hover svg {
     transform: scale(1.1);
   }
-  
-  button:active svg, a:active svg {
+
+  button:active svg,
+  a:active svg {
     transform: scale(0.95);
   }
-  
+
   /* Specific animation for theme toggle */
   .theme-toggle:hover svg {
     transform: rotate(15deg) scale(1.1);
   }
-  
+
   .theme-toggle:active svg {
     transform: rotate(0) scale(0.95);
   }
@@ -161,7 +170,19 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     /* Make text color change instantly */
-    transition-property: background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-box-shadow, -webkit-filter, -webkit-backdrop-filter;
+    transition-property:
+      background-color,
+      border-color,
+      fill,
+      stroke,
+      opacity,
+      box-shadow,
+      transform,
+      filter,
+      backdrop-filter,
+      -webkit-box-shadow,
+      -webkit-filter,
+      -webkit-backdrop-filter;
     /* Force text color to change instantly */
     color: var(--color-text) !important;
   }
@@ -186,7 +207,19 @@
     @apply prose-headings:text-[var(--color-secondary)];
     /* Smooth transitions except for text color */
     transition: var(--transition-theme);
-    transition-property: background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-box-shadow, -webkit-filter, -webkit-backdrop-filter;
+    transition-property:
+      background-color,
+      border-color,
+      fill,
+      stroke,
+      opacity,
+      box-shadow,
+      transform,
+      filter,
+      backdrop-filter,
+      -webkit-box-shadow,
+      -webkit-filter,
+      -webkit-backdrop-filter;
     /* Force text color to change instantly */
     color: var(--color-text) !important;
   }
@@ -214,8 +247,20 @@
     @apply font-sans text-[var(--color-primary)] underline underline-offset-[3px];
     @apply decoration-[var(--color-primary)]/30;
     @apply transition-colors duration-300 ease-in-out;
-  /* Make text color change instantly */
-  transition-property: background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-box-shadow, -webkit-filter, -webkit-backdrop-filter;
+    /* Make text color change instantly */
+    transition-property:
+      background-color,
+      border-color,
+      fill,
+      stroke,
+      opacity,
+      box-shadow,
+      transform,
+      filter,
+      backdrop-filter,
+      -webkit-box-shadow,
+      -webkit-filter,
+      -webkit-backdrop-filter;
   }
   article a:hover {
     @apply text-[var(--color-secondary)];
@@ -227,7 +272,20 @@
   @apply -translate-y-3 opacity-0;
   @apply transition-all duration-300 ease-out;
   /* Ensure smooth theme transitions - exclude text color */
-  transition-property: transform, opacity, background-color, border-color, text-decoration-color, fill, stroke, box-shadow, filter, backdrop-filter, -webkit-box-shadow, -webkit-filter, -webkit-backdrop-filter;
+  transition-property:
+    transform,
+    opacity,
+    background-color,
+    border-color,
+    text-decoration-color,
+    fill,
+    stroke,
+    box-shadow,
+    filter,
+    backdrop-filter,
+    -webkit-box-shadow,
+    -webkit-filter,
+    -webkit-backdrop-filter;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 0.3s;
   /* Force text color to change instantly */
@@ -251,19 +309,20 @@ pre {
   @apply border border-[var(--color-primary)]/15 py-5;
 }
 
-:root {
-  --astro-code-foreground: #09090b;
-  --astro-code-background: #fafafa;
-  --astro-code-token-comment: #a19595;
-  --astro-code-token-keyword: #f47067;
-  --astro-code-token-string: #00a99a;
-  --astro-code-token-function: #6eafad;
-  --astro-code-token-constant: #b3cceb;
-  --astro-code-token-parameter: #4e8fdf;
-  --astro-code-token-string-expression: #bf7db6;
-  --astro-code-token-punctuation: #8996a3;
-  --astro-code-token-link: #8d85ff;
+/* Remove previous attempt */
 
+:root {
+  --astro-code-foreground: #000000;
+  --astro-code-background: #fafafa;
+  --astro-code-token-comment: #686060;
+  --astro-code-token-keyword: #c92f25;
+  --astro-code-token-string: #007d70;
+  --astro-code-token-function: #2d6967;
+  --astro-code-token-constant: #356fa5;
+  --astro-code-token-parameter: #0e5eb8;
+  --astro-code-token-string-expression: #8c467f;
+  --astro-code-token-punctuation: #3f4851;
+  --astro-code-token-link: #4e3dfd;
 }
 
 .dark {
