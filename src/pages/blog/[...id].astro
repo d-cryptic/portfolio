@@ -7,7 +7,7 @@ import { readingTime } from "@lib/utils";
 import BackToPrevious from "@components/BackToPrevious.astro";
 import PostNavigation from "@components/PostNavigation.astro";
 import TableOfContents from "@components/TableOfContents.astro";
-import Giscus from "@components/Giscus.astro";
+// import Giscus from "@components/Giscus.astro";
 
 export async function getStaticPaths() {
   const posts = (await getCollection("blog"))
@@ -93,7 +93,7 @@ const { Content, headings } = await render(post);
         <PostNavigation prevPost={prevPost} nextPost={nextPost} path={"blog"}/>
       </div>
       <div class="mt-24">
-        <Giscus />
+        {/* <Giscus /> */}
       </div>
     </article>
   </Container>
