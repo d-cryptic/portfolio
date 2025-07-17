@@ -1,16 +1,26 @@
 {
   "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.15.0/.schema/devbox.schema.json",
-  "packages": ["python@3.11", "uv@latest", "direnv@latest", "d2@latest"],
+  "packages": [
+    "python@3.11",
+    "uv@latest",
+    "direnv@latest",
+    "d2@latest",
+    "nodejs@20",
+    "imagemagick@latest"
+  ],
   "shell": {
     "init_hook": [
       "echo 'Welcome to devbox!' > /dev/null",
       "echo '🔧 Setting up git hooks...'",
-      "bash scripts/setup-git-hooks.sh"
+      "bash scripts/setup-git-hooks.sh",
+      "echo '📦 Installing mermaid-cli...'",
+      "npm install -g @mermaid-js/mermaid-cli"
     ],
     "scripts": {
       "test": ["echo \"Error: no test specified\" && exit 1"],
       "setup-hooks": ["bash scripts/setup-git-hooks.sh"],
-      "migrate-giphy": ["cd scripts && python3 migrate_giphy_to_r2.py"]
+      "migrate-giphy": ["cd scripts && python3 migrate_giphy_to_r2.py"],
+      "migrate-mermaid": ["cd scripts && python3 migrate_mermaid_to_r2.py"]
     }
   }
 }
