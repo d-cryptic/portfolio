@@ -185,6 +185,116 @@ The hook is automatically set up when you enter the devbox environment. To bypas
 git commit --no-verify
 ```
 
+## Diagram Support
+
+This blog supports both **Mermaid** and **D2lang** diagrams with automatic theme switching and responsive design.
+
+### Mermaid Diagrams
+
+Mermaid diagrams are rendered client-side and automatically adapt to your theme preference.
+
+#### Usage
+
+````markdown
+```mermaid
+graph TD
+    A[Start] --> B[End]
+```
+````
+
+#### Supported Diagram Types
+
+- Flowcharts
+- Sequence diagrams
+- Gantt charts
+- Class diagrams
+- State diagrams
+- Entity Relationship diagrams
+- User Journey diagrams
+- Git graphs
+- Pie charts
+- Requirement diagrams
+- C4 diagrams
+- Mindmaps
+- Timeline diagrams
+- And more!
+
+#### Features
+
+- ✅ Client-side rendering (privacy-friendly)
+- ✅ Automatic theme switching
+- ✅ All Mermaid diagram types supported
+- ✅ Works offline after initial load
+- ✅ Zero configuration needed
+
+### D2lang Diagrams
+
+D2 diagrams are rendered at build-time, providing optimized SVG output with advanced layout algorithms.
+
+#### Usage
+
+````markdown
+```d2
+server -> database: query
+database -> server: results
+```
+````
+
+#### Features
+
+- ✅ Build-time rendering (faster page loads)
+- ✅ Advanced layout algorithms
+- ✅ Better for complex system diagrams
+- ✅ Optimized SVG output
+- ✅ CSS-based theme styling
+
+#### Advanced Example
+
+````markdown
+```d2
+title: System Architecture
+
+users: Users {
+  shape: person
+  style.fill: "#e1f5fe"
+}
+
+api: API Server {
+  shape: hexagon
+  style.fill: "#4caf50"
+}
+
+db: Database {
+  shape: cylinder
+  style.fill: "#ff9800"
+}
+
+users -> api: HTTP requests
+api -> db: SQL queries
+db -> api: Results
+api -> users: JSON response
+```
+````
+
+### Theme Integration
+
+Both diagram types automatically adapt to your site's theme:
+
+- **Light Mode**: Clean, professional appearance with subtle colors
+- **Dark Mode**: High contrast with theme-appropriate colors
+- **Smooth Transitions**: Seamless switching between themes
+
+### Performance & Privacy
+
+- **Mermaid**: 100% client-side rendering, no external dependencies at runtime
+- **D2**: Build-time processing, no runtime overhead
+- **Corporate Friendly**: No external API calls, works in restricted environments
+- **Offline Capable**: Both solutions work completely offline
+
+### Example Blog Post
+
+Check out the [Diagram Showcase](/blog/diagram-showcase) post to see both diagram types in action with various examples and theme switching demonstrations.
+
 ### Project Structure
 
 ```
