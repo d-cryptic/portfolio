@@ -2,9 +2,15 @@
 
 This directory contains scripts for migrating content in the blog.
 
-## Mermaid to R2 Migration
+## Image Migration Scripts
+
+### Mermaid to R2 Migration
 
 The `migrate_mermaid_to_r2.py` script converts Mermaid diagrams in blog posts to AVIF images stored in Cloudflare R2.
+
+### General Image Migration
+
+The `migrate_images_to_r2.py` script migrates all images (local and remote) from blog posts to AVIF format in Cloudflare R2.
 
 ### Prerequisites
 
@@ -37,21 +43,39 @@ R2_PUBLIC_URL=https://your_custom_domain.com  # Optional
 # Enter devbox environment
 devbox shell
 
-# Run the migration script
+# Run the Mermaid migration script
 devbox run migrate-mermaid
+
+# Run the general image migration script
+devbox run migrate-images
 
 # Or run directly
 cd scripts && python migrate_mermaid_to_r2.py
+cd scripts && python migrate_images_to_r2.py
 ```
 
-### What it does
+### What the Mermaid script does
 
 1. Scans all blog posts in `src/content/blog/*/index.mdx`
 2. Finds Mermaid code blocks (`mermaid ... `)
-3. Renders each diagram to SVG using mermaid-cli
-4. Converts SVG to AVIF format (high quality, small size)
-5. Uploads AVIF images to R2 at `blogs/<blog-folder-name>/<diagram-name>.avif`
-6. Replaces Mermaid code blocks with image markdown links
+3. Renders each diagram to PNG using mermaid-cli (neutral theme, transparent background)
+4. Adds rounded borders and padding
+5. Converts to AVIF format (high quality, small size)
+6. Uploads AVIF images to R2 at `blogs/<blog-folder-name>/<diagram-name>.avif`
+7. Replaces Mermaid code blocks with image markdown links
+
+### What the image migration script does
+
+1. Scans all blog posts in `src/content/blog/*/index.mdx`
+2. Finds all image references (markdown `![](...)` and HTML `<img>` tags)
+3. Supports both local file paths and remote URLs
+4. Downloads/reads images from various sources
+5. Converts images to AVIF format for optimal web performance (preserves GIFs as-is)
+6. Uploads to R2 at `blogs/<blog-folder-name>/<image-name>.(avif|gif)`
+7. Replaces original image references with R2 URLs
+
+**Supported image formats:** PNG, JPG, JPEG, GIF, WebP, SVG, BMP, TIFF
+**Supported sources:** Local files (relative/absolute paths), HTTP/HTTPS URLs
 
 ### File naming
 

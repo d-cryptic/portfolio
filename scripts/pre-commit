@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Pre-commit hook to run Giphy migration script
-# This script runs before each commit to migrate any new Giphy links to R2
+# Pre-commit hook to run image migration scripts
+# This script runs before each commit to migrate images to R2
 
 set -e
 
-echo "🔄 Running Giphy to R2 migration..."
+echo "🔄 Running image migrations to R2..."
 
 # Check if required environment variables are set
 if [ -z "$R2_ACCESS_KEY_ID" ] || [ -z "$R2_SECRET_ACCESS_KEY" ] || [ -z "$R2_ENDPOINT_URL" ] || [ -z "$R2_BUCKET_NAME" ]; then
@@ -25,19 +25,27 @@ if ! python3 -c "import boto3, requests, dotenv" 2>/dev/null; then
     fi
 fi
 
-# Run the migration script
-echo "🚀 Starting migration..."
+# Run the migration scripts
+echo "🚀 Starting Giphy migration..."
 if python3 scripts/migrate_giphy_to_r2.py; then
     echo "✅ Giphy migration completed successfully"
-    
-    # Check if any files were modified by the migration
-    if ! git diff --quiet; then
-        echo "📝 Migration updated some files. Adding them to the commit..."
-        git add src/content/blog/
-    fi
 else
     echo "❌ Giphy migration failed"
     exit 1
+fi
+
+echo "🚀 Starting image migration..."
+if python3 scripts/migrate_images_to_r2.py; then
+    echo "✅ Image migration completed successfully"
+else
+    echo "❌ Image migration failed"
+    exit 1
+fi
+
+# Check if any files were modified by the migrations
+if ! git diff --quiet; then
+    echo "📝 Migrations updated some files. Adding them to the commit..."
+    git add src/content/blog/
 fi
 
 echo "✨ Pre-commit hook completed"
