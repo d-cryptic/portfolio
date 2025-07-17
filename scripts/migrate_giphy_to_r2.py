@@ -74,7 +74,13 @@ class GiphyToR2Migrator:
         giphy_pattern = r'!\[([^\]]*)\]\((https://media[0-9]*\.giphy\.com/[^)]+)\)'
         matches = re.findall(giphy_pattern, content)
         
-        return matches
+        # Filter out URLs already hosted on our R2 endpoint
+        filtered_matches = []
+        for alt_text, url in matches:
+            if not url.startswith('https://assets.barundebnath.com/'):
+                filtered_matches.append((alt_text, url))
+        
+        return filtered_matches
     
     def download_gif(self, url: str) -> bytes:
         """Download GIF from Giphy URL"""

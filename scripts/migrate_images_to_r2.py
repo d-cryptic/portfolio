@@ -108,6 +108,10 @@ class ImageToR2Migrator:
     
     def _is_image_url(self, url: str) -> bool:
         """Check if URL points to an image"""
+        # Skip images already hosted on our R2 endpoint
+        if url.startswith('https://assets.barundebnath.com/'):
+            return False
+            
         # Check file extension
         parsed = urlparse(url)
         path = parsed.path.lower()

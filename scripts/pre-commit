@@ -5,11 +5,17 @@
 
 set -e
 
+# Check if there are any changes in src/content directory
+if ! git diff --cached --name-only | grep -q "^src/content/"; then
+    echo "ℹ️  No changes in src/content directory. Skipping image migrations."
+    exit 0
+fi
+
 echo "🔄 Running image migrations to R2..."
 
 # Check if required environment variables are set
 if [ -z "$R2_ACCESS_KEY_ID" ] || [ -z "$R2_SECRET_ACCESS_KEY" ] || [ -z "$R2_ENDPOINT_URL" ] || [ -z "$R2_BUCKET_NAME" ]; then
-    echo "⚠️  Warning: R2 credentials not configured. Skipping Giphy migration."
+    echo "⚠️  Warning: R2 credentials not configured. Skipping image migrations."
     echo "   Configure R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_ENDPOINT_URL, and R2_BUCKET_NAME in .env"
     exit 0
 fi
