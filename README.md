@@ -165,6 +165,26 @@ npm run preview
 - `npm run preview` - Preview production build
 - `npm run astro` - Run Astro CLI commands
 
+### Devbox Scripts
+
+- `devbox run setup-hooks` - Manually setup git hooks
+- `devbox run migrate-giphy` - Manually run Giphy migration script
+
+### Git Hooks
+
+The project includes an automatic git pre-commit hook that:
+
+- Scans blog posts for Giphy links on every commit
+- Downloads GIFs and uploads them to Cloudflare R2
+- Replaces Giphy links with R2 URLs in your markdown files
+- Automatically adds modified files to the commit
+
+The hook is automatically set up when you enter the devbox environment. To bypass the hook for a specific commit:
+
+```bash
+git commit --no-verify
+```
+
 ### Project Structure
 
 ```
