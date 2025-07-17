@@ -40,7 +40,7 @@ load_dotenv()
 
 class GiphyToR2Migrator:
     def __init__(self):
-        self.blog_content_dir = Path("../src/content/blog")
+        self.blog_content_dir = Path("src/content/blog")
         self.r2_client = self._setup_r2_client()
         self.bucket_name = os.getenv("R2_BUCKET_NAME")
         self.r2_public_url = os.getenv("R2_PUBLIC_URL", f"https://{self.bucket_name}.r2.dev")
