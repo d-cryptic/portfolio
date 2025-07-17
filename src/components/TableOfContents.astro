@@ -20,7 +20,10 @@ function buildToc(headings: Heading[]) {
     if (heading.depth === 2) {
       toc.push(heading);
     } else {
-      parentHeadings.get(heading.depth - 1).subheadings.push(heading);
+      const parent = parentHeadings.get(heading.depth - 1);
+      if (parent && parent.subheadings) {
+        parent.subheadings.push(heading);
+      }
     }
   });
   return toc;
