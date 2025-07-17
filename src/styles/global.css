@@ -351,3 +351,56 @@ pre {
 .copy-code:active {
   @apply scale-90 transition-transform;
 }
+
+/* Diagram styling */
+.mermaid {
+  @apply my-8 flex justify-center;
+  @apply transition-all duration-300 ease-in-out;
+}
+
+.mermaid svg {
+  @apply h-auto max-w-full;
+  @apply rounded-lg;
+}
+
+.d2-diagram {
+  @apply my-8 flex justify-center;
+  @apply transition-all duration-300 ease-in-out;
+}
+
+.d2-diagram svg {
+  @apply h-auto max-w-full;
+  @apply rounded-lg shadow-sm;
+  @apply border border-[var(--color-primary)]/10;
+}
+
+.d2-error {
+  @apply my-4 rounded-lg border border-red-200 bg-red-50 p-4 text-red-800;
+  @apply dark:border-red-800/30 dark:bg-red-900/20 dark:text-red-200;
+}
+
+.d2-error details {
+  @apply mt-2;
+}
+
+.d2-error summary {
+  @apply cursor-pointer font-medium hover:text-red-600 dark:hover:text-red-300;
+}
+
+.d2-error pre {
+  @apply mt-2 rounded bg-red-100 p-2 text-sm dark:bg-red-900/30;
+  @apply border-none;
+}
+
+/* Dark mode adjustments for D2 diagrams */
+.dark .d2-diagram svg {
+  @apply brightness-90 contrast-110 filter;
+}
+
+/* Responsive diagram containers */
+@media (max-width: 768px) {
+  .mermaid,
+  .d2-diagram {
+    @apply mx-4;
+  }
+}
