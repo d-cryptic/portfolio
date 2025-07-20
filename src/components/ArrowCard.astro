@@ -21,7 +21,11 @@ const getUrl = (entry: Entry) => {
   if (entry.data.redirected && entry.data.redirectedUrl) {
     return entry.data.redirectedUrl;
   }
-  return `/${entry.collection}/${entry.id}`;
+  // Remove /index.mdx or /index.md from blog post IDs
+  const cleanId = entry.collection === 'blog' 
+    ? entry.id.replace(/\/index\.mdx?$/, '') 
+    : entry.id;
+  return `/${entry.collection}/${cleanId}`;
 };
 
 const url = getUrl(entry);

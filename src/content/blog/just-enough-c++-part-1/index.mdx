@@ -2,7 +2,7 @@
 title: "Enough C++ To Build Anything: Part 1"
 description: "In this blog series, I will be learning, exploring, and explaining C++ Concepts. Whether it's DSA, building DB or picking up an OSS project, this blog series will help you navigate the C++ world."
 date: "2025-07-16"
-draft: false
+draft: true
 tags:
   - c++
   - dsa
@@ -14,3 +14,1294 @@ tags:
 ## C++: The Godfather Of Programming languages
 
 ![C++ Godfather of Programming Languages](https://assets.barundebnath.com/blogs/just-enough-c++-part-1/C-Godfather-of-Programming-Lan-C_Godfather_GeminiGenerated-f41e49f4.avif)
+<center>AI Generated Meme with prompt "C++: Godfather of Programming Languages"</center>
+
+
+I always had/have a love-hate relationship with C++. I try to use it for DSA and sometimes to build something, but anyhow I move on with other attractive languages - Python, Golang, etc. 
+
+My recent craze with learning DBs and performance engineering made me realized the importance of C++. Specially the optimizations and low level stuffs that C++ provides.
+
+Hence I finally decided to learn C++ properly. This is Part 1 of the series and this part will cover all the basics of C++.
+
+---
+
+## Basic Setup and Syntax
+
+### Template for Competitive Programming (if you are doing)
+
+```cpp
+#include <bits/stdc++.h>  // Includes all standard libraries
+using namespace std;
+
+int main() {
+    ios_base::sync_with_stdio(false);  // Faster I/O
+    cin.tie(NULL);
+    
+    // Your code here
+    
+    return 0;
+}
+```
+
+- **Why IO is faster with just two lines, you may ask??**
+  - removes synchronization overhead
+
+  A. `ios_base:sync_with_stdio(false)`
+    - By default, C++ streams (`cin`, `cout`) are synchronized with C streams (`stdin`, `stdout`) to allow safe mixing of C and C++ I/O.
+    - This synchronization makes C++ streams unbuffered, every operation immediately flushes to the C stream buffer.
+    - When you disable it:
+      1. C++ streams can buffer independently
+      2. No more expensive synchronization checks
+      3. Significantly faster for large amounts of I/O
+
+    > Trade Off: You can no longer safely mix `prinf`/`scanf` with `cin`/`cout` 
+  
+  B. `cin.tie(NULL)`
+    - By default, `cin` is tied to `cout`
+    - `cout` automatically flushes before every `cin` operaion.
+    - This ensures ouput appears before prompting for input in interactive programs
+    - Untying removes this automatic flushing:
+      - No forced `count.flush()` before each `cin`
+      - Faster when you don't need immediate output visibility
+
+---
+
+### Individual Headers
+
+```cpp
+#include <iostream>   // cin, cout
+#include <vector>     // vector
+#include <algorithm>  // sort, binary_search, etc.
+#include <string>     // string
+#include <queue>      // queue, priority_queue
+#include <stack>      // stack
+#include <map>        // map, unordered_map
+#include <set>        // set, unordered_set
+#include <iomanip>    // setprecision, fixed
+```
+
+---
+
+## Variables and Data Types
+
+### Primitive Types
+
+```cpp
+// Integers
+int num = 42;           // 4 bytes, -2^31 to 2^31-1
+long long big = 1e18;   // 8 bytes, use for large numbers
+unsigned int positive = 100;
+
+// Floating point
+double price = 99.99;   // 8 bytes, preferred over float
+float small = 3.14f;    // 4 bytes
+
+// Character and Boolean
+char grade = 'A';
+bool isValid = true;
+
+// String
+string name = "Alice";
+```
+
+- Use `long long` for large numbers in competitive programming
+- `int` range: approximately `-2×10^9` to `2×10^9`
+- `long long` range: approximately `-9×10^18` to `9×10^18`
+
+---
+
+## Input and Output
+
+### Basic I/O
+
+```cpp
+int n;
+cin >> n;           // Read integer
+cout << n << endl;  // Print with newline
+
+string name;
+cin >> name;        // Reads until whitespace
+getline(cin, name); // Reads entire line including spaces
+
+// Multiple inputs
+int a, b, c;
+cin >> a >> b >> c;
+```
+
+### Formatted Output
+
+```cpp
+cout << "Answer: " << result << "\n";
+cout << fixed << setprecision(2) << 3.14159;  // Output: 3.14
+
+// Fast I/O for competitive programming
+ios_base::sync_with_stdio(false);
+cin.tie(NULL);
+```
+
+---
+
+## Control Flow
+
+### Conditionals
+
+```cpp
+if (x > 0) {
+    cout << "Positive";
+} else if (x < 0) {
+    cout << "Negative";
+} else {
+    cout << "Zero";
+}
+
+// Ternary operator
+string result = (x > 0) ? "Positive" : "Non-positive";
+```
+
+### Loops
+
+```cpp
+// For loop
+for (int i = 0; i < n; i++) {
+    cout << i << " ";
+}
+
+// Range-based for loop (C++11)
+vector<int> arr = {1, 2, 3, 4, 5};
+for (int x : arr) {
+    cout << x << " ";
+}
+
+// While loop
+int i = 0;
+while (i < n) {
+    cout << i << " ";
+    i++;
+}
+```
+
+---
+
+## Functions
+
+### Basic Functions
+
+```cpp
+// Function declaration
+int add(int a, int b) {
+    return a + b;
+}
+
+// Function with reference parameters (modifies original)
+void swap(int& a, int& b) {
+    int temp = a;
+    a = b;
+    b = temp;
+}
+
+// Function overloading
+int max(int a, int b) { return (a > b) ? a : b; }
+double max(double a, double b) { return (a > b) ? a : b; }
+```
+
+### Lambda Functions (from `C++11`)
+
+```cpp
+auto add = [](int a, int b) { return a + b; };
+cout << add(3, 4); // Output: 7
+
+// Useful with STL algorithms
+sort(arr.begin(), arr.end(), [](int a, int b) { return a > b; }); // Descending sort
+```
+
+## Arrays & Vectors
+
+### Static Arrays
+
+```cpp
+int arr[100];               // uninitialized
+int nums[5] = {1,2,3,4,5};
+int matrix[10][10];         // 2D array
+
+// size must be known at compile time
+const int SIZE = 1000;
+int large_arr[SIZE];
+```
+
+### Vectors (Dynamic Arrays)
+
+```cpp
+vector<int> v;          //Empty Vector
+vector<int> v(10);      // 10 elements, all 0
+vector<int> v(10, 5);   // 10 elements, all 5
+vector<int> v = {1,2,3}; // initialize with values
+
+//common operations
+v.push_back(42);        // add element at end
+v.pop_back();           // remove last element
+cout << v.size();       // number of elements
+cout << v[0];           // access element (no bounds checking)
+cout << v.at(0);        // access element (with bounds checking)
+
+// 2D
+vector<vector<int>> matrix(n, vector<int>(m, 0)); //nXm matrix filled wih 0
+```
+
+### Vector Iteration
+
+```cpp
+// method 1: Index based
+for (int i=0; i<v.size(); i++) {
+  cout << v[i] << " ";
+}
+
+// method 2: Iterator
+for (auto it = v.begin(); it != v.end(); it++) {
+  cout << *it << " ";
+}
+
+// Method 3: Range based
+for (int x: v) {
+  cout << x << " ";
+}
+```
+
+---
+
+## Strings
+
+### Basics
+
+```c++
+string s = "Hello";
+s += " World";      // Concatenation
+cout << s.length(); // or s.size()
+cout << s[0];       // Access character
+s.push_back('!');   // Add character at end
+s.pop_back();       // remove last character
+```
+
+### String functions
+
+```c++
+string s = "programming";
+
+// substring
+string sub = s.substr(3,4);  // "gram" (start at index 3, length 4)
+
+// find
+int pos = s.find("gram");    // Returns index, or string::npos if not found
+
+// Character checks
+if (isalpha(s[0])) { /* is letter */ }
+if (isdigit(s[0])) { /* is digit */ }
+if (islower(s[0])) { /*is lowercase*/ }
+
+// convert case
+//transform(start-of-string, end-of-string, output-destination, functin-to-apply);
+transform(s.begin(), s.end(), s.begin(), ::tolower);
+transform(s.begin(), s.end(), s.begin(), ::toupper);
+```
+
+### String to number conversion
+
+```c++
+string s = "123";
+int num = stoi(s);  // string to int
+long long big = stoll(s); //string to long long
+double d = stod(s); //string to double
+
+// number to string
+int num = 123;
+string s = to_string(num);
+```
+
+---
+
+## Pointers and references
+
+### Pointers
+
+```c++
+int x = 10;
+int* ptr = &x;  // ptr stores address of x
+cout << *ptr;   // dereference: prints value at address (10)
+cout << ptr;    // prints address
+*ptr = 20;      // changes value of x to 20
+```
+
+### References
+
+```c++
+int x = 10;
+int& ref = x;   // ref is an alias for x
+ref = 20;       // changes x to 20
+
+// references in functions (no copying)
+void increment(int& n) {
+  n++;          // modifies original variable
+}
+```
+
+---
+
+## STL Containers
+
+### Vector
+
+```c++
+vector<int> v = {3, 1, 4, 1, 5};
+sort(v.begin(), v.end()); // sort ascending
+reverse(v.begin(), v.end());; //reverse
+cout << *max_element(v.begin(), v.end()); // find maximum
+```
+
+### Map
+
+```c++
+map<string, int> m;
+m["apple"] = 5;
+m["banana"] = 3;
+
+// check if key exists
+if (m.find("apple") != m.end()) {
+  cout << "Found apple";
+}
+
+//iterate
+for (auto& pair: m) {
+  cout << pair.first << ": " << pair.second << end;
+}
+
+// unordered map (faster average case)
+unordered_map<string, int> um;
+```
+
+### Set (unique elements)
+
+```c++
+set<int> s;
+s.insert(5);
+s.insert(3);
+s.insert(5); // duplicate, won't be added
+// s now contains {3,5}
+
+// check memsership
+if (s.count(5)) { // or s.find(5) != s.end()
+  count << "5 is in set";
+}
+
+//unordered set (faster average case)
+unordered_set<int> us;
+```
+
+### Queue and Stack
+
+```c++
+queue<int> q;
+q.push(1);
+q.push(2);
+cout << q.front(); // 1
+q.pop(); //removes front element
+
+stack<int> st;
+st.push(1);
+st.push(2);
+cout << st.top(); // 2
+st.pop(); // removes top element
+
+// priority queue (max heap by default)
+priority_queue<int> pq;
+pq.push(3);
+pq.push(1);
+pq.push(4);
+cout << pq.top(); // 4 (maximum element)
+
+// min heap
+priority_queue<int, vector<int>, greater<int>> min_pq;
+```
+
+---
+
+## STL Algorithms
+
+### Sorting
+
+```c++
+
+vector<int> v = {3, 1, 4, 1, 5};
+sort(v.begin(), s.end());     // ascending
+sort(v.begin(), s.end(), greater<int>()); //descending
+
+// custom comparator
+
+sort(v.begin(), v.end(), [](int a, int b) {
+  return a > b; //descending
+})
+```
+
+### Useful Algorithms
+
+```c++
+vector<int> v = {1,2,3,4,5};
+
+// min/max
+cout << *min_element(v.begin(), v.end());
+cout << *max_element(v.begin(), v.end());
+
+// Sum
+int sum = accumulate(v.begin(), v.end(), 0);
+
+// Count
+int count = count(v.begin(), v.end(), 3);
+
+// Reverse
+reverse(v.begin(), v.end());
+
+// Unique (removes consecutive duplicates, vector should be sorted first)
+// 1. sort vector
+// 2. unique() only removes consecutive duplicates. Moves unique elements to front, returns iterator pointing to the new end, elements after this iterator are in undefined state
+// 3. erase the undefined elements
+sort(v.begin(), v.end());
+v.erase(unique(v.begin(), v.end()), v.end());
+```
+
+---
+
+## Classes and Objects
+```c++
+class Rectangle {
+  private:
+    int length;
+    int width;
+  public:
+    // constructor
+    Rectangle(int l, int w): length(l), width(w) {}
+
+    // methods
+    int area() {
+      return length * width;
+    }
+
+    void setDimensions(int l, int w) {
+      length = l;
+      width = w;
+    }
+};
+
+// usage
+Rectangle rect(5,3);
+cout << rect.area(); //15
+```
+
+## Pair
+
+```c++
+pair<int, int> p = {3,4};
+cout << p.first << " " << p.second;
+// useful for coordinates, key-value pairs
+vector<pair<int,int>> points = {
+  {1,2},
+  {3,4},
+  {5,6}
+};
+
+// sort by first element, then by second
+sort(points.begin(), point.end());
+```
+
+## Common DSA Patterns
+
+### Two Pointers
+
+```d2
+direction: down
+
+start: {
+  label: "Start: isPalindrome()"
+  shape: oval
+  style.fill: "#e1f5fe"
+}
+
+init: {
+  label: "Initialize pointers\nleft = 0\nright = arr.size() - 1"
+  shape: rectangle
+  style.fill: "#f3e5f5"
+}
+
+while_condition: {
+  label: "while (left < right)"
+  shape: diamond
+  style.fill: "#fff3e0"
+}
+
+compare: {
+  label: "if (arr[left] != arr[right])"
+  shape: diamond
+  style.fill: "#fff3e0"
+}
+
+increment: {
+  label: "Increment left++\nDecrement right--"
+  shape: rectangle
+  style.fill: "#f3e5f5"
+}
+
+return_false: {
+  label: "Return false ❌"
+  shape: oval
+  style.fill: "#ffebee"
+}
+
+return_true: {
+  label: "Return true ✅"
+  shape: oval
+  style.fill: "#e8f5e8"
+}
+
+# Flow connections
+start -> init
+init -> while_condition
+
+while_condition -> compare: "true"
+while_condition -> return_true: "false"
+
+compare -> return_false: "true\n(not equal)"
+compare -> increment: "false\n(equal)"
+
+increment -> while_condition
+
+# Styling
+*.style.font-size: 14
+*.style.stroke-width: 2
+```
+
+```c++
+// check if array is palindrome
+bool isPalindrome(vector<int>& arr) {
+  int left = 0;
+  int right = arr.size() - 1;
+  while (left < right) {
+    if (arr[left] != arr[right]) return false;
+    left++;
+    right--;
+  }  
+
+  return true;
+}
+```
+
+### Sliding Window
+
+```d2
+direction: down
+
+start: {
+  label: "Start: maxSum(arr, k)"
+  shape: oval
+  style.fill: "#e1f5fe"
+}
+
+init: {
+  label: "Initialize\nn = arr.size()\nwindowSum = 0"
+  shape: rectangle
+  style.fill: "#f3e5f5"
+}
+
+first_window_loop: {
+  label: "for (i = 0; i < k; i++)\nCalculate first window sum"
+  shape: hexagon
+  style.fill: "#e8f5e8"
+}
+
+first_window_body: {
+  label: "windowSum += arr[i]"
+  shape: rectangle
+  style.fill: "#f3e5f5"
+}
+
+set_max: {
+  label: "maxSum = windowSum"
+  shape: rectangle
+  style.fill: "#f3e5f5"
+}
+
+slide_loop: {
+  label: "for (i = k; i < n; i++)\nSlide the window"
+  shape: hexagon
+  style.fill: "#fff3e0"
+}
+
+slide_window: {
+  label: "windowSum = windowSum\n- arr[i-k] + arr[i]\n(Remove left, add right)"
+  shape: rectangle
+  style.fill: "#f3e5f5"
+}
+
+update_max: {
+  label: "maxSum = max(maxSum, windowSum)"
+  shape: rectangle
+  style.fill: "#f3e5f5"
+}
+
+return_result: {
+  label: "Return maxSum"
+  shape: oval
+  style.fill: "#e8f5e8"
+}
+
+# Flow connections
+start -> init
+init -> first_window_loop
+
+first_window_loop -> first_window_body: "i < k"
+first_window_body -> first_window_loop: "continue loop"
+first_window_loop -> set_max: "loop complete"
+
+set_max -> slide_loop
+
+slide_loop -> slide_window: "i < n"
+slide_window -> update_max
+update_max -> slide_loop: "continue loop"
+
+slide_loop -> return_result: "loop complete"
+
+# Add visual separation
+phase1: {
+  label: "Phase 1: Calculate First Window"
+  style.fill: "#e8f5e8"
+  style.opacity: 0.3
+  style.stroke-dash: 5
+}
+
+phase2: {
+  label: "Phase 2: Slide Window"
+  style.fill: "#fff3e0"
+  style.opacity: 0.3
+  style.stroke-dash: 5
+}
+
+# Position phases behind elements
+first_window_loop -> phase1: {style.opacity: 0}
+slide_loop -> phase2: {style.opacity: 0}
+
+# Styling
+*.style.font-size: 14
+*.style.stroke-width: 2
+```
+
+```c++
+// maximum sum of k consecutive elements
+int maxSum(vector<int>& arr, int k) {
+  int n = arr.size();
+  int windowSum = 0;
+
+  // calculate sum of first window
+  for(int i=0; i<k; i++) {
+    windowSum += arr[i];
+  }
+
+  int maxSum = windowSum;
+
+  // Slide the window
+  for(int i=k; i<n; i++) {
+    windowSum = windowSum - arr[i-k] + arr[i];
+    maxSum = max(maxSum, windowSum);
+  }
+
+  return maxSum;
+}
+```
+
+### Prefix Sum
+
+```d2
+direction: down
+
+# Build Prefix Sum Function
+build_start: {
+  label: "Start: buildPrefixSum(arr)"
+  shape: oval
+  style.fill: "#e1f5fe"
+}
+
+build_init: {
+  label: "Initialize\nn = arr.size()\nvector<int> prefix(n)"
+  shape: rectangle
+  style.fill: "#f3e5f5"
+}
+
+set_first: {
+  label: "prefix[0] = arr[0]"
+  shape: rectangle
+  style.fill: "#f3e5f5"
+}
+
+build_loop: {
+  label: "for (i = 1; i < n; i++)"
+  shape: hexagon
+  style.fill: "#e8f5e8"
+}
+
+build_body: {
+  label: "prefix[i] = prefix[i-1] + arr[i]"
+  shape: rectangle
+  style.fill: "#f3e5f5"
+}
+
+build_return: {
+  label: "Return prefix array"
+  shape: oval
+  style.fill: "#e8f5e8"
+}
+
+# Range Sum Function
+range_start: {
+  label: "Start: rangeSum(prefix, l, r)"
+  shape: oval
+  style.fill: "#e1f5fe"
+}
+
+check_l: {
+  label: "if (l == 0)"
+  shape: diamond
+  style.fill: "#fff3e0"
+}
+
+return_direct: {
+  label: "Return prefix[r]"
+  shape: oval
+  style.fill: "#e8f5e8"
+}
+
+return_diff: {
+  label: "Return prefix[r] - prefix[l-1]"
+  shape: oval
+  style.fill: "#e8f5e8"
+}
+
+# Flow connections for buildPrefixSum
+build_start -> build_init
+build_init -> set_first
+set_first -> build_loop
+
+build_loop -> build_body: "i < n"
+build_body -> build_loop: "continue loop"
+build_loop -> build_return: "loop complete"
+
+# Flow connections for rangeSum
+range_start -> check_l
+check_l -> return_direct: "true\n(l == 0)"
+check_l -> return_diff: "false\n(l > 0)"
+
+# Visual separation with containers
+build_function: {
+  label: "buildPrefixSum() Function"
+  style.fill: "#e8f5e8"
+  style.opacity: 0.2
+  style.stroke-dash: 5
+  style.stroke-width: 3
+}
+
+range_function: {
+  label: "rangeSum() Function"
+  style.fill: "#fff3e0"
+  style.opacity: 0.2
+  style.stroke-dash: 5
+  style.stroke-width: 3
+}
+
+# Position containers
+build_start -> build_function: {style.opacity: 0}
+range_start -> range_function: {style.opacity: 0}
+
+# Add example visualization
+example: {
+  label: "Example:\nArray: [1, 2, 3, 4, 5]\nPrefix: [1, 3, 6, 10, 15]\nrangeSum(1,3) = 15-1 = 14"
+  shape: rectangle
+  style.fill: "#f0f4c3"
+  style.stroke-dash: 3
+}
+
+build_return -> example: {style.stroke-dash: 3; label: "enables"}
+example -> range_start: {style.stroke-dash: 3; label: "used by"}
+
+# Styling
+*.style.font-size: 14
+*.style.stroke-width: 2
+```
+
+```c++
+// Build prefix sum array
+vector<int> buildPrefixSum(vector<int>& arr) {
+  int n = arr.size();
+  vector<int> prefix(n);
+  prefix[0] = arr[0];
+
+  for(int i=1; i<n; i++) {
+    prefix[i] = prefix[i-1] + arr[i];
+  }
+
+  return prefix;
+}
+
+// Range sum query: sum from index l to r
+int rangeSum(vector<int>& prefix, int l, int r) {
+  if (l == 0) return prefix[r];
+  return prefix[r] - prefix[l-1];
+}
+```
+
+### Binary Search
+
+```d2
+direction: down
+
+start: {
+  label: "Start: binarySearch(arr, target)"
+  shape: oval
+  style.fill: "#e1f5fe"
+}
+
+init: {
+  label: "Initialize\nleft = 0\nright = arr.size() - 1"
+  shape: rectangle
+  style.fill: "#f3e5f5"
+}
+
+while_condition: {
+  label: "while (left <= right)"
+  shape: diamond
+  style.fill: "#fff3e0"
+}
+
+calculate_mid: {
+  label: "mid = left + (right - left) / 2\n(prevents overflow)"
+  shape: rectangle
+  style.fill: "#f3e5f5"
+}
+
+compare_target: {
+  label: "if (arr[mid] == target)"
+  shape: diamond
+  style.fill: "#fff3e0"
+}
+
+found_target: {
+  label: "Return mid ✅\n(target found)"
+  shape: oval
+  style.fill: "#e8f5e8"
+}
+
+compare_less: {
+  label: "else if (arr[mid] < target)"
+  shape: diamond
+  style.fill: "#fff3e0"
+}
+
+move_left: {
+  label: "left = mid + 1\n(search right half)"
+  shape: rectangle
+  style.fill: "#ffecb3"
+}
+
+move_right: {
+  label: "right = mid - 1\n(search left half)"
+  shape: rectangle
+  style.fill: "#ffecb3"
+}
+
+not_found: {
+  label: "Return -1 ❌\n(target not found)"
+  shape: oval
+  style.fill: "#ffebee"
+}
+
+# Flow connections
+start -> init
+init -> while_condition
+
+while_condition -> calculate_mid: "true\n(left <= right)"
+while_condition -> not_found: "false\n(left > right)"
+
+calculate_mid -> compare_target
+
+compare_target -> found_target: "true\n(arr[mid] == target)"
+compare_target -> compare_less: "false\n(arr[mid] != target)"
+
+compare_less -> move_left: "true\n(arr[mid] < target)"
+compare_less -> move_right: "false\n(arr[mid] > target)"
+
+move_left -> while_condition: "continue search"
+move_right -> while_condition: "continue search"
+
+# Add visual indicators for search space
+search_space: {
+  label: "Search Space Reduction:\nLeft half ← | → Right half"
+  shape: rectangle
+  style.fill: "#f0f4c3"
+  style.stroke-dash: 3
+}
+
+move_left -> search_space: {style.opacity: 0.3; style.stroke-dash: 3}
+move_right -> search_space: {style.opacity: 0.3; style.stroke-dash: 3}
+
+# Add complexity note
+complexity: {
+  label: "Time Complexity: O(log n)\nSpace Complexity: O(1)"
+  shape: rectangle
+  style.fill: "#e8eaf6"
+  style.stroke-dash: 3
+}
+
+start -> complexity: {style.opacity: 0.3; style.stroke-dash: 3}
+
+# Styling
+*.style.font-size: 14
+*.style.stroke-width: 2
+```
+
+```c++
+int binarySearch(vector<int>& arr, int target) {
+  int left = 0, right = arr.size() - 1;
+
+  while (left <= right) {
+    int mid = left + (right - left) / 2; //prevents overflow
+
+    if (arr[mid] == target) {
+      return mid;
+    } else if (arr[mid] < target) {
+      left = mid + 1;
+    } else {
+      right = mid - 1;
+    }
+  }
+
+  return -1;
+}
+```
+
+### DFS - Depth First Search
+
+```d2
+direction: down
+
+start: {
+  label: "Start: dfs(graph, node, visited)"
+  shape: oval
+  style.fill: "#e1f5fe"
+}
+
+mark_visited: {
+  label: "visited[node] = true\n(mark current node as visited)"
+  shape: rectangle
+  style.fill: "#e8f5e8"
+}
+
+process_node: {
+  label: "Process current node\ncout << node << \" \""
+  shape: rectangle
+  style.fill: "#f3e5f5"
+}
+
+for_loop: {
+  label: "for (neighbor : graph[node])\nIterate through all neighbors"
+  shape: hexagon
+  style.fill: "#fff3e0"
+}
+
+check_visited: {
+  label: "if (!visited[neighbor])"
+  shape: diamond
+  style.fill: "#fff3e0"
+}
+
+recursive_call: {
+  label: "dfs(graph, neighbor, visited)\n(recursive call)"
+  shape: rectangle
+  style.fill: "#ffecb3"
+  style.stroke-dash: 2
+}
+
+skip_neighbor: {
+  label: "Skip neighbor\n(already visited)"
+  shape: rectangle
+  style.fill: "#f5f5f5"
+}
+
+end_function: {
+  label: "End function\n(return to caller)"
+  shape: oval
+  style.fill: "#e8f5e8"
+}
+
+# Flow connections
+start -> mark_visited
+mark_visited -> process_node
+process_node -> for_loop
+
+for_loop -> check_visited: "has neighbors"
+for_loop -> end_function: "no more neighbors"
+
+check_visited -> recursive_call: "true\n(not visited)"
+check_visited -> skip_neighbor: "false\n(already visited)"
+
+recursive_call -> for_loop: "return from recursion"
+skip_neighbor -> for_loop: "continue loop"
+
+# Add recursion visualization
+recursion_stack: {
+  label: "Recursion Stack:\nnode1 → node2 → node3 → ...\n(goes deeper before backtracking)"
+  shape: rectangle
+  style.fill: "#f0f4c3"
+  style.stroke-dash: 3
+}
+
+recursive_call -> recursion_stack: {style.opacity: 0.3; style.stroke-dash: 3}
+
+# Add graph traversal example
+example_graph: {
+  label: "Example Traversal:\nGraph: 1-2-3\n      |   |\n      4   5\nDFS order: 1 → 2 → 3 → 5 → 4"
+  shape: rectangle
+  style.fill: "#e8eaf6"
+  style.stroke-dash: 3
+}
+
+start -> example_graph: {style.opacity: 0.3; style.stroke-dash: 3}
+
+# Add key properties
+properties: {
+  label: "DFS Properties:\n• Goes deep before wide\n• Uses recursion (implicit stack)\n• Time: O(V + E)\n• Space: O(V) for visited array"
+  shape: rectangle
+  style.fill: "#fce4ec"
+  style.stroke-dash: 3
+}
+
+end_function -> properties: {style.opacity: 0.3; style.stroke-dash: 3}
+
+# Styling
+*.style.font-size: 14
+*.style.stroke-width: 2
+```
+
+```c++
+void dfs(vector<vector<int>>& graph, int node, vector<bool>& visited) {
+  visited[node] = true;
+
+  //process current node
+  cout << node << " ";
+
+  for(int neighbor : graph[node]) {
+    if (!visited[neighbor]) {
+      dfs(graph, neighbor, visited);
+    }
+  }
+}
+```
+
+### BFS - Breadth First Search
+
+```d2
+direction: down
+
+start: {
+  label: "Start: bfs(graph, start)"
+  shape: oval
+  style.fill: "#e1f5fe"
+}
+
+init: {
+  label: "Initialize\nn = graph.size()\nvector<bool> visited(n, false)\nqueue<int> q"
+  shape: rectangle
+  style.fill: "#f3e5f5"
+}
+
+add_start: {
+  label: "q.push(start)\nvisited[start] = true"
+  shape: rectangle
+  style.fill: "#e8f5e8"
+}
+
+while_condition: {
+  label: "while (!q.empty())"
+  shape: diamond
+  style.fill: "#fff3e0"
+}
+
+get_front: {
+  label: "node = q.front()\nq.pop()"
+  shape: rectangle
+  style.fill: "#f3e5f5"
+}
+
+process_node: {
+  label: "Process current node\ncout << node << \" \""
+  shape: rectangle
+  style.fill: "#f3e5f5"
+}
+
+for_neighbors: {
+  label: "for (neighbor : graph[node])\nIterate through neighbors"
+  shape: hexagon
+  style.fill: "#fff3e0"
+}
+
+check_visited: {
+  label: "if (!visited[neighbor])"
+  shape: diamond
+  style.fill: "#fff3e0"
+}
+
+add_neighbor: {
+  label: "visited[neighbor] = true\nq.push(neighbor)"
+  shape: rectangle
+  style.fill: "#ffecb3"
+}
+
+skip_neighbor: {
+  label: "Skip neighbor\n(already visited)"
+  shape: rectangle
+  style.fill: "#f5f5f5"
+}
+
+end_function: {
+  label: "End BFS\n(queue is empty)"
+  shape: oval
+  style.fill: "#e8f5e8"
+}
+
+# Flow connections
+start -> init
+init -> add_start
+add_start -> while_condition
+
+while_condition -> get_front: "true\n(!q.empty())"
+while_condition -> end_function: "false\n(q.empty())"
+
+get_front -> process_node
+process_node -> for_neighbors
+
+for_neighbors -> check_visited: "has neighbors"
+for_neighbors -> while_condition: "no more neighbors"
+
+check_visited -> add_neighbor: "true\n(not visited)"
+check_visited -> skip_neighbor: "false\n(already visited)"
+
+add_neighbor -> for_neighbors: "continue loop"
+skip_neighbor -> for_neighbors: "continue loop"
+
+# Add queue visualization
+queue_visual: {
+  label: "Queue Operation:\nFIFO - First In, First Out\nLevel 0 → Level 1 → Level 2 → ..."
+  shape: rectangle
+  style.fill: "#f0f4c3"
+  style.stroke-dash: 3
+}
+
+add_neighbor -> queue_visual: {style.opacity: 0.3; style.stroke-dash: 3}
+
+# Add BFS vs DFS comparison
+comparison: {
+  label: "BFS vs DFS:\nBFS: Uses Queue (level by level)\nDFS: Uses Stack/Recursion (depth first)"
+  shape: rectangle
+  style.fill: "#e8eaf6"
+  style.stroke-dash: 3
+}
+
+start -> comparison: {style.opacity: 0.3; style.stroke-dash: 3}
+
+# Add example traversal
+example: {
+  label: "Example Traversal:\nGraph:    1\n         / \\\n        2   3\n       /   / \\\n      4   5   6\nBFS order: 1 → 2 → 3 → 4 → 5 → 6"
+  shape: rectangle
+  style.fill: "#fce4ec"
+  style.stroke-dash: 3
+}
+
+process_node -> example: {style.opacity: 0.3; style.stroke-dash: 3}
+
+# Add properties
+properties: {
+  label: "BFS Properties:\n• Explores level by level\n• Uses explicit queue\n• Time: O(V + E)\n• Space: O(V) for queue and visited\n• Finds shortest path in unweighted graphs"
+  shape: rectangle
+  style.fill: "#f3e5f5"
+  style.stroke-dash: 3
+}
+
+end_function -> properties: {style.opacity: 0.3; style.stroke-dash: 3}
+
+# Styling
+*.style.font-size: 14
+*.style.stroke-width: 2
+```
+
+```c++
+void bfs(vector<vector<int>>& graph, int start) {
+  int n = graph.size();
+  vector<bool> visited(n, false);
+  queue<int> q;
+
+  q.push(start);
+  visited[start] = true;
+
+  while (!q.empty()) {
+    int node = q.front();
+    q.pop();
+
+    // process current node
+    cout << node << " ";
+
+    // add all visited neighbors to queue
+    for(int neighbor: graph[node]) {
+      if(!visited[neighbor]) {
+        visited[neighbor] = true;
+        q.push(neighbor);
+      }
+    }
+  }
+}
+```
+
+---
+
+## Common operations quick reference
+
+### Time Complexity
+
+- Vector access - `O(1)`
+- Vector push_back - `O(1) amortized`
+- Vector insert/erase: O(n)
+- Map operations: O(log n)
+- Unordered_map operations: O(1) average, O(n) worst
+- Set operations: O(log n)
+- Sort: O(n log n)
+- Binary search: O(log n)
+
+### Space Complexity
+
+- Vector: O(n)
+- Map/Set: O(n)
+- Recursion depth: O(depth)
+
+---
+
+## Debugging
+
+- Follow the methods here to debug efficiently
+
+```c++
+// print vector
+// Print vector
+void printVector(vector<int>& v) {
+    for (int x : v) cout << x << " ";
+    cout << endl;
+}
+
+// Debug macro
+#define debug(x) cout << #x << " = " << x << endl;
+
+int main() {
+    int n = 5;
+    debug(n);  // Prints: n = 5
+}
+```

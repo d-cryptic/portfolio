@@ -9,6 +9,7 @@ import { remarkD2 } from "./src/plugins/remark-d2.js";
 // https://astro.build/config
 export default defineConfig({
   site: "https://barundebnath.com",
+  trailingSlash: "never",
   integrations: [
     mermaid({
       theme: "default",
