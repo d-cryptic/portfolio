@@ -137,68 +137,55 @@ class MermaidToR2Migrator:
             if os.path.exists(mmd_file_path):
                 os.unlink(mmd_file_path)
     
-    def add_rounded_border_and_convert_to_avif(self, png_path: str) -> bytes:
-        """Add rounded border to PNG and convert to AVIF format"""
+    def add_rounded_corners_and_convert_to_avif(self, png_path: str) -> bytes:
+        """Add rounded corners to PNG and convert to AVIF format (no borders)"""
         avif_path = png_path.replace('.png', '.avif')
-        
+
         try:
             with Image.open(png_path) as img:
                 # Ensure RGBA mode for transparency handling
                 if img.mode != 'RGBA':
                     img = img.convert('RGBA')
-                
-                # Add padding for the border
-                padding = 20
+
+                # Add minimal padding
+                padding = 10
                 new_width = img.width + (padding * 2)
                 new_height = img.height + (padding * 2)
-                
+
                 # Create new image with padding
                 padded_img = Image.new('RGBA', (new_width, new_height), (0, 0, 0, 0))
                 padded_img.paste(img, (padding, padding))
-                
+
                 # Create rounded rectangle mask
                 mask = Image.new('L', (new_width, new_height), 0)
                 from PIL import ImageDraw
                 draw = ImageDraw.Draw(mask)
-                
-                # Draw rounded rectangle (radius = 12px)
-                radius = 12
+
+                # Draw rounded rectangle (radius = 8px, smaller radius)
+                radius = 8
                 draw.rounded_rectangle(
-                    [(0, 0), (new_width, new_height)], 
-                    radius=radius, 
+                    [(0, 0), (new_width, new_height)],
+                    radius=radius,
                     fill=255
                 )
-                
+
                 # Apply mask to create rounded corners
                 rounded_img = Image.new('RGBA', (new_width, new_height), (0, 0, 0, 0))
                 rounded_img.paste(padded_img, (0, 0))
                 rounded_img.putalpha(mask)
-                
-                # Add subtle border
-                border_img = Image.new('RGBA', (new_width, new_height), (0, 0, 0, 0))
-                border_draw = ImageDraw.Draw(border_img)
-                border_draw.rounded_rectangle(
-                    [(1, 1), (new_width-1, new_height-1)], 
-                    radius=radius, 
-                    outline=(200, 200, 200, 100),  # Light gray border with transparency
-                    width=2
-                )
-                
-                # Composite border with rounded image
-                final_img = Image.alpha_composite(rounded_img, border_img)
-                
-                # Convert to RGB with white background for AVIF
-                background = Image.new('RGB', final_img.size, (255, 255, 255))
-                background.paste(final_img, mask=final_img.split()[-1])
-                
+
+                # Convert to RGB with white background for AVIF (no border)
+                background = Image.new('RGB', rounded_img.size, (255, 255, 255))
+                background.paste(rounded_img, mask=rounded_img.split()[-1])
+
                 background.save(avif_path, 'AVIF', quality=85, speed=6)
-            
+
             # Read AVIF data
             with open(avif_path, 'rb') as f:
                 avif_data = f.read()
-            
+
             return avif_data
-            
+
         finally:
             # Clean up temporary files
             for temp_path in [png_path, avif_path]:
@@ -293,8 +280,8 @@ class MermaidToR2Migrator:
                 # Render Mermaid directly to PNG with neutral theme and transparent background
                 png_path = self.render_mermaid_to_png(mermaid_code)
                 
-                # Add rounded border and convert PNG to AVIF
-                avif_data = self.add_rounded_border_and_convert_to_avif(png_path)
+                # Add rounded corners and convert PNG to AVIF (no borders)
+                avif_data = self.add_rounded_corners_and_convert_to_avif(png_path)
                 
                 # Generate filename
                 filename = self.generate_filename(mermaid_code, index)

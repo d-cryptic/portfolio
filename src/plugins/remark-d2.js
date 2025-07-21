@@ -1,8 +1,8 @@
-import { visit } from "unist-util-visit";
 import { execSync } from "child_process";
-import { writeFileSync, readFileSync, unlinkSync, existsSync } from "fs";
-import { join } from "path";
 import crypto from "crypto";
+import { existsSync, readFileSync, unlinkSync, writeFileSync } from "fs";
+import { join } from "path";
+import { visit } from "unist-util-visit";
 
 export function remarkD2() {
   return (tree) => {
@@ -27,7 +27,7 @@ export function remarkD2() {
           env.PATH = `${process.env.HOME}/.local/bin:${env.PATH}`;
 
           // Run D2 to generate SVG
-          execSync(`d2 "${tempFile}" "${outputFile}" --theme=0`, {
+          execSync(`d2 "${tempFile}" "${outputFile}" --theme=0 --pad=0`, {
             stdio: "pipe",
             env: env,
           });

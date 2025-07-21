@@ -386,8 +386,7 @@ pre code {
 
 .d2-diagram svg {
   @apply h-auto max-w-full;
-  @apply rounded-lg shadow-sm;
-  @apply border border-[var(--color-primary)]/10;
+  @apply rounded-lg;
 }
 
 .d2-error {

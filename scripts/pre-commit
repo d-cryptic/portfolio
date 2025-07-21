@@ -48,6 +48,14 @@ else
     exit 1
 fi
 
+echo "🚀 Starting D2 diagram migration..."
+if python3 scripts/migrate_d2_to_r2.py; then
+    echo "✅ D2 diagram migration completed successfully"
+else
+    echo "❌ D2 diagram migration failed"
+    exit 1
+fi
+
 # Check if any files were modified by the migrations
 if ! git diff --quiet; then
     echo "📝 Migrations updated some files. Adding them to the commit..."
