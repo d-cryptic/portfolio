@@ -64,7 +64,8 @@
     font-size: 0.875em;
     font-weight: 500;
     transition: all 0.2s ease;
-    white-space: nowrap;
+    white-space: normal;
+    word-break: break-word;
     position: relative;
   }
 
@@ -307,6 +308,21 @@ html.scrolled #back-to-top {
 /* shiki config */
 pre {
   @apply border border-[var(--color-primary)]/15 py-5;
+  /* Code block wrapping for all screen sizes */
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  overflow-x: visible; /* No horizontal scrollbar */
+  position: relative;
+  padding-right: 3rem; /* Space for copy button */
+}
+
+pre code {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  display: block;
+  padding-right: 0; /* Reset any default padding */
 }
 
 /* Remove previous attempt */
@@ -402,5 +418,24 @@ pre {
   .mermaid,
   .d2-diagram {
     @apply mx-4;
+  }
+}
+
+/* Additional responsive improvements for very small screens */
+@media (max-width: 480px) {
+  pre {
+    font-size: 0.875rem; /* Slightly smaller font on mobile */
+    padding: 1rem;
+    padding-right: 2.5rem; /* Adjusted space for smaller copy button */
+    margin-left: -0.75rem;
+    margin-right: -0.75rem;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  .copy-code {
+    @apply top-2 right-2 size-8;
+    font-size: 0.75rem;
   }
 }
