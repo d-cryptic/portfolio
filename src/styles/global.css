@@ -420,17 +420,25 @@ pre code {
   }
 }
 
+/* Medium screen improvements for tablets */
+@media (max-width: 768px) and (min-width: 481px) {
+  pre {
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
 /* Additional responsive improvements for very small screens */
 @media (max-width: 480px) {
   pre {
     font-size: 0.875rem; /* Slightly smaller font on mobile */
     padding: 1rem;
     padding-right: 2.5rem; /* Adjusted space for smaller copy button */
-    margin-left: -0.75rem;
-    margin-right: -0.75rem;
-    border-radius: 0;
-    border-left: none;
-    border-right: none;
+    margin-left: 0;
+    margin-right: 0;
+    border-radius: 0.5rem;
+    border-left: 1px solid var(--color-primary, #0e9b77);
+    border-right: 1px solid var(--color-primary, #0e9b77);
   }
 
   .copy-code {
