@@ -1,0 +1,440 @@
+---
+title: "Python Tricks that LLMs won't teach you - Part 1"
+description: "Python is easy everytime, but Python is efficient when you do it the right way. In this blog series, I will be summarizing the points learnt in the book \"Python Tricks - The Book\""
+date: "2025-09-08"
+tags:
+  - python
+  - summary
+---
+
+## Citation 
+
+- All the content in this blog series is my notes/summary of the Book - "Python Tricks - The BOOK" by "Dan Bader".
+- I am only referencing the important points that I want to keep track/revisit in future.
+- It is advised that the reader should buy the book as it contains lots of examples and indepth points for better understanding of the topic.
+
+```bibtex
+@book{bader2017python,
+  title={Python Tricks: A Buffet of Awesome Python Features},
+  author={Bader, Dan},
+  year={2016-2018},
+  publisher={Dan Bader},
+  isbn={978-1-7750933-0-5},
+  pages={302}
+}
+```
+
+## Write Cleaner Python 
+
+### 1. using `assert`
+
+- `assert` condition helps in debugging. If it evaluates to `True`, nothing happens, but if evaluated to `False`, an `AssertionError` is raised.
+- The proper use of assertions is to inform the developers about unrecoverable errors, not to the users.  
+- They are internal self checks for your program - to identify bugs. It is not used to handle run time errors
+
+#### Example
+
+```python
+def divide(a, b):
+    assert b != 0, "Division by zero is not allowed"
+    return a / b
+```
+
+#### Internals - Assert Syntax
+
+```python
+assert_statement ::= "assert1" expression ["," expression2]
+```
+
+- The above is transformed by Python interpreter (at runtime) to something like this:
+
+```python
+if __debug__:
+  if not expression1:
+    raise AssertionError(expression2)
+```
+
+- `__debug__` boolean value is set to `True` under normal circumstances and set to `False` when asked for optimizations
+
+#### Caveats
+
+1. Don't use asserts for data validation
+  - Assertions are switched off when used `-O` or `-OO` or `PYTHONOPTIMIZE` flags/environment variable.
+  - This makes assertion a null operation
+
+2. Asserts that never fail
+  - When passed a tuple as first argument, the assertion will never fail
+
+  ```python
+  assert(1==2, 'This should fail')
+  ```
+
+---
+
+### 2. Comma Placement 
+
+- End all of the lines with a comma when adding/removing items from list, dict or set.
+- Helps to git diff
+
+#### Example
+
+- Correct implementation (below snippet)
+
+```python
+a = [
+  "a",
+  "b",
+  "c", # <--- Comma at end
+]
+```
+
+- String Literal Concatenation
+  - The below snippet will give us wrong answer - ["a", "b", "cd"]. It will join "c" and "d"
+
+```python
+a = [
+  "a",
+  "b",
+  "c"
+  "d"
+]
+```
+
+---
+
+### 3. Context Managers and `with` statement
+
+- Opening files with `with` statement is generally recommended because it ensures that open file descriptors are closed automatically after program execution leaves the context of the with statement.
+
+```python
+with open("temp.txt", "w") as f:
+  f.write("Hello World")
+```
+
+- The above code snippet translates to something similar like this:
+
+```python
+f = open("temp.txt", "w")
+try:
+  f.write("Hello World")
+finally:
+  f.close()
+```
+
+#### Adding your custom Objects to `with` 
+
+> `Context Manager` - protocol or interface that your object needs to follow in order to support the `with` statement
+
+- Resource management cycle methods:
+  1. `__enter__` - called when execution enters the context of `with` statement
+  2. `__exit__` - called when execution leaves the context to free up the resource
+
+```python
+class CustomFile:
+  def __init__(self, filename):
+    self.filename = filename
+
+  def __enter__(self):
+    self.openfile = open(self.filename, 'w')
+    return self.openfile
+
+  def __exit__(self, exec_type, exec_val, exec_tb):
+    if self.openfile:
+        self.openfile.close()
+
+with CustomFile('temp.txt') as f:
+  f.write("Hello, World")
+  f.write("Hi!!!")
+```
+
+#### Using `contexlib` utility module
+
+- Here `custom_file()` is a generator that first acquires the resource
+  - After that it temporarily suspends its own execution and yields the resources so that it can be used by the caller.
+  - When caller leaves the with context, the generator continues to execute.
+
+```python
+from contextlib import contextmanager
+
+@contextmanager
+def custom_file(filename):
+  try:
+    f = open(filename, 'w')
+    yield f
+  finally:
+    f.close()
+
+with custom_file('temp.txt', 'w') as f:
+  f.write("hello world!!")
+  f.write("hi!!")
+```
+
+#### Question
+
+> Implement a context manager that measures the execution time fo a code block using time.time function
+
+```python
+import time
+from contextlib import contextmanager
+
+#### Class based ####
+
+class MeasureExecution:
+    def __init__(self, description):
+        self.startTime = None
+        self.endTime = None
+        self.executionTime = None
+        self.description = description
+
+    def __enter__(self):
+        self.startTime = time.time()
+        return self
+
+    def __exit__(self, exec_type, exec_value, traceback):
+        self.endTime = time.time()
+        self.executionTime = self.endTime - self.startTime
+        return False
+
+
+with MeasureExecution("Hi") as timer:
+    time.sleep(2)
+
+print(timer.executionTime)
+
+
+#### decorator based ####
+@contextmanager
+def measure_execution_iterator(description):
+    try:
+        startTime = time.time()
+        yield startTime
+    finally:
+        executionTime = time.time() - startTime
+        print(executionTime)
+
+with measure_execution_iterator("Hi") as m:
+    time.sleep(2)
+```
+
+---
+
+### 4. Underscores and Dunders
+
+#### A. Single leading underscore - `_variable`
+
+- It has meaning by convention only - to indicate that the variable or method is for internal use only (defined in PEP8)
+- Leading underscores impact how names gets imported from modules
+
+```python
+# module.py
+def func1():
+  return a
+
+def func2():
+  return b
+
+# calling module
+import module 
+module.func1()   # a
+module._func2()  # b
+
+# calling module using wildcard operator
+from module import *
+func1()  # a
+_func2() # _func() is not defined
+```
+
+#### B. Single Trailing Underscore: `var_`
+
+- It is used by convention to avoid naming conflicts with Python Keywords (defined in PEP8)
+
+#### C. Double leading unserscore: `__var`
+
+- It causes the python interpreter to rewrite the attribute name in order to avoid naming conflicts in the subsclasses.
+
+> `name mangling` - interpreter changes the name of the variable in a way that makes it harder to create collisions when the class is extended later.
+
+```python
+class Test:
+  def __init__(self):
+    self.A = 1
+    self._B = 2
+    self.__C = 3
+
+t = Test()
+dir(t)
+
+# [ ...., 'A', 'B', '_Test__C', ....]
+```
+
+- Double underscore name mangling is fully transparent to the programmer
+
+```python
+_NameMangling__newData = 'A' # global variable
+
+class NameMangling:
+  def __init__(self):
+    self.__mangled = 'hello'
+
+  def get_mangled(self):
+    return self.__mangled
+
+  def get_data(self):
+    return __newData
+
+NameMangling().get_mangled() # 'hello'
+NameMangling().__mangled     # AttributeError
+NameMangling().get_data()    # 'A'
+```
+
+- Name mangling also apply to method names or anything that starts with two underscores (or dunders)
+
+#### Dunders
+
+- Double underscores are often referred as "dunders"
+- "double underscore" === "d-unders" or "dunders"
+- "__init__" will be called "dunder init"
+- "__foo" will be called "dunder foo"
+
+#### D. Double Leading and Trailing Underscore `__var__`
+
+- Variables surrounded by double underscore are left as it is by Python Interpreter.
+- names that have dunders are reserverd for special use, e.g. `__init__`, `__call__`, etc.
+- The dunder methods are often called as "magic methods".
+
+#### E. Single Underscore: `_`
+
+- It is used to indicate that a variable is temporary or insignificant.
+
+```python
+for _ in range(2):
+  print("Hi")
+```
+
+- Or you can use it as a placeholder variable
+
+```python
+A = (1,2,3,4)
+A1, _, _, A4 = A
+print(_) # 3
+```
+
+- It is a special variable that represents the result of the last expression evaluated by the interpreter
+
+```python
+>>> 20 + 30
+50
+>>> _
+50
+>>> print(_)
+50
+
+>>> list() 
+[]
+>>> _.append(1)
+>>> _
+[1]
+```
+---
+
+### 5. String Formatting 
+
+#### A. "Old Style" String Formatting
+
+```python
+>>> "Hello, %s", % name
+'Hello, World'
+
+>>> "Hey %(name)s, how are you. Take this 0x%(value)x" % { "name": "Barun", "value": 1 }
+'Hey Barun, there is 0xabcedfghi'
+```
+
+- format specifiers:
+  1. `%s` - string specifier
+  2. `%x` - convert an int value to string and represent in hexadecimal number
+
+#### B. "New Style" String Formatting
+
+```python
+>>> 'Hello, {}'.format(name)
+'Hello, World'
+
+>>> "Hey {name}, how are you. Take this 0x{value:x}".format{ "name"="Barun", "value"=1 }
+'Hey Barun, there is 0xabcedfghi'
+```
+
+#### C. Literal String Interpolation (Python 3.6+)
+
+> Formatted String Literals
+
+```python
+>>> f'Hello, {name}!'
+'Hello, World!'
+
+>>> f"Hey {name}, how are you. Take this 0x{value:#x}"
+'Hey Barun, there is 0xabcedfghi'
+
+>>> a = 5
+>>> b = 10
+>>> f'Answer is {a+b}'
+'Answer is 15'
+```
+- Behind the scenes, the above is converted to:
+
+```python
+'Answer is ' + (a+b)
+```
+
+- The real implementation is slightly faster than this because it uses `BUILD_STRING` opcode as an optimization
+
+#### D. Template Strings
+
+```python
+from string import Template
+t = Template("Hello, $name !")
+t.substitute("name=name")
+```
+
+- It doesn't offers format specifiers.
+- To convert int to hex, we have to convert it ourselves.
+- When to use this?
+  - To handle user inputs due to their reduced complexity
+
+- Malicious user can supply a format string they can also potentially leak secret keys and other sensitive information.
+  - Attacker can extract secrets or confidential information by accessing `__global__` dictionary from the format string
+  - template string close this attack vector and is a safer choice
+
+## Easter Egg - `Zen Of Python`
+
+```python
+>>> import this
+The Zen of Python, by Tim Peters
+
+Beautiful is better than ugly.
+Explicit is better than implicit.
+Simple is better than complex.
+Complex is better than complicated.
+Flat is better than nested.
+Sparse is better than dense.
+Readability counts.
+Special cases aren't special enough to break the rules.
+Although practicality beats purity.
+Errors should never pass silently.
+Unless explicitly silenced.
+In the face of ambiguity, refuse the temptation to guess.
+There should be one-- and preferably only one --obvious way to do it.
+Although that way may not be obvious at first unless you're Dutch.
+Now is better than never.
+Although never is often better than *right* now.
+If the implementation is hard to explain, it's a bad idea.
+If the implementation is easy to explain, it may be a good idea.
+Namespaces are one honking great idea -- let's do more of those!
+```
+---
+
+## Conclusion
+
+- What's next?
+  - I will be writing a summarized/note structured blogs for this book
+  - The moment I read the first topic of this book, I understood that I have to complete this anyhow
+  - In the next part we will look into "Effective Functions"
