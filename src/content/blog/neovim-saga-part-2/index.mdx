@@ -1,0 +1,269 @@
+---
+title: "Neovim Saga Part 2: Theming, File Explorer and More"
+description: "In this blog, we will configure our Neovim to feel like a full fledged IDE. We will set important keymaps, install necessary plugins, use a theme, and much more."
+date: "2025-05-18"
+draft: true
+tags:
+  - neovim
+  - productivity
+  - ide
+  - dotfiles
+
+---
+
+## Introduction
+
+In [Part 1](https://barundebnath.com/blog/neovim-saga-part-1/), we looked into all useful NeoVim keybindings, along with basics of Lua. This is enough to start configuring our Neovim to be a full fledged IDE (almost).
+
+To be honest, that blank screen of Neovim gives me PTSD. I want my editor to be vibrant with lots of cool features (so that I can play with those plugins and everyone still thinks that I am working). I will add all the links to the plugins that I used, along with the configuration that I used, you are free to open to use whatever configurations or alternative plugin your like.
+
+> NOTE: 
+> - All code can be found [here](https://github.com/d-cryptic/dotfiles/tree/main/.config/nvim)
+> - All plugins and configurations that I will include here are tested and configured with lots of testing and debugging. It might happen that errors will pop out in your case, so please look into the logs, debug it, refer the official repos, ask in the community.
+
+So let's get started!!
+
+---
+
+## First Things First - setting up formatter and file structure
+
+All the configurations for Neovim will be stored in `~/.config` folder if you are in MacOS or in Linux. Create a folder named `nvim`.
+
+```bash
+cd ~/.config
+mkdir nvim
+```
+
+The structure of the folder should be like this below if you want to follow me end to end:
+
+<center>![Neovim Directory Structure](https://assets.barundebnath.com/blogs/nvim-part-2-05-2025/nvim-dir-structure.png)</center>
+
+```bash
+cd nvim
+mkdir configs
+mkdir lua
+mkdir lua/plugins
+mkdir lua/configs
+```
+
+### <b>Setting up lua formatter</b>
+
+Create a `.stylua.toml` file in root of directory with following configurations:
+
+```toml
+column_width = 120
+line_endings = "Unix"
+indent_type = "Spaces"
+indent_width = 2
+quote_style = "AutoPreferDouble"
+call_parentheses = "None"
+```
+
+- [Link](https://github.com/d-cryptic/dotfiles/blob/main/.config/nvim/.stylua.toml)
+
+### Kick off the configurations
+
+Root of the configurations will be `init.lua` file. It's like the starting point of your Neovim configuration. You can reference other files here to make your configurations more orgnized.
+
+Also we will be using [`Lazy`](https://github.com/folke/lazy.nvim) plugin manager for Neovim. If you want you can use other package managers like `Packer`. I use Lazy because of its simplicity and UI. 
+
+In `nvim/configs` folder, create a file named `lazy.lua`. Add the configuration from [here](https://github.com/d-cryptic/dotfiles/blob/main/.config/nvim/configs/lazy.lua) in it.
+
+Similarly create a `configs/lspconfig.lua` and add the configuration from [here](https://github.com/d-cryptic/dotfiles/blob/main/.config/nvim/configs/lspconfig.lua)
+
+### Loading the `init.lua`
+
+In your `init.lua`, add the below lines to start/install the Lazy Package manager. 
+
+```lua
+vim.g.mapleader = " "
+vim.deprecate = function() end
+
+-- bootstrap lazy and all plugins
+local lazypath = vim.fn.stdpath "data" .. "/lazy/lazy.nvim" -- install location of lazy.nvim
+
+-- -- if not found lazy, will clone from github
+if not vim.uv.fs_stat(lazypath) then
+  local repo = "https://github.com/folke/lazy.nvim.git"
+  vim.fn.system { "git", "clone", "--filter=blob:none", repo, "--branch=stable", lazypath }
+end
+
+-- -- add lazy to start of runtime
+vim.opt.rtp:prepend(lazypath)
+
+local lazy_config = require "lazy"
+
+require("lazy").setup({}, lazy_config)
+```
+
+<b> Explanation:</b>
+- `mapleader` is an important keybinding which allows us to trigger custom keymaps. Here I set it as `Space` in `normal` mode.
+- If lazy isn't installed, it should install it first.
+- If any deprecated function, ignore it.
+- At last load the lazy config
+- You can refer the configuration from [here](https://github.com/d-cryptic/dotfiles/blob/main/.config/nvim/init.lua#L4C1-L17C30)
+
+- If everything went well, open Neovim and type `:Lazy`. You will see this UI screen (themes or colors might be different.)
+
+<center>![Lazy UI Screen](https://assets.barundebnath.com/blogs/nvim-part-2-05-2025/lazy-ui.png)</center>
+
+---
+
+## Mappings, Autocommands and Options
+
+Inside `lua` folder, create these files:
+
+```bash
+cd lua
+touch options.lua
+touch mappings.lua
+touch autocmds.lua
+```
+
+### Explanation
+
+1. <b>options.lua</b>
+  - This file will set the behavior of the editor. For e.g. how many spaces in tab, relative numbering, indentation, etc.
+  - Get the configuration from [here](https://github.com/d-cryptic/dotfiles/blob/main/.config/nvim/lua/options.lua)
+
+2. <b>mappings.lua</b>
+  - This file will set the keymaps for plugins, inbuilt neovim actions, etc.
+  - Get the configuration from [here](https://github.com/d-cryptic/dotfiles/blob/main/.config/nvim/lua/mappings.lua).
+  - At first, comment out the plugin related mappings, and then uncomment those as we add more plugins.
+
+3. <b>autocmds.lua</b>
+  - Plugins or mappings that rely on the file buffer, filetype, or UI being ready only run once everything is truly initialized.
+  - Prevents flickers or misapplied settings during Neovim startup.
+  - Get the configuration from [here](https://github.com/d-cryptic/dotfiles/blob/main/.config/nvim/lua/autocmds.lua).
+  - At first, comment out the plugin related mappings, and then uncomment those as we add more plugins.
+
+Import the configuration to `init.lua`. Refer [here](https://github.com/d-cryptic/dotfiles/blob/4685adb9b90409c211cb69275d1cc363e6751942/.config/nvim/init.lua#L70C1-L76C5)
+
+---
+
+## Let's start theming
+
+I like `catppuccin` theme a lot.......!!! So without a second thought I am gonna use it. The configuration steps mentioned below will be same for any other themes. If you are also a catppuccin fan, you can refer the official [repo](https://github.com/catppuccin/nvim) too.
+
+- Create a `lua/plugins/colorscheme.lua` file. Copy the configuration from [here](https://github.com/d-cryptic/dotfiles/blob/main/.config/nvim/lua/plugins/colorscheme.lua).
+
+- In `init.lua`, get the cache folder for your theme (Generally it's inside `~/.cache/nvim/` folder). Import it like [this](https://github.com/d-cryptic/dotfiles/blob/4685adb9b90409c211cb69275d1cc363e6751942/.config/nvim/init.lua#L1).
+- Import your theme config like [this](https://github.com/d-cryptic/dotfiles/blob/4685adb9b90409c211cb69275d1cc363e6751942/.config/nvim/init.lua#L21) and add it to the lazy setup like done [here](https://github.com/d-cryptic/dotfiles/blob/4685adb9b90409c211cb69275d1cc363e6751942/.config/nvim/init.lua#L43).
+- Execute the files generated by your respective theme, refer [here](https://github.com/d-cryptic/dotfiles/blob/4685adb9b90409c211cb69275d1cc363e6751942/.config/nvim/init.lua#L65)
+- Restart your neovim and you will see theme getting downloaded and applied.
+
+---
+
+## Makeover of your Neovim Editor
+
+Now we are Neovim'ing. We are onto an interesting part. Now we will start installing plugins which will shape our neovim into a fully fledged IDE.
+
+>> All Editor plugins can be found [here](https://github.com/d-cryptic/dotfiles/blob/main/.config/nvim/lua/plugins/editor.lua) 
+
+
+### <b>1. Trouble </b> 
+> A pretty list for showing diagnostics, references, telescope results, quickfix and location lists to help you solve all the trouble your code is causing.
+
+- [Repo](https://github.com/folke/trouble.nvim)
+
+### <b>2. Alpha </b>
+
+<center>![Dashboard Greeter](https://assets.barundebnath.com/blogs/nvim-part-2-05-2025/alpha-nvim-greeter.png)</center>
+
+> alpha is a fast and fully programmable greeter for neovim.
+- [Repo](https://github.com/goolord/alpha-nvim)
+
+### <b>3. mini.starter</b>
+
+- [Repo](https://github.com/echasnovski/mini.starter), optional plugin
+> Fast and flexible start screen
+
+### <b>4. dashboard and nvim-web-devicons</b>
+
+- [Repo](https://github.com/nvimdev/dashboard-nvim), optional plugin
+> Fancy and Blazing Fast start screen plugin of neovim
+
+### <b>5. flash</b> 
+
+- [Repo](https://github.com/folke/flash.nvim)
+> flash.nvim lets you navigate your code with search labels, enhanced character motions, and Treesitter integration.
+
+### <b>6. noice</b>
+
+- [Repo](https://github.com/folke/noice.nvim)
+> Highly experimental plugin that completely replaces the UI for messages, cmdline and the popupmenu.
+
+### <b>7. incline</b>
+
+- [Repo](https://github.com/b0o/incline.nvim)
+> 🎈 Floating statuslines for Neovim, winbar alternative
+
+### <b>8. nvim-ufo</b>
+
+- [Repo](https://github.com/kevinhwang91/nvim-ufo)
+> Not UFO in the sky, but an ultra fold in Neovim.
+
+### <b>9. outline</b>
+
+- [Repo](https://github.com/hedyhli/outline.nvim)
+> Navigate code with an outline sidebar. Forked from symbols-outline.nvim.
+
+### <b>10. lualine</b>
+
+- [Repo](https://github.com/nvim-lualine/lualine.nvim)
+> A blazing fast and easy to configure neovim statusline plugin written in pure lua.
+
+### <b>11. tabby</b>
+
+- [Repo](https://github.com/nanozuki/tabby.nvim)
+> A declarative, highly configurable, and neovim style tabline plugin. Use your nvim tabs as a workspace multiplexer!
+
+### <b>12. vim-surround</b>
+
+- [Repo](https://github.com/tpope/vim-surround)
+> surround.vim: Delete/change/add parentheses/quotes/XML-tags/much more with ease
+
+### <b>13. vim-repeat</b>
+
+- [Repo](https://github.com/tpope/vim-repeat)
+> repeat.vim: enable repeating supported plugin maps with "."
+
+---
+
+## Important Utility Plugins
+
+### <b>1. indentline</b>
+
+- [Repo](https://github.com/lukas-reineke/indent-blankline.nvim)
+> This plugin adds indentation guides to Neovim. It uses Neovim's virtual text feature and no conceal
+- [My implementation](https://github.com/d-cryptic/dotfiles/blob/main/.config/nvim/lua/plugins/indent.lua)
+
+### <b>2. telescope</b>
+
+- [Repo](https://github.com/nvim-telescope/telescope.nvim)
+> telescope.nvim is a highly extendable fuzzy finder over lists. Built on the latest awesome features from neovim core. Telescope is centered around modularity, allowing for easy customization.
+- [My implementation](https://github.com/d-cryptic/dotfiles/blob/main/.config/nvim/lua/plugins/telescope.lua)
+
+### <b>3. treesitter</b>
+
+- [Repo](https://github.com/nvim-treesitter/nvim-treesitter)
+> The goal of nvim-treesitter is both to provide a simple and easy way to use the interface for tree-sitter in Neovim and to provide some basic functionality such as highlighting based on it.
+- [My implementation](https://github.com/d-cryptic/dotfiles/blob/main/.config/nvim/lua/plugins/treesitter.lua)
+
+### <b>4. which-key</b>
+
+- [Repo](https://github.com/folke/which-key.nvim)
+> 💥 Create key bindings that stick. WhichKey helps you remember your Neovim keymaps, by showing available keybindings in a popup as you type.
+- [My implementation](https://github.com/d-cryptic/dotfiles/blob/main/.config/nvim/lua/plugins/which-key.lua)
+
+### <b>5. snacks</b>
+
+### <b>6. plenary</b>
+
+### <b>7. nvzone</b>
+
+### <b>8. nvim-tree</b>
+
+### <b>9. gitsigns</b>
+
+
