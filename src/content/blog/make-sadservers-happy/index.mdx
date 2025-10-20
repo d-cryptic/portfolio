@@ -1,0 +1,878 @@
+---
+title: "Hitchhiker's Guide To Make SadServers Happy - Part 1"
+description: "In this blog, I will go through all the concepts that is required to complete almost all of the exercises in [sadservers](sadservers.com). This blog is not a compilation of solutions, but a guide for anyone to reach the appropriate solution."
+date: "2025-10-20"
+draft: true
+tags:
+  - troubleshooting
+  - linux
+  - interviews
+  - devops
+  - servers
+
+---
+
+## Hitchhiker's Guide To Make SadServers Happy - Part 1
+
+### Intro
+
+I love [sadservers](https://sadservers.com). Before every devops/platform/SRE interviews, I would try to look into sadservers' exercises.
+To  my surprise, everytime I learn something new whenever I solve a particular exercise. And everytime I forget these crucial yet important concepts after few days. 
+Hence, this blog is my initiative to create a one stop guide for anything [sadservers](https://sadservers.com).
+
+- For beginners, starting out with linux and want to learn basics, try practicing from these challenges first - [link](https://linuxupskillchallenge.org/).
+
+---
+
+### Basics
+
+- `lsb_release -a` - see which Linux distro and version you are using
+  - `cat /etc/os-release` - does the same thing
+
+- `uname -a` - prints system information
+- `uptime` - how long system has been running
+  - `cat /proc/uptime` - more readable format
+
+- `whoami` - print the user name
+  - `who` - who is logged on
+  - `w` - what they are doing
+
+- hardware information:
+  1. `lscpu` - display information about cpu architecture
+  2. `lsblk` - list block devices
+  3. `lspci` - list PCI devices
+  4. `lsusb` - list usb devices
+
+- `free -h` - check memory used
+  - `vmstat` - memory statistics
+  - `top` - task manager for linux
+  - `htop` - interactive version of top
+
+- `df -h` - see disk space usage
+  - `du -h` - estimate the size of your folders
+
+- `ifconfig` - network interfaces and their ip addresses
+  - `ip address` - modern substitute
+  - `netstat -i` - static view of bandwidth usage
+  - `ifstat` - continuous view of bandwidth usage
+
+- `sudo iftop -i eth0` - nice display
+
+- `man` - manual
+- `pwd` - present working directory
+- `type <command>`
+
+- Administrative Tasks
+
+```bash
+sudo hostnamectl set-hostname <hostname> # rename your server
+
+# edit /etc/cloud/cloud.cfg
+# preserve_hostname: true
+
+timedatectl # interacting with timezones
+timedatectl list-timezones
+sudo timedatectl set-timezone Australia/Sydney
+```
+
+---
+
+### Grep, find and kill the process
+
+- Most of the processes can be running indefinitely or can be faulty. Best way to solve this is via grepping the process from `ps aux` and then kill with PID.
+
+```bash
+ps aux | grep <filename or keyword-to-find>
+kill -9 <PID>
+```
+
+- `ps` is used to display a list of all running processes
+  - `ps` stands for process status
+  - `a` shows processes for all users
+  - `u` displays the processes in user friendly format
+  - `x` include processes that have no controlling terminal (like daemons)
+
+- `kill -9` sends `signal 9` (SIGKILL) to a process, which forces it to terminate immediately.
+  - `-9` refers to SIGKILL signal, which cannnot be caught, ignored, or blocked by the process.
+  - This causes the process to stop instantly without saving data or cleaning up resources.
+
+> Try `kill` which sends `SIGTERM`, allowing graceful shutdown first.
+
+---
+
+### Grokking Columnar Structured Data 
+
+- Generally you will be provided lots of log lines in a file, you will be asked to get distinct ips or top repeated ips or status code, etc.
+- The first step here should be to get the data from that particular column
+
+#### 1. `awk`
+
+```bash
+awk '{print $n}' 
+```
+
+- To add a newline after each block, if blocks are separated by blank lines:
+
+```bash
+awk 'NF { printf "%s ", $0; next } {print ""  } END { print "" }'  file.txt
+```
+
+- Use conditions with print 
+
+```bash
+awk '$3 == "value" {print $1}' file.txt
+```
+
+#### 2. `sort`
+
+- Then use `sort` to sort the data
+
+```bash
+sort # ascending
+sort -n # sort numerically
+sort -r # reverse order
+sort -k # sort by specific field (column)
+sort -f # ignore case
+sort -u # unique, suppress duplicate lines
+```
+
+#### 3. `uniq`
+- Then use `uniq` to find unique values if needed
+
+```bash
+uniq # works on adjacent duplicate
+uniq -c # count occurrences of each line
+uniq -d # show only duplicate lines (one entry per duplicate)
+uniq -u # show only lines that are not duplicated
+```
+
+#### 4. `head` and `tail`
+- Then use `head` or `tail` command to get the specific data point
+
+```bash
+head filename # first 10 lines by default
+head -n filename # first n lines
+
+tail filename # last 10 lines by default
+tail -n filename # last n lines
+
+tail -f filename # tail files in real time
+tail -c n filename # last n bytes
+```
+
+#### 5. `paste`
+
+> It merges lines from multiple lines or input streams, joining them by a delimeter (tab by default). It's useful for combining data column-wise
+
+```bash
+paste -d' ' - - - - - < file.txt # If each block is 5 lines, join them into one line (columns separated by space)
+
+echo -e "X\nY" | paste - file1.txt # paste from standard input (`-`)
+
+paste -s file1.txt # merges all lines into one
+```
+
+#### 6. `tr`
+
+- It is used to translate, squeeze, or delete characters from standard input and write the result to standard output. It works by character by character.
+
+```bash
+tr '\n' ' ' < file.txt # replace newlines with spaces 
+
+echo "hello world" | tr 'a-z' 'A-Z' # Output: HELLO WORLD
+echo "hello world" | tr '[:lower:]' '[:upper:]' # HELLO WORLD
+
+echo "ABC 123" | tr -d '0-9' # delete digits
+echo "ABC 123" | tr -d '[:digit:]'
+```
+
+echo "too abc   spaces" | tr - s ' ' # too many spaces
+echo "too abc   spaces" | tr -s '[:space:' ' '
+
+#### 7. `xargs`
+
+- It reads from stdin and executes another command using that input as arguments.
+
+> `-I {}` lets you use `{}` as a placeholder for each item.
+
+```bash 
+echo "A B C" | xargs echo "Item: " # turn input into arguments
+
+echo "1.txt 2.txt 3.txt" | xargs touch # create multiple files
+
+find . -name "*.tmp" | xargs rm # delete files found by find
+
+find . -name "*.log" -print0 | xargs -0 rm # handle spaces in filenames
+
+echo "file1 file2" | xargs -p rm # interactive mode
+
+grep "A" file.txt | awk '{print $1}' | xargs -I {} grep {} file.txt # awk input and then use that pattern to grep in a file
+```
+
+#### 8. `grep`
+
+- It is used to search for text patterns in files or input streams using regex.
+
+```bash
+grep "pattern" file.txt    # default uses basic regex (BRE)
+grep -i "pattern" file.txt # case insensitive search
+grep -n "pattern" file.txt # shows line numbers
+grep -v "pattern" file.txt # invert match - lines without pattern
+grep -c "pattern" file.txt # count how many times pattern appears
+grep -r "pattern" file.txt # recursive search in directories
+grep -o "pattern" file.txt # shows only matching part
+grep -E "pattern1|Pattern2" file.txt # Finds lines with either pattern1 or pattern2
+grep -F "pattern" file.txt # use literal strings, fast and no regex based.
+```
+
+> Extended search `-E` supports `+`, `?`, `|`, `()`, etc.
+
+#### 9. `cat` (concatenate and print)
+
+- It reads files and outputs their contents to standard output.
+
+```bash
+cat file1.txt file2.txt file3.txt # allows you to stdout multiple files at once.
+
+cat -n file.txt # number all lines
+
+cat -b file.txt # number non blank lines
+
+cat -E file.txt # show end of line
+
+cat -s file.txt # squeeze blank lines
+```
+
+#### 10. `pipes`
+
+- A pipe `|` connects the output of one command to the input of another, allowing you to chain commands together and process data step by step.
+
+```bash
+ls -lah | less # list files and view them page by page
+
+ps aux | grep "ssh" # search for a specific process
+
+cat file.txt | wc -l # count lines in a file
+
+cat file.txt | sort | uniq # sort and remove duplicates
+
+ps aux | sort -k4 -nr | head -5 # sort by 4th column (memory %), numberically, reverse and show top 5 lines
+```
+
+#### 11. `comm` (compare two sorted files line by line)
+
+- It is used to find lines that are common or unique to two lines
+
+```bash
+comm file1.txt file2.txt file3.txt 
+
+-n # suppress filen
+
+comm <(sort unsorted1.txt) <(sort unsorted2.txt) # compare unsorted files on the fly
+```
+
+#### 12. `find`
+
+- It is used to search files and directories based on name, type, size, permissions, timestamps, etc.
+
+```bash
+find /home -name "file.txt" # find by name
+find /home -iname "file.txt" # case insensitive version 
+
+# find by type
+# `f` = file
+# `d` = directory
+# `l` = symbolic link
+
+find /var -type d -name "log*"
+
+find /tmp -size +100M # find by size
+# `k` = KBs 
+# `M` = MBs
+# `G` = GBs
+
+find <filename> -mtime -7 # find my modification time
+# `-mtime n` - changed n days ago
+# `-mtime -n` - changed less than n days ago
+# `-mtime +n` - changed more than n days ago
+# `-atime` - access time
+# `-ctime` - change inode metadata
+
+find . -type f -perm 600 # find by permissions
+find /home -type f -perm -o=r # find world readable files
+
+find /home -user alice # find by user
+find /var -group staff # find by group
+
+find . -name "*.tmp" -exec rm {} \; # execute commands on found file `-exec` - delete all .tmp files
+find . name "*.tmp" -exec rm -i {} \; # prompt before each deletion
+find . -name "*.log" -exec gzip {} +; # using '+' for efficiency - compresses all .log files in one go
+
+find /var/log -name "*.log" -size +10M -mtime +30 # find `.log` files larger than 10MB and older than 30 days
+find . -name "*.txt" -or -name "*.log" # use `-and`, `-or`, `-not` or `!` explicitly if needed
+
+find /etc -maxdepth 2 -name "passwd" # only searches /etc directory and its immediate subdirectory
+
+find . -name "*.sh" -ls # print with details or `ls -l`
+```
+
+
+#### 13. `cut`
+
+- It extracts `sections (columns or characters)` from each line of a file or input stream.
+
+```bash
+cut -d',' -f2 data.csv # extract second field, using comma as delimeter
+# -f1,3 #multiple fields
+# -f2-4 # field range
+# TAB is default delimeter
+
+cut -c1-5 file.txt # extract by character position
+# -c1,5,10 # character at position 1,5, and 10
+# -c5- # from character 5 to end
+# -b1-10 # extract by bytes
+
+cut -d',' -f2 file.txt -s # suppress lines without delimeters (skip lines)
+```
+
+#### 14. `join`
+
+- The `join` command combines two files based on a common field, but only if both files are sorted on the join field.
+
+```bash
+join file1.txt file2.txt
+# -t DELIMETER
+# -1 FIELD // join on field `FIELD` from file 1
+# -2 FIELD // join on field `FIELD` from file 2
+# -o FORMAT // specify output format
+# -a FILENUM // print unpairable lines from file `FILENUM` (1 or 2)
+# -e STR // replace missing values with `STR`
+```
+
+---
+
+### Basic Regex to rule them all
+
+> Regex is a sequence of characters that defines a search pattern.
+
+| pattern | meaning | 
+| -- | -- |
+| `.` |  matches any single character | 
+| `^` | start of line | 
+| `$` | End of line |
+| `*` | zero or more of the preceding character |
+| `+` | one or more of the preceding character |
+| `?` | zero or one of the precdeing character |
+| `\` | escape special characters |
+| `[abc]` | matches any one character inside brackets |
+| `[a-z]` or `[0-9]` or `[A-Z]` | mataches any character |
+| `[^abc]` or `[^0-9]` or `[^A-Z]` | matches any character not in brackets |
+| `\d` | Digit |
+| '\w' | Word character |
+| '\s' | Whitespace | 
+| '\b' | Word boundary |
+| `.*` | Any number of any characters (in between) |
+| '\b.*\b' | Match words not lines |  
+| `(?i)` | enables case insensitive mode (supported in Perl, Python, etc.) |
+
+
+---
+
+### Knock Knock? 
+
+- Now let's learn about `port knocking`. One can refer this article [link](http://sushant747.gitbooks.io/total-oscp-guide/content/port_knocking.html).
+
+> Port knocking basically means that after knocking on ports in a specific sequence a certain port will open automatically.
+
+- When you `knock` on a port, you are sending TCP packets with `SYN` flag to that port. The closed port will then respond with `ACK/RST`, which basically means that the host has received `TCP` packet, and ACKnowledged it, but responds with `RST` flag. `RST` means that the port is closed.
+
+---
+
+### Networking Tools
+
+#### 1. `nc`
+
+- It is short for `netcat`. It is used to read from and write to network connections using TCP or UDP.
+
+```bash
+nc -zv host port # port scanning
+nc host port # connect to server
+nc -lvp port # listen on a port (server mode)
+nc -lvp port < file # transfer file (on receiver)
+nc host port < file # transfer file (on sender)
+```
+
+#### 2. `nmap`
+
+- It is used to discover hosts, services, open ports, and other network properties.
+
+```bash
+nmap example.com # scan a host (discover open ports)
+nmap ip <OR> nmap cidrRange
+nmap -p 80,443,22 host # scan specific ports
+nmap -p- host # scan all ports
+nmap -sV host # service version detection
+nmap -O host # OS detection
+nmap -A host # aggressive scan (enables OS, version, script scanning)
+nmap -sS host # stealth scan (SYN scan)
+nmap -oN file host # output results to file
+```
+
+#### 3. `telnet`
+
+- It is a legacy network protocol and utility used to connect to remote systems over TCP, typically on port 23.
+- It allows terminal access to a remote host, but does not encrypt data.
+
+```bash
+telnet host port #connect to a remote host or test if port is open
+```
+
+#### 4. `dig`
+
+- `dig` (Domain Information Groper) command is a DNS lookup utility used to query DNS records and troubleshoot domain name resolution.
+
+```bash
+dig host # lookup A record
+dig host MX/NS/TXT/AAAA
+dig @<DNS-SERVER> host # query a specific dns server
+dig +trace host # perform authorative answer lookup
+dig host +short # short output
+dig -x ip # reverse dns lookup (ip to hostname)
+
+# `+nocmd` - hide command line info
+# `+noall` - turn off all output
+# `+answer` - show only answer section 
+# `+stats` - show query stats
+```
+
+#### 5. `nslookup`
+
+- `nslookup` (Name Server Lookup) is used to query DNS servers for domain name or IP address resolution. 
+- It operates in two modes: `interactive` and `non-interactive`.
+
+```bash
+nslookup host # lookup A record
+nslookup -type=MX/NS/TXT host # lookup specific record type
+nslookup host <DNS-SERVER> # query a specific DNS server
+nslookup ip # reverse DNS lookup
+```
+
+#### 6. `ping`
+
+- It is used to test connectivity between your computer and another network host. It sends ICMP (Internet Control Message Protocol) echo requests and waits for replies
+
+```bash
+ping host
+
+# -c N - sends n pings and stop
+# -i N - Wait for N seconds between pings
+# -t N - set ttl (time to live) value
+# -q - Quiet Mode (show summary only)
+```
+
+#### 7. `ss`
+
+- It is used for displaying network socket information.
+
+```bash
+ss -a # list all active connections
+ss -t # list tcp sockets
+ss -u # list udp sockets
+ss -l # show listening ports
+ss -p # show process using the socket
+ss -n # show numeric addresses
+ss -tnulp
+```
+
+#### 8. `netstat`
+
+- It stands for `network statistics`.
+- It is used to display network connections, routing tables, interface statistics, masquerade connections, multicast memberships and more.
+
+```bash
+netstat -a # list all active connections
+netstat -t # show only tcp connections
+netstat -u # show only udp connections
+netstat -l # show listening ports
+netstat -n # show numeric address
+netstat -p # show process/PID using the socket
+netstat -tulnp
+netstat -i # display network interface statistics
+netstat -r # display routing table
+```
+
+- It is slower than `ss` and reads `/proc/net/tcp` and related files.
+
+---
+
+### Host Firewall
+
+- The Linux kernel has built-in firewall functionality called `netfilter`. 
+
+#### 1. `iptables`
+
+- It a user space utility program that allows you to configure the IP packet filter rules of the Linux kernel firewall (part of the Netfilter framework).
+- It's used to set up, maintain, and inspect tables of network packet filtering rules.
+
+```bash
+iptables [-t table] COMMAND CHAIN RULE-SPECIFICATION [MATCHES] [-j TARGET]
+
+# `filter` - default table for packet filtering (e.g. ACCEPT, DROP)
+# `nat` - for network address translation (e.g. port forwarding)
+# `mangle` - for specialized packet alteration
+# `raw` - for configuration exceptions
+
+# `INPUT` - packets destined to local system
+# `OUTPUT` - packets originating from local system
+# `FORWARD` - packets being routed through the system
+# `PREROUTING` - packets just arrived (before routing)
+# `POSTROUTING` - packets about to leave (after routing)
+
+# `-A` - Append a rule to a chain
+# `-I` - Insert a rule at a specific position
+# `-D` - Delete a rule
+# `-L` - List rules
+# `-F` - Flush (delete) all rules
+# `-N` - Create a new chain
+# `-X` - Delete a user-defined chain
+
+iptables -A INPUT -p tcp --dport 22 -j ACCEPT                                           # allow SSH (port 22)
+iptables -P INPUT DROP                                                                  # Drop all incoming traffic
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT                        # Allow established connections
+iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECTED --to-port 8080            # Port forwarding (e.g. forward 80 to 8080)
+iptables -A INPUT -j LOG --log-prefix "Dropped:" iptables -A INPUT -j DROP              # Log Dropped Packets
+
+# Tools - `iptables-save`, `iptables-restore`, and `iptables-persistent`
+```
+
+#### 2. `nftables`
+
+- It is the modern successor to `iptables` in Linux. It uses `nft` command which consolidates `iptables`, `ip6tables`, `arptables`, and `ebtables` into a single tool.
+
+```bash
+nft [options] <command> <arguments>
+
+# Key Concepts
+# `Tables` - contain chains and classify traffic by family (ip, ip6, inet, arp, bridge)
+# `Chains` - hold rules; can be for input, output, forward, etc.
+# `Rules`  - define matching criteria and actions
+# `Sets` and `Maps` - efficient ways to handle lists of data
+```
+
+#### 3. `ufw`
+
+> You can alter port configuration in `/etc/ssh/sshd_config`
+
+- `ufw` (Uncomplicated Firweall) is a user friendly frontend for managing `iptables`/`nftables`.
+
+```bash
+ufw status # check status
+ufw status verbose
+
+ufw enable 
+ufw disable
+
+# set default policies
+ufw default deny incoming
+ufw default allow outgoing
+
+ufw allow ssh OR ufw allow 22 # allow ssh
+ufw allow 80 # allow http
+ufw allow 443 # allow https
+ufw deny port # deny a port
+
+ufw allow from <ip> # allow from specific ip
+ufw allow from <ip> to any port <port> 
+
+ufw status umbered # list rules with numbers
+ufw delete <n> # delete rule #n
+
+ufw limit ssh # rate limiting
+ufw limit 22/tcp
+
+# port ranges
+ufw allow 1000:2000/tcp
+ufw allow 1000:2000/udp 
+
+# allow specific protocol
+ufw allow 53/udp
+ufw allow 1194/udp
+
+# logging
+ufw logging off
+ufw logging low|medium|high
+
+ufw reset # reset all rules
+```
+
+---
+
+### Scheduling tasks
+
+#### `crontab`
+
+- It is used to schedule tasks (scripts or commands) to automatically at specified times or intervals.
+
+```bash
+* * * * * command to be executed
+- - - - -
+| | | | |
+| | | | ----- Day of week (0 - 7) (Sunday=0 or 7)
+| | | ------- Month (1 - 12)
+| | --------- Day of month (1 - 31)
+| ----------- Hour (0 - 23)
+------------- Minute (0 - 59)
+```
+
+##### Operators
+
+| Symbol | Description |
+| -- | -- |
+| `*` | Wildcard, specifies every possible time interval |
+| `,` | List multiple values separated by a comma |
+| `-` | Specify a range between two numbers, separated by a hyphen |
+| `/` | Specify a periodicity/frequency using a slash |
+
+```bash
+crontab -e # edit your cron jobs
+crontab -l # list current cron jobs
+crontab -r # remove all cron jobs
+crontab -u user -e # edit another user's crontab
+```
+
+---
+
+### Linux Utilities
+
+#### 1. `date`
+
+- displays current date and time
+
+```bash
+date +"%Y-%m-%d" # 2025-04-05 ISO DATE
+# %Y - 4 digit year
+# %m - month 01-12
+# %d - day 01-31
+# %H - hour 00-23
+# %M - minute 00-59
+# %S - second 00-60
+# %Z - timezone
+# %s - unix epoch time
+
+date -s "YYYY-MM-DD HH-MM-SS" # set system date and time
+TZ='Asia/Kolkata' date # show date from a specific timezone
+
+# show future/past dates
+date -d "+7 days" 
+date -d "next Monday"
+date -d "2025-12-25"
+date -d "yesterday"
+date -d "1 hour ago"
+# now, tomorrow, 3 weeks ago
+
+# check date is valid or not
+date -d "2025-02-30" || echo "Invalid date"
+```
+
+- For synchronization, use `ntp`, `systemd-timesyncd`, or `chrony`.
+
+#### 2. `tar`
+
+- It stands for `tape archive`.
+
+```bash
+tar [options] [archive-file] [file(s)-to-include]
+
+# -c - create a new archive
+# -x - extract files from archive
+# -t - list contents of archive
+# -f - specify filename of the archive
+# -z - compress/extract with `gzip`
+# -j - use `bzip2` compression
+# -J - use `xz` compression
+# -v - verbose output
+# -C - exract to a specific directory
+```
+
+#### 3. `locate` 
+
+- It is used to find files and directories by name. It searches through a pre-built database (`mlocate.db`) of the filesystem rather than scanning the disk in realtime.
+
+```bash
+locate file.txt # find files by name
+locate -i "*.PDF" # case insensitive search
+locate -n 5 filename # limit results to 5 entries
+sudo updatedb # update the locate database
+
+# `-i` - case insensitive search
+# `-n N` - limit number of results
+# `-r` - use regex pattern
+# `--regex` - use extended regular expressions
+# `--existing` show only currently existing files
+```
+
+#### 4. `which`
+
+- It is used to locate the path of an executable that would be run if typed in the shell. It searches through the directories listed in `PATH` environment variable.
+
+```bash
+which ls # /bin/ls
+which -a python # find all matches
+which -s # silent mode - return exit status only
+```
+
+#### 5. `adduser`, `groupadd`, `usermod`, and `groupmod`
+
+- `adduser` - Add a new user
+
+```bash
+sudo adduser username
+```
+
+- `groupadd` - create a new group
+
+```bash
+sudo groupadd groupname
+sudo groupadd --gid 2000 admins # specify GID
+sudo group --system cache # use --system to create a system group
+```
+
+- `usermod` - modify a existing user
+
+```bash
+# -aG - append user to supplementary groups
+# -G - replace all supplementary groups
+# -s - change login shell
+# -d - change home directory
+# -m - move contents to new home
+# -L - lock user account
+# -U - unlock user account
+
+sudo usermod -aG developers alice # add user to group
+sudo usermod -aG sudo alice # give sudo access
+```
+
+- `groupmod` - It is used to modify existing group attributes
+
+```bash
+# -n, --new-name - rename a group
+# -g, --gid - change the group ID
+
+sudo groupmod -n developers devs
+sudo groupmod -g 2000 developers
+sudo groupmod -n webdev -g 2100 apache
+```
+
+#### 6. `chown`, `chmod` and `chgrp`
+
+1. `chown` - change owner (and group)
+
+- change the user (and optionally group) that owns a file or directory.
+
+```bash
+sudo chown [user][:group] file
+
+sudo chown alice file.txt
+sudo chown alice:developers file.txt
+sudo chown :developers file.txt
+sudo chown -R alice:developers file.txt # recursive for directories
+```
+
+2. `chmod` - Change permissions (mode)
+
+- change read, write, execute permissions for owner, group, and others.
+
+```bash
+chmod [who][operator][permission] file
+
+# who - `u` = user(owner), `g` = group, `o` = others, `a` = all (default)
+# operator - `+` = add, `-` = remove, `=` = set exactly
+# permission - `r` = read, `w` = write, `x` = execute
+
+chmod u+x script.sh # owner can execute
+chmod g+w file.txt # group can write
+chmod o-r private.txt # others cannot read
+chmod a=rw notes.txt # all can read/write, no execute
+
+# numeric (octal) mode
+# `r` = 4 
+# `w` = 2
+# `x` = 1
+
+# (User, Group, Others)
+chmod 755 script.sh
+```
+
+3. `chgrp` - Change group
+
+- change the group ownership of a file.
+
+```bash
+chgrp groupname file
+chgrp developers app.log
+chgrp -R developers <directory>
+```
+
+#### 7. `wget` and `curl`
+
+1. `wget` - for downloading
+
+```bash
+wget endpoint                           # download a file
+wget -c endpoint                        # resume broken download
+wget -O file endpoint                   # download with custom filename
+wget --mirror --convert-links endpoint  # mirror a website
+wget -b endpoint                        # run in background
+```
+
+2. `curl` - transfer and interaction
+
+```bash
+curl endpoint                           # fetch and display content
+curl -o file.html endpoint              # save output to file
+curl -L endpoint                        # follow redirects
+curl -X POST endpoint -H "Content-Type: application/json" -d {name: Alice} # send POST request with JSON
+curl -s endpoint                        # download
+curl -u username:password endpoint      # use authentication
+```
+
+#### 8. `logrotate` and `truncate`
+
+1. `logrotate` - rotate, compress, and manage log files
+
+2. `truncate` - reduce file zie, often used to empty large log files without deleting them. It preserves file description, so running apps can keep writing.
+
+```bash
+truncate [options] -s Size file
+truncate -s 0 file.log # keep the file in place but sets its size to zero
+truncate -s 1K file.log # set to 1 KB
+```
+
+#### 9. `stat`
+
+- It displays detailed information about a file or file system.
+
+```bash
+stat file.txt 
+```
+
+#### 10. `ln`
+
+- It creates links between files in Linux. There are two types: hard links and symbolic (soft) links.
+
+```bash
+# creates a new name for same file, both share the same inode
+ln file.txt hardlink-to-file.txt #points directly to inode, cannot link directories, original file deleted -> hard link works, data remoains
+ln -i file.txt hardlink-to-file.txt # verify
+
+# symbolic (short) links - shortcut that points to path of the original file.
+# can link to directories and span across filesystems.
+# if original file is deleted, symlink becomes broken (dangling).
+ln -s original.txt symlink.txt # creates a symbolic link, use absolute paths to avoid broken links
+```
+
+---
+
+### What's Next?
+
+This was quite a long write-up, but still we have just saw the tip of an iceberg. Linux Troubleshooting and devops troubleshooting in general is so vast, that all can't be covered in mere series of blogs.
