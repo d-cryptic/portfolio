@@ -7,7 +7,8 @@
     "d2@latest",
     "nodejs@20",
     "imagemagick@latest",
-    "bun@latest"
+    "bun@latest",
+    "git@latest"
   ],
   "shell": {
     "init_hook": [
