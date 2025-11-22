@@ -23,13 +23,14 @@ export const BLOG: Metadata = {
 
 export const NOTES: Metadata = {
   TITLE: "Digital Garden",
-  DESCRIPTION: "Contains all the notes, journals, daily learnings which are important but blog won't do justice",
-}
+  DESCRIPTION:
+    "Contains all the notes, journals, daily learnings which are important but blog won't do justice",
+};
 
 export const SNIPPETS: Metadata = {
   TITLE: "My Ninja Snippets",
   DESCRIPTION: "Contains all the useful snippets that I need now and then!!",
-}
+};
 
 export const PROJECTS: Metadata = {
   TITLE: "Projects & Experiments",
@@ -38,7 +39,7 @@ export const PROJECTS: Metadata = {
 };
 
 export const SOCIALS: Socials = [
-  { NAME: "X (formerly Twitter)", HREF: "https://twitter.com/heydensetsu" },
+  { NAME: "X (formerly Twitter)", HREF: "https://twitter.com/hey_barun" },
   { NAME: "GitHub", HREF: "https://github.com/d-cryptic" },
   { NAME: "LinkedIn", HREF: "https://www.linkedin.com/in/barundebnath" },
   { NAME: "Medium", HREF: "https://medium.barundebnath.com" },
