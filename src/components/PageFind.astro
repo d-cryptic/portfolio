@@ -105,7 +105,18 @@ const searchItems = [
         uiOptions={{ showImages: false, excerptLength: 15, resetStyles: false }}
       />
       <div id="search-tips" class="pt-2 text-xs text-black/65 dark:text-white/65">
-        Tip: <code>#tag</code> <code>@type</code> <code>type:</code> <code>tag:</code> <code>stack:</code> <code>role:</code> <code>outcome:</code> <code>since:</code> <code>until:</code> and exclusions with <code>-</code>
+        <span class="tips-label">Tip:</span>
+        <code>#tag</code>
+        <code>@type</code>
+        <code>type:</code>
+        <code>tag:</code>
+        <code>stack:</code>
+        <code>role:</code>
+        <code>outcome:</code>
+        <code>since:</code>
+        <code>until:</code>
+        <span class="tips-text">and exclusions with</span>
+        <code>-</code>
       </div>
       <div id="semantic-suggestions" class="mt-2 hidden"></div>
       <div class="dark:prose-invert mr-2 pt-4 pb-1 text-right text-xs">
@@ -130,6 +141,20 @@ const searchItems = [
   let currentSuggestions = [];
 
   const normalizeValue = (value) => value.toLowerCase().trim();
+  const normalizeInternalHref = (href) => {
+    if (!href) return href;
+    try {
+      const url = new URL(href, window.location.origin);
+      const isInternal = url.origin === window.location.origin;
+      if (!isInternal) return href;
+      if (url.pathname.length > 1 && url.pathname.endsWith("/")) {
+        url.pathname = url.pathname.replace(/\/+$/, "");
+      }
+      return `${url.pathname}${url.search}${url.hash}`;
+    } catch {
+      return href;
+    }
+  };
   const parseDate = (value) => {
     if (!value) return null;
     const timestamp = new Date(value).getTime();
@@ -388,7 +413,7 @@ const searchItems = [
         event.preventDefault();
         const selected = currentSuggestions[activeSuggestionIndex];
         if (selected?.item?.url) {
-          window.location.href = selected.item.url;
+          window.location.href = normalizeInternalHref(selected.item.url);
         }
       }
     });
@@ -475,12 +500,28 @@ const searchItems = [
         event.target instanceof Element &&
         event.target.classList.contains("pagefind-ui__result-link")
       ) {
+        const anchor = event.target;
+        const href = anchor.getAttribute("href");
+        const normalizedHref = normalizeInternalHref(href);
+        if (normalizedHref && normalizedHref !== href) {
+          event.preventDefault();
+          window.location.href = normalizedHref;
+          return;
+        }
         closePagefind();
       }
       if (
         event.target instanceof Element &&
         event.target.closest(".semantic-suggestion-item")
       ) {
+        const anchor = event.target.closest(".semantic-suggestion-item");
+        const href = anchor?.getAttribute("href");
+        const normalizedHref = normalizeInternalHref(href);
+        if (normalizedHref && normalizedHref !== href) {
+          event.preventDefault();
+          window.location.href = normalizedHref;
+          return;
+        }
         closePagefind();
       }
     });
@@ -515,11 +556,11 @@ const searchItems = [
   }
 
   .dark {
-    --pagefind-ui-primary: #f1f5ff;
-    --pagefind-ui-text: #e2e8ff;
+    --pagefind-ui-primary: var(--color-text);
+    --pagefind-ui-text: var(--color-text);
     --pagefind-ui-background: #171a2e;
-    --pagefind-ui-border: #3e476e;
-    --pagefind-ui-tag: #28315e;
+    --pagefind-ui-border: #4a537f;
+    --pagefind-ui-tag: #2a335f;
   }
 
   .dark #pagefind-container {
@@ -530,6 +571,16 @@ const searchItems = [
 
   #search input {
     font-weight: 500;
+  }
+
+  #search .pagefind-ui__search-input,
+  #search .pagefind-ui__search-input::placeholder,
+  #search .pagefind-ui__result-link,
+  #search .pagefind-ui__result-title,
+  #search .pagefind-ui__result-title a,
+  #search .pagefind-ui__result-excerpt,
+  #search .pagefind-ui__message {
+    font-family: var(--font-sans) !important;
   }
 
   #pagefind-container,
@@ -567,6 +618,16 @@ const searchItems = [
     color: #ffffff;
     text-decoration: underline;
     text-underline-offset: 3px;
+  }
+
+  .dark #search .pagefind-ui__result-title a,
+  .dark #search .pagefind-ui__result-link,
+  .dark #search .pagefind-ui__result-excerpt,
+  .dark #search .pagefind-ui__message,
+  .dark #search p,
+  .dark #search-tips {
+    color: var(--color-text) !important;
+    opacity: 1;
   }
 
   #search .pagefind-ui__message {
@@ -615,6 +676,35 @@ const searchItems = [
     padding: 0.08rem 0.3rem;
     font-size: 0.72rem;
     margin-right: 0.12rem;
+  }
+
+  #search-tips {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.35rem;
+    line-height: 1.35;
+  }
+
+  #search-tips .tips-label,
+  #search-tips .tips-text {
+    color: var(--pagefind-ui-text);
+  }
+
+  #search-tips code,
+  #search-tips kbd {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    line-height: 1;
+    margin-right: 0;
+  }
+
+  .dark #search-tips code,
+  .dark #search-tips kbd {
+    color: var(--color-text) !important;
+    border-color: color-mix(in srgb, var(--color-text) 28%, transparent);
+    background: color-mix(in srgb, var(--pagefind-ui-tag) 55%, transparent);
   }
 
   .semantic-suggestions-list {
