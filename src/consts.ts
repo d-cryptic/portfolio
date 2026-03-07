@@ -4,6 +4,9 @@ export const SITE: Site = {
   TITLE: "Barun Debnath",
   DESCRIPTION:
     "SRE by day, manga enthusiast by night. Exploring systems, technology, and life with a beginner's mindset (Shoshin).",
+  URL: "https://barundebnath.com",
+  AUTHOR: "Barun Debnath",
+  X_HANDLE: "@barundebnath",
   EMAIL: "barundebnath91@gmail.com",
   NUM_POSTS_ON_HOMEPAGE: 6,
   NUM_PROJECTS_ON_HOMEPAGE: 3,
@@ -39,7 +42,7 @@ export const PROJECTS: Metadata = {
 };
 
 export const SOCIALS: Socials = [
-  { NAME: "X (formerly Twitter)", HREF: "https://twitter.com/hey_barun" },
+  { NAME: "X (formerly Twitter)", HREF: "https://x.com/barundebnath" },
   { NAME: "GitHub", HREF: "https://github.com/d-cryptic" },
   { NAME: "LinkedIn", HREF: "https://www.linkedin.com/in/barundebnath" },
   { NAME: "Medium", HREF: "https://medium.barundebnath.com" },
