@@ -267,6 +267,11 @@
     @apply text-[var(--color-secondary)];
     @apply decoration-[var(--color-secondary)]/50;
   }
+
+  article :where(h1, h2, h3, h4, h5, h6, p, li, blockquote, a) {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
 }
 
 .animate {
