@@ -4,7 +4,6 @@ import Search from "astro-pagefind/components/Search";
 
 <aside data-pagefind-ignore>
   <div
-    transition:persist
     id="backdrop"
     class="bg-[rgba(0, 0, 0, 0.5] invisible fixed top-0 left-0 z-50 flex h-screen w-full justify-center p-6 backdrop-blur-xs"
   >
@@ -27,10 +26,28 @@ import Search from "astro-pagefind/components/Search";
 </aside>
 
 <script is:inline>
+  const pagefindStylesheetId = "pagefind-ui-styles";
   const magnifyingGlass = document.getElementById("magnifying-glass");
   const backdrop = document.getElementById("backdrop");
 
-  function openPagefind() {
+  function ensurePagefindStyles() {
+    if (document.getElementById(pagefindStylesheetId)) {
+      return Promise.resolve();
+    }
+
+    return new Promise((resolve) => {
+      const stylesheet = document.createElement("link");
+      stylesheet.id = pagefindStylesheetId;
+      stylesheet.rel = "stylesheet";
+      stylesheet.href = "/pagefind/pagefind-ui.css";
+      stylesheet.onload = () => resolve();
+      stylesheet.onerror = () => resolve();
+      document.head.appendChild(stylesheet);
+    });
+  }
+
+  async function openPagefind() {
+    await ensurePagefindStyles();
     const searchDiv = document.getElementById("search");
     const search = searchDiv.querySelector("input");
     setTimeout(() => {
@@ -47,46 +64,50 @@ import Search from "astro-pagefind/components/Search";
     backdrop?.classList.add("invisible");
   }
 
-  // open pagefind
-  magnifyingGlass?.addEventListener("click", () => {
-    openPagefind();
-  });
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "/") {
-      e.preventDefault();
+  if (!window.__pagefindListenersBound) {
+    // open pagefind
+    magnifyingGlass?.addEventListener("click", () => {
       openPagefind();
-    } else if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-      e.preventDefault();
-      openPagefind();
-    }
-  });
+    });
 
-  // close pagefind
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
-      closePagefind();
-    }
-  });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "/") {
+        e.preventDefault();
+        openPagefind();
+      } else if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        openPagefind();
+      }
+    });
 
-  // close pagefind when searched result(link) clicked
-  document.addEventListener("click", (event) => {
-    if (event.target.classList.contains("pagefind-ui__result-link")) {
-      closePagefind();
-    }
-  });
+    // close pagefind
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        closePagefind();
+      }
+    });
 
-  backdrop?.addEventListener("click", (event) => {
-    if (!event.target.closest("#pagefind-container")) {
-      closePagefind();
-    }
-  });
+    // close pagefind when searched result(link) clicked
+    document.addEventListener("click", (event) => {
+      if (event.target.classList.contains("pagefind-ui__result-link")) {
+        closePagefind();
+      }
+    });
 
-  // prevent form submission
-  const form = document.getElementById("form");
-  form?.addEventListener("submit", (event) => {
-    event.preventDefault();
-  });
+    backdrop?.addEventListener("click", (event) => {
+      if (!event.target.closest("#pagefind-container")) {
+        closePagefind();
+      }
+    });
+
+    // prevent form submission
+    const form = document.getElementById("form");
+    form?.addEventListener("submit", (event) => {
+      event.preventDefault();
+    });
+
+    window.__pagefindListenersBound = true;
+  }
 </script>
 
 <style is:global>

@@ -3,11 +3,6 @@ import "../styles/global.css";
 import { SITE } from "@consts";
 import { toAbsoluteUrl } from "@lib/seo";
 
-import "@fontsource/recursive/400.css";
-import "@fontsource/recursive/600.css";
-import "@fontsource/ibm-plex-mono/400.css";
-import "@fontsource/ibm-plex-mono/600.css";
-
 interface Props {
   title: string;
   description: string;
@@ -95,15 +90,6 @@ const jsonLd = Array.isArray(schema) ? schema : schema ? [schema] : [];
 <meta property="twitter:description" content={description} />
 <meta property="twitter:image" content={imageURL} />
 <meta property="twitter:creator" content={SITE.X_HANDLE} />
-
-<!-- PageFind -->
-<link
-  rel="preload"
-  href="/pagefind/pagefind-ui.css"
-  as="style"
-  onload="this.onload=null;this.rel='stylesheet'"
-/>
-<noscript><link href="/pagefind/pagefind-ui.css" rel="stylesheet" /></noscript>
 
 {
   jsonLd.map((entry) => (
