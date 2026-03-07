@@ -28,10 +28,12 @@ import { SITE } from "@consts";
         <span>
           {`/`}
         </span>
-        <div class="group relative">
+        <div class="relative">
           <button
             type="button"
+            id="desktop-more-button"
             aria-haspopup="true"
+            aria-expanded="false"
             class="inline-flex items-center gap-1 underline-offset-8 transition-colors duration-200 hover:underline focus-visible:underline"
           >
             more
@@ -51,7 +53,8 @@ import { SITE } from "@consts";
             </svg>
           </button>
           <div
-            class="pointer-events-none absolute right-0 top-full z-20 mt-2 min-w-[9rem] rounded-md border border-black/15 bg-[var(--color-background)] p-2 opacity-0 shadow-lg transition-all duration-150 ease-in-out group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100 dark:border-white/20"
+            id="desktop-more-menu"
+            class="pointer-events-none absolute right-0 top-full z-20 mt-2 min-w-[9rem] rounded-md border border-black/15 bg-[var(--color-background)] p-2 opacity-0 shadow-lg transition-all duration-150 ease-in-out dark:border-white/20"
           >
             <nav class="flex flex-col gap-1 text-sm">
               <Link href="/notes">notes</Link>
@@ -178,6 +181,24 @@ import { SITE } from "@consts";
   const mobileNav = document.getElementById("mobile-nav");
   const mobileNavLinks = mobileNav?.querySelectorAll("a");
   const mainContent = document.querySelector("main");
+  const desktopMoreButton = document.getElementById("desktop-more-button");
+  const desktopMoreMenu = document.getElementById("desktop-more-menu");
+  const desktopMoreLinks = desktopMoreMenu?.querySelectorAll("a");
+  let desktopMoreOpen = false;
+
+  function openDesktopMore() {
+    if (!desktopMoreMenu || !desktopMoreButton) return;
+    desktopMoreOpen = true;
+    desktopMoreMenu.classList.remove("pointer-events-none", "opacity-0");
+    desktopMoreButton.setAttribute("aria-expanded", "true");
+  }
+
+  function closeDesktopMore() {
+    if (!desktopMoreMenu || !desktopMoreButton) return;
+    desktopMoreOpen = false;
+    desktopMoreMenu.classList.add("pointer-events-none", "opacity-0");
+    desktopMoreButton.setAttribute("aria-expanded", "false");
+  }
 
   function toggleMenu() {
     if (mobileMenu?.classList.contains("hidden")) {
@@ -217,14 +238,39 @@ import { SITE } from "@consts";
 
   mobileMenuButton?.addEventListener("click", toggleMenu);
   mobileMenuClose?.addEventListener("click", toggleMenu);
+  desktopMoreButton?.addEventListener("click", (event) => {
+    event.stopPropagation();
+    if (desktopMoreOpen) closeDesktopMore();
+    else openDesktopMore();
+  });
 
   // Close menu when clicking on navigation links
   mobileNavLinks?.forEach((link) => {
     link.addEventListener("click", closeMenu);
   });
+  desktopMoreLinks?.forEach((link) => {
+    link.addEventListener("click", closeDesktopMore);
+  });
 
   // Ensure search functionality works on mobile
   mobileSearchButton?.addEventListener("click", () => {
     magnifyingGlass?.click();
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!desktopMoreOpen) return;
+    if (
+      event.target instanceof Element &&
+      !event.target.closest("#desktop-more-menu") &&
+      !event.target.closest("#desktop-more-button")
+    ) {
+      closeDesktopMore();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeDesktopMore();
+    }
   });
 </script>

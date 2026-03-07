@@ -9,6 +9,8 @@ const uniqueSortedValues = (values: string[]): string[] =>
 const stacks = uniqueSortedValues(items.flatMap((item) => item.stack));
 const roles = uniqueSortedValues(items.flatMap((item) => item.roles));
 const outcomes = uniqueSortedValues(items.flatMap((item) => item.outcomes));
+const types = uniqueSortedValues(items.map((item) => item.contentType));
+const tags = uniqueSortedValues(items.flatMap((item) => item.tags));
 
 const getFilters = (values: string[]): string =>
   values.map((value) => value.toLowerCase().trim()).filter(Boolean).join("|");
@@ -33,69 +35,153 @@ const getFilters = (values: string[]): string =>
 
   <div class="space-y-4 rounded-lg border border-black/10 p-4 dark:border-white/10">
     <div class="space-y-2">
-      <h3 class="text-sm font-semibold uppercase tracking-wide text-black/70 dark:text-white/70">
-        Stack
-      </h3>
-      <div class="flex flex-wrap gap-2">
-        {
-          stacks.map((value) => (
-            <button
-              type="button"
-              data-filter-button
-              data-filter-group="stack"
-              data-filter-value={value}
-              aria-pressed="false"
-              class="rounded-full border border-black/20 px-3 py-1 text-sm transition-colors hover:bg-black/5 aria-pressed:bg-black aria-pressed:text-white dark:border-white/20 dark:hover:bg-white/10 dark:aria-pressed:bg-white dark:aria-pressed:text-black"
-            >
-              {value}
-            </button>
-          ))
-        }
+      <label for="explorer-query" class="text-sm font-semibold uppercase tracking-wide text-black/70 dark:text-white/70">
+        Search Query
+      </label>
+      <input
+        id="explorer-query"
+        data-query-input
+        type="text"
+        placeholder="Try: #devops @blog outcome:seo stack:python -git since:2025-01-01"
+        class="w-full rounded-md border border-black/20 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-black/30 dark:border-white/20 dark:focus:ring-white/30"
+      />
+      <div class="text-xs text-black/65 dark:text-white/65">
+        Syntax: <code>#tag</code> <code>@type</code> <code>stack:</code> <code>role:</code> <code>outcome:</code> <code>tag:</code> <code>type:</code> <code>since:</code> <code>until:</code> and exclusions with <code>-</code>
+      </div>
+      <div data-suggestions-root class="hidden rounded-md border border-black/15 dark:border-white/15"></div>
+    </div>
+
+    <div class="grid gap-3 md:grid-cols-2">
+      <div class="space-y-1">
+        <label for="explorer-since" class="text-xs font-semibold uppercase tracking-wide text-black/65 dark:text-white/65">From date</label>
+        <input
+          id="explorer-since"
+          data-since-input
+          type="date"
+          class="w-full rounded-md border border-black/20 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-black/30 dark:border-white/20 dark:focus:ring-white/30"
+        />
+      </div>
+      <div class="space-y-1">
+        <label for="explorer-until" class="text-xs font-semibold uppercase tracking-wide text-black/65 dark:text-white/65">To date</label>
+        <input
+          id="explorer-until"
+          data-until-input
+          type="date"
+          class="w-full rounded-md border border-black/20 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-black/30 dark:border-white/20 dark:focus:ring-white/30"
+        />
       </div>
     </div>
 
     <div class="space-y-2">
-      <h3 class="text-sm font-semibold uppercase tracking-wide text-black/70 dark:text-white/70">
-        Role
-      </h3>
+      <h3 class="text-sm font-semibold uppercase tracking-wide text-black/70 dark:text-white/70">Quick Views</h3>
       <div class="flex flex-wrap gap-2">
-        {
-          roles.map((value) => (
-            <button
-              type="button"
-              data-filter-button
-              data-filter-group="roles"
-              data-filter-value={value}
-              aria-pressed="false"
-              class="rounded-full border border-black/20 px-3 py-1 text-sm transition-colors hover:bg-black/5 aria-pressed:bg-black aria-pressed:text-white dark:border-white/20 dark:hover:bg-white/10 dark:aria-pressed:bg-white dark:aria-pressed:text-black"
-            >
-              {value}
-            </button>
-          ))
-        }
+        <button type="button" data-preset-query="outcome:performance" class="rounded-full border border-black/20 px-3 py-1 text-xs hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10">Performance work</button>
+        <button type="button" data-preset-query="outcome:seo" class="rounded-full border border-black/20 px-3 py-1 text-xs hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10">SEO work</button>
+        <button type="button" data-preset-query="outcome:infra" class="rounded-full border border-black/20 px-3 py-1 text-xs hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10">Infra work</button>
+        <button type="button" data-preset-query="outcome:data" class="rounded-full border border-black/20 px-3 py-1 text-xs hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10">Data work</button>
       </div>
     </div>
 
-    <div class="space-y-2">
-      <h3 class="text-sm font-semibold uppercase tracking-wide text-black/70 dark:text-white/70">
-        Outcome
-      </h3>
-      <div class="flex flex-wrap gap-2">
-        {
-          outcomes.map((value) => (
-            <button
-              type="button"
-              data-filter-button
-              data-filter-group="outcomes"
-              data-filter-value={value}
-              aria-pressed="false"
-              class="rounded-full border border-black/20 px-3 py-1 text-sm transition-colors hover:bg-black/5 aria-pressed:bg-black aria-pressed:text-white dark:border-white/20 dark:hover:bg-white/10 dark:aria-pressed:bg-white dark:aria-pressed:text-black"
-            >
-              {value}
-            </button>
-          ))
-        }
+    <div class="space-y-4">
+      <div class="space-y-2">
+        <h3 class="text-sm font-semibold uppercase tracking-wide text-black/70 dark:text-white/70">Type</h3>
+        <div class="flex flex-wrap gap-2">
+          {
+            types.map((value) => (
+              <button
+                type="button"
+                data-facet-button
+                data-facet-group="types"
+                data-facet-value={value}
+                aria-pressed="false"
+                class="rounded-full border border-black/20 px-3 py-1 text-sm transition-colors hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-40 aria-pressed:bg-black aria-pressed:text-white dark:border-white/20 dark:hover:bg-white/10 dark:aria-pressed:bg-white dark:aria-pressed:text-black"
+              >
+                {value} (<span data-facet-count>{0}</span>)
+              </button>
+            ))
+          }
+        </div>
       </div>
+
+      <div class="space-y-2">
+        <h3 class="text-sm font-semibold uppercase tracking-wide text-black/70 dark:text-white/70">Stack</h3>
+        <div class="flex flex-wrap gap-2">
+          {
+            stacks.map((value) => (
+              <button
+                type="button"
+                data-facet-button
+                data-facet-group="stack"
+                data-facet-value={value}
+                aria-pressed="false"
+                class="rounded-full border border-black/20 px-3 py-1 text-sm transition-colors hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-40 aria-pressed:bg-black aria-pressed:text-white dark:border-white/20 dark:hover:bg-white/10 dark:aria-pressed:bg-white dark:aria-pressed:text-black"
+              >
+                {value} (<span data-facet-count>{0}</span>)
+              </button>
+            ))
+          }
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <h3 class="text-sm font-semibold uppercase tracking-wide text-black/70 dark:text-white/70">Role</h3>
+        <div class="flex flex-wrap gap-2">
+          {
+            roles.map((value) => (
+              <button
+                type="button"
+                data-facet-button
+                data-facet-group="roles"
+                data-facet-value={value}
+                aria-pressed="false"
+                class="rounded-full border border-black/20 px-3 py-1 text-sm transition-colors hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-40 aria-pressed:bg-black aria-pressed:text-white dark:border-white/20 dark:hover:bg-white/10 dark:aria-pressed:bg-white dark:aria-pressed:text-black"
+              >
+                {value} (<span data-facet-count>{0}</span>)
+              </button>
+            ))
+          }
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <h3 class="text-sm font-semibold uppercase tracking-wide text-black/70 dark:text-white/70">Outcome</h3>
+        <div class="flex flex-wrap gap-2">
+          {
+            outcomes.map((value) => (
+              <button
+                type="button"
+                data-facet-button
+                data-facet-group="outcomes"
+                data-facet-value={value}
+                aria-pressed="false"
+                class="rounded-full border border-black/20 px-3 py-1 text-sm transition-colors hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-40 aria-pressed:bg-black aria-pressed:text-white dark:border-white/20 dark:hover:bg-white/10 dark:aria-pressed:bg-white dark:aria-pressed:text-black"
+              >
+                {value} (<span data-facet-count>{0}</span>)
+              </button>
+            ))
+          }
+        </div>
+      </div>
+
+      <details class="rounded-md border border-black/10 p-3 dark:border-white/10">
+        <summary class="cursor-pointer text-sm font-semibold text-black/70 dark:text-white/70">Tags</summary>
+        <div class="mt-3 flex max-h-40 flex-wrap gap-2 overflow-auto">
+          {
+            tags.map((value) => (
+              <button
+                type="button"
+                data-facet-button
+                data-facet-group="tags"
+                data-facet-value={value}
+                aria-pressed="false"
+                class="rounded-full border border-black/20 px-2 py-0.5 text-xs transition-colors hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-40 aria-pressed:bg-black aria-pressed:text-white dark:border-white/20 dark:hover:bg-white/10 dark:aria-pressed:bg-white dark:aria-pressed:text-black"
+              >
+                #{value} (<span data-facet-count>{0}</span>)
+              </button>
+            ))
+          }
+        </div>
+      </details>
     </div>
   </div>
 
@@ -104,6 +190,12 @@ const getFilters = (values: string[]): string =>
       items.map((item) => (
         <li
           data-filter-item
+          data-title={item.title.toLowerCase()}
+          data-description={item.description.toLowerCase()}
+          data-href={item.href.toLowerCase()}
+          data-date={item.date.toISOString().slice(0, 10)}
+          data-type={item.contentType.toLowerCase()}
+          data-tags={getFilters(item.tags)}
           data-stack={getFilters(item.stack)}
           data-roles={getFilters(item.roles)}
           data-outcomes={getFilters(item.outcomes)}
@@ -121,9 +213,10 @@ const getFilters = (values: string[]): string =>
               </div>
               <p class="line-clamp-2 text-sm">{item.description}</p>
               <div class="flex flex-wrap gap-2 text-xs text-black/70 dark:text-white/70">
-                {item.stack.map((value) => <span>#{value}</span>)}
-                {item.roles.map((value) => <span>@{value}</span>)}
-                {item.outcomes.map((value) => <span>!{value}</span>)}
+                {item.stack.map((value) => <span>stack:{value}</span>)}
+                {item.roles.map((value) => <span>role:{value}</span>)}
+                {item.outcomes.map((value) => <span>outcome:{value}</span>)}
+                {item.tags.slice(0, 3).map((value) => <span>#{value}</span>)}
               </div>
             </div>
           </a>
@@ -136,91 +229,451 @@ const getFilters = (values: string[]): string =>
     data-empty-state
     class="hidden rounded-lg border border-dashed border-black/20 p-4 text-sm text-black/70 dark:border-white/20 dark:text-white/70"
   >
-    No items match these filters.
+    No items match. Try broadening the query, removing exclusions, or clearing date bounds.
   </p>
 </section>
 
 <script>
+  // @ts-nocheck
   (() => {
     const root = document.querySelector("[data-live-filters]");
     if (!root) {
       return;
     }
 
-    const filterButtons = Array.from(
-      root.querySelectorAll<HTMLButtonElement>("[data-filter-button]"),
-    );
-    const cards = Array.from(
-      root.querySelectorAll<HTMLElement>("[data-filter-item]"),
-    );
-    const countNode = root.querySelector<HTMLElement>("[data-result-count]");
-    const emptyNode = root.querySelector<HTMLElement>("[data-empty-state]");
-    const clearButton = root.querySelector<HTMLButtonElement>("[data-clear-filters]");
+    const queryInput = root.querySelector("[data-query-input]");
+    const sinceInput = root.querySelector("[data-since-input]");
+    const untilInput = root.querySelector("[data-until-input]");
+    const cards = Array.from(root.querySelectorAll("[data-filter-item]"));
+    const facetButtons = Array.from(root.querySelectorAll("[data-facet-button]"));
+    const clearButton = root.querySelector("[data-clear-filters]");
+    const countNode = root.querySelector("[data-result-count]");
+    const emptyNode = root.querySelector("[data-empty-state]");
+    const suggestionsRoot = root.querySelector("[data-suggestions-root]");
+    const presetButtons = Array.from(root.querySelectorAll("[data-preset-query]"));
 
-    const activeFilters: Record<string, Set<string>> = {
-      stack: new Set(),
-      roles: new Set(),
-      outcomes: new Set(),
+    const state = {
+      query: "",
+      since: "",
+      until: "",
+      selected: {
+        types: new Set(),
+        tags: new Set(),
+        stack: new Set(),
+        roles: new Set(),
+        outcomes: new Set(),
+      },
+      activeSuggestionIndex: -1,
+      currentSuggestions: [],
     };
 
-    const updateVisibility = (): void => {
-      let visibleCount = 0;
+    const track = (eventName, payload = {}) => {
+      window.posthog?.capture?.(eventName, payload);
+      window.dataLayer?.push?.({ event: eventName, ...payload });
+    };
+
+    const normalizeValue = (value) => value.toLowerCase().trim();
+    const splitValues = (value) => (value || "").split("|").filter(Boolean);
+    const parseDate = (value) => {
+      if (!value) return null;
+      const timestamp = new Date(value).getTime();
+      return Number.isNaN(timestamp) ? null : timestamp;
+    };
+
+    const fuzzyScore = (text, query) => {
+      if (!query) return 0;
+      const haystack = text.toLowerCase();
+      const needle = query.toLowerCase();
+      if (haystack.includes(needle)) {
+        return 100 - haystack.indexOf(needle);
+      }
+
+      let score = 0;
+      let searchIndex = 0;
+      for (let i = 0; i < needle.length; i++) {
+        const foundAt = haystack.indexOf(needle[i], searchIndex);
+        if (foundAt === -1) {
+          return -1;
+        }
+        score += 2;
+        searchIndex = foundAt + 1;
+      }
+      return score;
+    };
+
+    const normalizeType = (value) => {
+      const aliases = {
+        blog: "blog",
+        blogs: "blog",
+        project: "projects",
+        projects: "projects",
+        note: "notes",
+        notes: "notes",
+        snippet: "snippets",
+        snippets: "snippets",
+        page: "pages",
+        pages: "pages",
+      };
+      return aliases[value] || value;
+    };
+
+    const parseQuery = (queryText) => {
+      const parsed = {
+        include: { types: [], tags: [], stack: [], roles: [], outcomes: [], terms: [] },
+        exclude: { types: [], tags: [], stack: [], roles: [], outcomes: [], terms: [] },
+        since: "",
+        until: "",
+      };
+
+      const tokens = queryText.split(/\s+/).map((token) => token.trim()).filter(Boolean);
+      for (const raw of tokens) {
+        const isNegative = raw.startsWith("-");
+        const token = isNegative ? raw.slice(1) : raw;
+        if (!token) continue;
+
+        const target = isNegative ? parsed.exclude : parsed.include;
+        const lowered = token.toLowerCase();
+
+        if (lowered.startsWith("#")) {
+          target.tags.push(normalizeValue(lowered.slice(1)));
+          continue;
+        }
+        if (lowered.startsWith("@")) {
+          target.types.push(normalizeType(normalizeValue(lowered.slice(1))));
+          continue;
+        }
+
+        const separatorIndex = lowered.indexOf(":");
+        if (separatorIndex !== -1) {
+          const key = lowered.slice(0, separatorIndex);
+          const value = normalizeValue(lowered.slice(separatorIndex + 1));
+          if (!value) continue;
+
+          if (key === "type") target.types.push(normalizeType(value));
+          else if (key === "tag") target.tags.push(value);
+          else if (key === "stack") target.stack.push(value);
+          else if (key === "role") target.roles.push(value);
+          else if (key === "outcome") target.outcomes.push(value);
+          else if (key === "since" || key === "from") parsed.since = value;
+          else if (key === "until" || key === "to") parsed.until = value;
+          else if (key === "date" && value.includes("..")) {
+            const [start, end] = value.split("..");
+            if (start) parsed.since = start;
+            if (end) parsed.until = end;
+          } else {
+            target.terms.push(value);
+          }
+          continue;
+        }
+
+        target.terms.push(lowered);
+      }
+
+      return parsed;
+    };
+
+    const queryParamState = () => {
+      const params = new URLSearchParams(window.location.search);
+      state.query = params.get("q") || "";
+      state.since = params.get("since") || "";
+      state.until = params.get("until") || "";
+
+      const groups = ["types", "tags", "stack", "roles", "outcomes"];
+      for (const group of groups) {
+        const values = (params.get(group) || "")
+          .split(",")
+          .map((value) => normalizeValue(value))
+          .filter(Boolean);
+        state.selected[group] = new Set(values);
+      }
+    };
+
+    const syncUrl = () => {
+      const params = new URLSearchParams(window.location.search);
+      const setOrDelete = (key, value) => {
+        if (value) params.set(key, value);
+        else params.delete(key);
+      };
+
+      setOrDelete("q", state.query);
+      setOrDelete("since", state.since);
+      setOrDelete("until", state.until);
+      setOrDelete("types", [...state.selected.types].join(","));
+      setOrDelete("tags", [...state.selected.tags].join(","));
+      setOrDelete("stack", [...state.selected.stack].join(","));
+      setOrDelete("roles", [...state.selected.roles].join(","));
+      setOrDelete("outcomes", [...state.selected.outcomes].join(","));
+
+      const url = `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ""}`;
+      window.history.replaceState({}, "", url);
+    };
+
+    const mergedFilters = () => {
+      const parsed = parseQuery(state.query);
+      return {
+        include: {
+          types: new Set([...state.selected.types, ...parsed.include.types]),
+          tags: new Set([...state.selected.tags, ...parsed.include.tags]),
+          stack: new Set([...state.selected.stack, ...parsed.include.stack]),
+          roles: new Set([...state.selected.roles, ...parsed.include.roles]),
+          outcomes: new Set([...state.selected.outcomes, ...parsed.include.outcomes]),
+          terms: parsed.include.terms,
+        },
+        exclude: {
+          types: new Set(parsed.exclude.types),
+          tags: new Set(parsed.exclude.tags),
+          stack: new Set(parsed.exclude.stack),
+          roles: new Set(parsed.exclude.roles),
+          outcomes: new Set(parsed.exclude.outcomes),
+          terms: parsed.exclude.terms,
+        },
+        since: parseDate(parsed.since || state.since),
+        until: parseDate(parsed.until || state.until),
+      };
+    };
+
+    const getCardData = (card) => ({
+      type: normalizeValue(card.dataset.type || ""),
+      tags: splitValues(card.dataset.tags),
+      stack: splitValues(card.dataset.stack),
+      roles: splitValues(card.dataset.roles),
+      outcomes: splitValues(card.dataset.outcomes),
+      date: parseDate(card.dataset.date),
+      searchText: [
+        card.dataset.title || "",
+        card.dataset.description || "",
+        card.dataset.href || "",
+        card.dataset.type || "",
+        card.dataset.tags || "",
+        card.dataset.stack || "",
+        card.dataset.roles || "",
+        card.dataset.outcomes || "",
+      ].join(" ").toLowerCase(),
+    });
+
+    const setMatches = (values, selectedSet) =>
+      selectedSet.size === 0 || values.some((value) => selectedSet.has(value));
+
+    const hasExcluded = (values, excludedSet) =>
+      excludedSet.size > 0 && values.some((value) => excludedSet.has(value));
+
+    const cardMatches = (cardData, filters) => {
+      if (!setMatches([cardData.type], filters.include.types)) return false;
+      if (!setMatches(cardData.tags, filters.include.tags)) return false;
+      if (!setMatches(cardData.stack, filters.include.stack)) return false;
+      if (!setMatches(cardData.roles, filters.include.roles)) return false;
+      if (!setMatches(cardData.outcomes, filters.include.outcomes)) return false;
+
+      if (hasExcluded([cardData.type], filters.exclude.types)) return false;
+      if (hasExcluded(cardData.tags, filters.exclude.tags)) return false;
+      if (hasExcluded(cardData.stack, filters.exclude.stack)) return false;
+      if (hasExcluded(cardData.roles, filters.exclude.roles)) return false;
+      if (hasExcluded(cardData.outcomes, filters.exclude.outcomes)) return false;
+
+      if (filters.since && cardData.date && cardData.date < filters.since) return false;
+      if (filters.until && cardData.date && cardData.date > filters.until) return false;
+
+      const includeTermsOk = filters.include.terms.every((term) =>
+        fuzzyScore(cardData.searchText, term) >= 0,
+      );
+      if (!includeTermsOk) return false;
+
+      const hasExcludedTerm = filters.exclude.terms.some((term) =>
+        fuzzyScore(cardData.searchText, term) >= 0,
+      );
+      if (hasExcludedTerm) return false;
+
+      return true;
+    };
+
+    const renderSuggestions = (filters, preserveActive = false) => {
+      if (!suggestionsRoot || !state.query.trim()) {
+        suggestionsRoot?.classList.add("hidden");
+        return;
+      }
+
+      const ranked = cards
+        .map((card) => {
+          const data = getCardData(card);
+          const visible = cardMatches(data, filters);
+          if (!visible) return null;
+          const score = fuzzyScore(data.searchText, state.query.replace(/[-#@]/g, " ").trim());
+          return {
+            card,
+            score: score >= 0 ? score : 0,
+            title: card.dataset.title || "",
+            href: card.querySelector("a")?.getAttribute("href") || "#",
+            type: card.dataset.type || "",
+            date: card.dataset.date || "",
+          };
+        })
+        .filter(Boolean)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 8);
+
+      state.currentSuggestions = ranked;
+      if (!preserveActive) {
+        state.activeSuggestionIndex = ranked.length > 0 ? 0 : -1;
+      } else if (ranked.length === 0) {
+        state.activeSuggestionIndex = -1;
+      } else {
+        state.activeSuggestionIndex = Math.min(
+          Math.max(state.activeSuggestionIndex, 0),
+          ranked.length - 1,
+        );
+      }
+
+      if (ranked.length === 0) {
+        suggestionsRoot.innerHTML = "";
+        suggestionsRoot.classList.add("hidden");
+        return;
+      }
+
+      suggestionsRoot.innerHTML = `<div class="divide-y divide-black/10 dark:divide-white/10">${ranked
+        .map(
+          (entry, index) =>
+            `<a href="${entry.href}" class="block px-3 py-2 text-sm hover:bg-black/5 dark:hover:bg-white/10 ${index === state.activeSuggestionIndex ? "bg-black/5 dark:bg-white/10" : ""}" data-suggestion-index="${index}">
+              <div class="font-semibold">${entry.title}</div>
+              <div class="text-xs text-black/60 dark:text-white/60">@${entry.type} • ${entry.date}</div>
+            </a>`,
+        )
+        .join("")}</div>`;
+      suggestionsRoot.classList.remove("hidden");
+    };
+
+    const updateFacetStates = (filters, visibleCards) => {
+      const visibleData = visibleCards.map((card) => getCardData(card));
+      facetButtons.forEach((button) => {
+        const group = button.dataset.facetGroup;
+        const value = normalizeValue(button.dataset.facetValue || "");
+        const selected = state.selected[group]?.has(value);
+        button.setAttribute("aria-pressed", String(Boolean(selected)));
+
+        let count = 0;
+        for (const data of visibleData) {
+          if (group === "types" && data.type === value) count++;
+          if (group === "tags" && data.tags.includes(value)) count++;
+          if (group === "stack" && data.stack.includes(value)) count++;
+          if (group === "roles" && data.roles.includes(value)) count++;
+          if (group === "outcomes" && data.outcomes.includes(value)) count++;
+        }
+
+        const countNode = button.querySelector("[data-facet-count]");
+        if (countNode) countNode.textContent = String(count);
+        button.disabled = !selected && count === 0;
+      });
+    };
+
+    const applyFilters = () => {
+      const filters = mergedFilters();
+      const visibleCards = [];
 
       cards.forEach((card) => {
-        const cardValues = {
-          stack: (card.dataset.stack || "").split("|").filter(Boolean),
-          roles: (card.dataset.roles || "").split("|").filter(Boolean),
-          outcomes: (card.dataset.outcomes || "").split("|").filter(Boolean),
-        };
-
-        const isVisible = Object.entries(activeFilters).every(([group, selected]) => {
-          if (selected.size === 0) {
-            return true;
-          }
-          return cardValues[group as keyof typeof cardValues].some((value) =>
-            selected.has(value),
-          );
-        });
-
-        card.hidden = !isVisible;
-        if (isVisible) {
-          visibleCount += 1;
-        }
+        const visible = cardMatches(getCardData(card), filters);
+        card.hidden = !visible;
+        if (visible) visibleCards.push(card);
       });
 
-      if (countNode) {
-        countNode.textContent = String(visibleCount);
-      }
-      if (emptyNode) {
-        emptyNode.classList.toggle("hidden", visibleCount !== 0);
-      }
+      if (countNode) countNode.textContent = String(visibleCards.length);
+      if (emptyNode) emptyNode.classList.toggle("hidden", visibleCards.length !== 0);
+
+      updateFacetStates(filters, visibleCards);
+      renderSuggestions(filters);
+      syncUrl();
     };
 
-    filterButtons.forEach((button) => {
+    const resetAll = () => {
+      state.query = "";
+      state.since = "";
+      state.until = "";
+      Object.keys(state.selected).forEach((key) => {
+        state.selected[key] = new Set();
+      });
+      if (queryInput) queryInput.value = "";
+      if (sinceInput) sinceInput.value = "";
+      if (untilInput) untilInput.value = "";
+      track("explorer_filters_cleared");
+      applyFilters();
+    };
+
+    queryParamState();
+    if (queryInput) queryInput.value = state.query;
+    if (sinceInput) sinceInput.value = state.since;
+    if (untilInput) untilInput.value = state.until;
+
+    queryInput?.addEventListener("input", (event) => {
+      state.query = event.target.value;
+      track("explorer_query_updated", { query_length: state.query.length });
+      applyFilters();
+    });
+
+    queryInput?.addEventListener("keydown", (event) => {
+      if (!state.currentSuggestions.length) return;
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        state.activeSuggestionIndex =
+          (state.activeSuggestionIndex + 1) % state.currentSuggestions.length;
+        renderSuggestions(mergedFilters(), true);
+      } else if (event.key === "ArrowUp") {
+        event.preventDefault();
+        state.activeSuggestionIndex =
+          (state.activeSuggestionIndex - 1 + state.currentSuggestions.length) %
+          state.currentSuggestions.length;
+        renderSuggestions(mergedFilters(), true);
+      } else if (event.key === "Enter") {
+        event.preventDefault();
+        const selected = state.currentSuggestions[state.activeSuggestionIndex];
+        if (selected?.href) window.location.href = selected.href;
+      } else if (event.key === "Escape") {
+        suggestionsRoot?.classList.add("hidden");
+      }
+    });
+
+    sinceInput?.addEventListener("change", (event) => {
+      state.since = event.target.value;
+      applyFilters();
+    });
+
+    untilInput?.addEventListener("change", (event) => {
+      state.until = event.target.value;
+      applyFilters();
+    });
+
+    facetButtons.forEach((button) => {
       button.addEventListener("click", () => {
-        const group = button.dataset.filterGroup;
-        const value = button.dataset.filterValue?.toLowerCase().trim();
-        if (!group || !value || !(group in activeFilters)) {
-          return;
-        }
+        const group = button.dataset.facetGroup;
+        const value = normalizeValue(button.dataset.facetValue || "");
+        if (!group || !value || !(group in state.selected)) return;
 
-        const isPressed = button.getAttribute("aria-pressed") === "true";
-        button.setAttribute("aria-pressed", String(!isPressed));
+        if (state.selected[group].has(value)) state.selected[group].delete(value);
+        else state.selected[group].add(value);
 
-        if (isPressed) {
-          activeFilters[group].delete(value);
-        } else {
-          activeFilters[group].add(value);
-        }
-
-        updateVisibility();
+        track("explorer_facet_toggled", { group, value });
+        applyFilters();
       });
     });
 
-    clearButton?.addEventListener("click", () => {
-      Object.values(activeFilters).forEach((set) => set.clear());
-      filterButtons.forEach((button) => button.setAttribute("aria-pressed", "false"));
-      updateVisibility();
+    clearButton?.addEventListener("click", resetAll);
+
+    presetButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        state.query = button.dataset.presetQuery || "";
+        if (queryInput) {
+          queryInput.value = state.query;
+          queryInput.focus();
+        }
+        track("explorer_preset_applied", { preset: state.query });
+        applyFilters();
+      });
     });
+
+    suggestionsRoot?.addEventListener("click", (event) => {
+      const link = event.target.closest("a[data-suggestion-index]");
+      if (!link) return;
+      event.preventDefault();
+      window.location.href = link.getAttribute("href");
+    });
+
+    applyFilters();
   })();
 </script>

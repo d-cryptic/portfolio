@@ -26,6 +26,7 @@ export type ExplorerItem = {
   href: string;
   contentType: string;
   date: Date;
+  tags: string[];
   stack: string[];
   roles: string[];
   outcomes: string[];
@@ -37,8 +38,8 @@ type BuildExplorerInput = {
   notes: CollectionEntry<"notes">[];
   snippets: CollectionEntry<"snippets">[];
   pages?: Array<
-    Omit<ExplorerItem, "stack" | "roles" | "outcomes"> &
-      Partial<Pick<ExplorerItem, "stack" | "roles" | "outcomes">>
+    Omit<ExplorerItem, "stack" | "roles" | "outcomes" | "tags"> &
+      Partial<Pick<ExplorerItem, "stack" | "roles" | "outcomes" | "tags">>
   >;
 };
 
@@ -154,6 +155,7 @@ const mapEntryToExplorerItem = (entry: FilterableEntry): ExplorerItem => {
     href: getEntryUrl(entry),
     contentType: getCollectionLabel(entry.collection),
     date: entry.data.date,
+    tags: normalizeValues(tags),
     stack,
     roles,
     outcomes,
@@ -172,6 +174,7 @@ export const buildExplorerItems = (input: BuildExplorerInput): ExplorerItem[] =>
     ...page,
     id: page.id || `page:${slugify(page.title)}`,
     contentType: page.contentType || "Pages",
+    tags: normalizeValues(page.tags || []),
     stack: normalizeValues(page.stack || []),
     roles: normalizeValues(page.roles || []),
     outcomes: normalizeValues(page.outcomes || []),

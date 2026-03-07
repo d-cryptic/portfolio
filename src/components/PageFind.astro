@@ -16,6 +16,10 @@ const searchItems = [
     url: `/blog/${post.id.replace(/\/index\.mdx?$/, "")}`,
     type: "blog",
     tags: post.data.tags || [],
+    stack: post.data.stack || [],
+    roles: post.data.roles || [],
+    outcomes: post.data.outcomes || [],
+    date: post.data.date.toISOString().slice(0, 10),
   })),
   ...projectPosts.map((project) => ({
     title: project.data.title,
@@ -23,6 +27,10 @@ const searchItems = [
     url: `/projects/${project.id}`,
     type: "projects",
     tags: project.data.tags || [],
+    stack: project.data.stack || [],
+    roles: project.data.roles || [],
+    outcomes: project.data.outcomes || [],
+    date: project.data.date.toISOString().slice(0, 10),
   })),
   ...notesPosts.map((note) => ({
     title: note.data.title,
@@ -30,6 +38,10 @@ const searchItems = [
     url: `/notes/${note.id}`,
     type: "notes",
     tags: note.data.tags || [],
+    stack: note.data.stack || [],
+    roles: note.data.roles || [],
+    outcomes: note.data.outcomes || [],
+    date: note.data.date.toISOString().slice(0, 10),
   })),
   ...snippetPosts.map((snippet) => ({
     title: snippet.data.title,
@@ -37,6 +49,10 @@ const searchItems = [
     url: `/snippets/${snippet.id}`,
     type: "snippets",
     tags: snippet.data.tags || [],
+    stack: snippet.data.stack || [],
+    roles: snippet.data.roles || [],
+    outcomes: snippet.data.outcomes || [],
+    date: snippet.data.date.toISOString().slice(0, 10),
   })),
   {
     title: "Content Explorer",
@@ -44,6 +60,10 @@ const searchItems = [
     url: "/explorer",
     type: "pages",
     tags: ["explorer", "filters"],
+    stack: ["astro"],
+    roles: ["platform engineer"],
+    outcomes: ["data", "seo"],
+    date: "2025-11-01",
   },
   {
     title: "Tag Directory",
@@ -51,6 +71,10 @@ const searchItems = [
     url: "/tags",
     type: "pages",
     tags: ["tags", "taxonomy"],
+    stack: ["astro"],
+    roles: ["software engineer"],
+    outcomes: ["data"],
+    date: "2025-11-01",
   },
   {
     title: "AI / Agent Guide",
@@ -58,6 +82,10 @@ const searchItems = [
     url: "/for-ai",
     type: "pages",
     tags: ["ai", "agents"],
+    stack: ["astro", "mdx"],
+    roles: ["systems engineer"],
+    outcomes: ["seo", "data"],
+    date: "2025-11-01",
   },
 ];
 ---
@@ -77,7 +105,7 @@ const searchItems = [
         uiOptions={{ showImages: false, excerptLength: 15, resetStyles: false }}
       />
       <div id="search-tips" class="pt-2 text-xs text-black/65 dark:text-white/65">
-        Tip: use <kbd>#tag</kbd> and <kbd>@type</kbd> (for example: <code>#devops @blog</code>)
+        Tip: <code>#tag</code> <code>@type</code> <code>type:</code> <code>tag:</code> <code>stack:</code> <code>role:</code> <code>outcome:</code> <code>since:</code> <code>until:</code> and exclusions with <code>-</code>
       </div>
       <div id="semantic-suggestions" class="mt-2 hidden"></div>
       <div class="dark:prose-invert mr-2 pt-4 pb-1 text-right text-xs">
@@ -98,22 +126,61 @@ const searchItems = [
   const suggestionsRoot = document.getElementById("semantic-suggestions");
   let semanticSearchInput = null;
   let semanticBindingsReady = false;
+  let activeSuggestionIndex = -1;
+  let currentSuggestions = [];
+
+  const normalizeValue = (value) => value.toLowerCase().trim();
+  const parseDate = (value) => {
+    if (!value) return null;
+    const timestamp = new Date(value).getTime();
+    return Number.isNaN(timestamp) ? null : timestamp;
+  };
 
   function tokenize(query) {
-    const tokens = query.trim().split(/\s+/).filter(Boolean);
-    const tags = tokens
-      .filter((token) => token.startsWith("#"))
-      .map((token) => token.slice(1).toLowerCase())
-      .filter(Boolean);
-    const types = tokens
-      .filter((token) => token.startsWith("@"))
-      .map((token) => token.slice(1).toLowerCase())
-      .filter(Boolean);
-    const terms = tokens
-      .filter((token) => !token.startsWith("#") && !token.startsWith("@"))
-      .map((token) => token.toLowerCase());
+    const parsed = {
+      include: { types: [], tags: [], stack: [], roles: [], outcomes: [], terms: [] },
+      exclude: { types: [], tags: [], stack: [], roles: [], outcomes: [], terms: [] },
+      since: "",
+      until: "",
+    };
 
-    return { tags, types, terms };
+    const tokens = query.trim().split(/\s+/).filter(Boolean);
+    for (const raw of tokens) {
+      const isNegative = raw.startsWith("-");
+      const token = isNegative ? raw.slice(1) : raw;
+      if (!token) continue;
+      const target = isNegative ? parsed.exclude : parsed.include;
+      const lowered = token.toLowerCase();
+
+      if (lowered.startsWith("#")) {
+        target.tags.push(normalizeValue(lowered.slice(1)));
+        continue;
+      }
+      if (lowered.startsWith("@")) {
+        target.types.push(normalizeType(normalizeValue(lowered.slice(1))));
+        continue;
+      }
+
+      const separatorIndex = lowered.indexOf(":");
+      if (separatorIndex !== -1) {
+        const key = lowered.slice(0, separatorIndex);
+        const value = normalizeValue(lowered.slice(separatorIndex + 1));
+        if (!value) continue;
+        if (key === "type") target.types.push(normalizeType(value));
+        else if (key === "tag") target.tags.push(value);
+        else if (key === "stack") target.stack.push(value);
+        else if (key === "role") target.roles.push(value);
+        else if (key === "outcome") target.outcomes.push(value);
+        else if (key === "since" || key === "from") parsed.since = value;
+        else if (key === "until" || key === "to") parsed.until = value;
+        else target.terms.push(value);
+        continue;
+      }
+
+      target.terms.push(lowered);
+    }
+
+    return parsed;
   }
 
   function normalizeType(type) {
@@ -155,27 +222,60 @@ const searchItems = [
   }
 
   function semanticSearch(query) {
-    const { tags, types, terms } = tokenize(query);
+    const { include, exclude, since, until } = tokenize(query);
     if (!query.trim()) {
       return [];
     }
 
-    const normalizedTypes = types.map(normalizeType);
-    const termQuery = terms.join(" ");
+    const sinceTs = parseDate(since);
+    const untilTs = parseDate(until);
 
     return semanticSearchItems
       .filter((item) => {
-        if (normalizedTypes.length > 0 && !normalizedTypes.includes(item.type)) {
+        const itemType = normalizeType(normalizeValue(item.type || ""));
+        const itemTags = (item.tags || []).map((tag) => normalizeValue(tag));
+        const itemStack = (item.stack || []).map((value) => normalizeValue(value));
+        const itemRoles = (item.roles || []).map((value) => normalizeValue(value));
+        const itemOutcomes = (item.outcomes || []).map((value) => normalizeValue(value));
+        const itemDate = parseDate(item.date);
+
+        const matchesOrEmpty = (selected, values) =>
+          selected.length === 0 || selected.some((value) => values.includes(value));
+        const hasExcluded = (selected, values) =>
+          selected.length > 0 && selected.some((value) => values.includes(value));
+
+        if (!matchesOrEmpty(include.types, [itemType])) return false;
+        if (!matchesOrEmpty(include.tags, itemTags)) return false;
+        if (!matchesOrEmpty(include.stack, itemStack)) return false;
+        if (!matchesOrEmpty(include.roles, itemRoles)) return false;
+        if (!matchesOrEmpty(include.outcomes, itemOutcomes)) return false;
+        if (hasExcluded(exclude.types, [itemType])) return false;
+        if (hasExcluded(exclude.tags, itemTags)) return false;
+        if (hasExcluded(exclude.stack, itemStack)) return false;
+        if (hasExcluded(exclude.roles, itemRoles)) return false;
+        if (hasExcluded(exclude.outcomes, itemOutcomes)) return false;
+
+        if (sinceTs && itemDate && itemDate < sinceTs) return false;
+        if (untilTs && itemDate && itemDate > untilTs) return false;
+
+        const searchableText = [
+          item.title,
+          item.description,
+          item.url,
+          item.type,
+          ...(item.tags || []),
+          ...(item.stack || []),
+          ...(item.roles || []),
+          ...(item.outcomes || []),
+        ].join(" ");
+
+        const hasAllTerms = include.terms.every((term) => fuzzyScore(searchableText, term) >= 0);
+        if (!hasAllTerms) {
           return false;
         }
-        if (tags.length > 0) {
-          const itemTags = (item.tags || []).map((tag) => tag.toLowerCase());
-          const hasEveryTag = tags.every((tag) =>
-            itemTags.some((itemTag) => itemTag.includes(tag)),
-          );
-          if (!hasEveryTag) {
-            return false;
-          }
+        const hasExcludedTerm = exclude.terms.some((term) => fuzzyScore(searchableText, term) >= 0);
+        if (hasExcludedTerm) {
+          return false;
         }
         return true;
       })
@@ -184,14 +284,23 @@ const searchItems = [
           item.title,
           item.description,
           item.url,
+          item.date,
           item.type,
           ...(item.tags || []),
+          ...(item.stack || []),
+          ...(item.roles || []),
+          ...(item.outcomes || []),
         ].join(" ");
 
         const score =
-          (termQuery ? fuzzyScore(searchableText, termQuery) : 30) +
-          tags.length * 20 +
-          normalizedTypes.length * 20;
+          (include.terms.length > 0
+            ? include.terms.reduce((sum, term) => sum + Math.max(0, fuzzyScore(searchableText, term)), 0)
+            : 20) +
+          include.tags.length * 20 +
+          include.types.length * 20 +
+          include.stack.length * 15 +
+          include.roles.length * 15 +
+          include.outcomes.length * 15;
 
         return { item, score };
       })
@@ -200,12 +309,23 @@ const searchItems = [
       .slice(0, 8);
   }
 
-  function renderSemanticSuggestions(query) {
+  function renderSemanticSuggestions(query, preserveActive = false) {
     if (!suggestionsRoot) {
       return;
     }
 
     const matches = semanticSearch(query);
+    currentSuggestions = matches;
+    if (!preserveActive) {
+      activeSuggestionIndex = matches.length > 0 ? 0 : -1;
+    } else if (matches.length === 0) {
+      activeSuggestionIndex = -1;
+    } else {
+      activeSuggestionIndex = Math.min(
+        Math.max(activeSuggestionIndex, 0),
+        matches.length - 1,
+      );
+    }
     if (matches.length === 0) {
       suggestionsRoot.innerHTML = "";
       suggestionsRoot.classList.add("hidden");
@@ -216,11 +336,12 @@ const searchItems = [
       <div class="semantic-suggestions-list">
         ${matches
           .map(
-            ({ item }) => `
-            <a class="semantic-suggestion-item" href="${item.url}">
+            ({ item }, index) => `
+            <a class="semantic-suggestion-item ${index === activeSuggestionIndex ? "active" : ""}" href="${item.url}" data-suggestion-index="${index}">
               <div class="semantic-suggestion-title">${item.title}</div>
               <div class="semantic-suggestion-meta">
                 <span>@${item.type}</span>
+                <span>${item.date}</span>
                 ${(item.tags || []).slice(0, 3).map((tag) => `<span>#${tag}</span>`).join("")}
               </div>
             </a>
@@ -250,6 +371,26 @@ const searchItems = [
     semanticSearchInput.addEventListener("input", (event) => {
       const value = event.target?.value || "";
       renderSemanticSuggestions(value);
+    });
+
+    semanticSearchInput.addEventListener("keydown", (event) => {
+      if (currentSuggestions.length === 0) return;
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        activeSuggestionIndex = (activeSuggestionIndex + 1) % currentSuggestions.length;
+        renderSemanticSuggestions(semanticSearchInput.value || "", true);
+      } else if (event.key === "ArrowUp") {
+        event.preventDefault();
+        activeSuggestionIndex =
+          (activeSuggestionIndex - 1 + currentSuggestions.length) % currentSuggestions.length;
+        renderSemanticSuggestions(semanticSearchInput.value || "", true);
+      } else if (event.key === "Enter") {
+        event.preventDefault();
+        const selected = currentSuggestions[activeSuggestionIndex];
+        if (selected?.item?.url) {
+          window.location.href = selected.item.url;
+        }
+      }
     });
 
     semanticSearchInput.addEventListener("focus", () => {
@@ -426,6 +567,10 @@ const searchItems = [
 
   .semantic-suggestion-item:hover {
     background-color: color-mix(in srgb, var(--pagefind-ui-border) 20%, transparent);
+  }
+
+  .semantic-suggestion-item.active {
+    background-color: color-mix(in srgb, var(--pagefind-ui-border) 25%, transparent);
   }
 
   .semantic-suggestion-title {
