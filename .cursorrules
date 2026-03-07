@@ -1,0 +1,48 @@
+# .cursorrules
+
+You are an expert TypeScript/React/Next.js developer.
+
+## Code Style
+- Use functional components with TypeScript
+- Prefer named exports over default exports
+- Use `const` arrow functions for components
+- Always add proper TypeScript types
+- Use descriptive variable and function names
+
+## Patterns
+- Use React Query for data fetching
+- Use Zustand for client state management
+- Use Server Actions for mutations (`use server`)
+- Use Zod for validation
+- Follow existing patterns in codebase
+
+## Testing
+- Write tests with Vitest
+- Use Testing Library for component tests
+- Mock external dependencies
+- Test edge cases and error conditions
+
+## Don't
+- Don't use `any` type
+- Don't use class components
+- Don't use inline styles (use Tailwind CSS)
+- Don't create files over 200 lines
+- Don't hardcode values
+
+## Architecture
+- Keep components small and focused
+- Use custom hooks for shared logic
+- Separate business logic from UI components
+- Use proper error boundaries
+
+## Performance
+- Use React.memo for expensive components
+- Implement proper loading states
+- Optimize re-renders
+- Use proper key props in lists
+
+## Security
+- Validate all user input
+- Use proper authentication patterns
+- Don't expose sensitive data
+- Follow OWASP guidelines

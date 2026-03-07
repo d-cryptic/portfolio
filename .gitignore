@@ -25,3 +25,5 @@ pnpm-debug.log*
 .idea/
 .venv/
 __pycache__
+# Local Obsidian workspace/config
+src/content/.obsidian/
