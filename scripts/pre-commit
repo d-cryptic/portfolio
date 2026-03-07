@@ -1,65 +1,127 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Pre-commit hook to run image migration scripts
-# This script runs before each commit to migrate images to R2
+set -euo pipefail
 
-set -e
+PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$PROJECT_ROOT"
 
-# Check if there are any changes in src/content directory
-if ! git diff --cached --name-only | grep -q "^src/content/"; then
-    echo "ℹ️  No changes in src/content directory. Skipping image migrations."
-    exit 0
-fi
+log() {
+  printf '%s\n' "$1"
+}
 
-echo "🔄 Running image migrations to R2..."
+has_staged_changes_matching() {
+  local pattern="$1"
+  git diff --cached --name-only | grep -Eq "$pattern"
+}
 
-# Check if required environment variables are set
-if [ -z "$R2_ACCESS_KEY_ID" ] || [ -z "$R2_SECRET_ACCESS_KEY" ] || [ -z "$R2_ENDPOINT_URL" ] || [ -z "$R2_BUCKET_NAME" ]; then
-    echo "⚠️  Warning: R2 credentials not configured. Skipping image migrations."
-    echo "   Configure R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_ENDPOINT_URL, and R2_BUCKET_NAME in .env"
-    exit 0
-fi
+install_python_deps_if_needed() {
+  if python3 -c "import boto3, requests, dotenv" >/dev/null 2>&1; then
+    return 0
+  fi
 
-# Install Python dependencies if not already installed
-if ! python3 -c "import boto3, requests, dotenv" 2>/dev/null; then
-    pwd
-    echo "📦 Installing Python dependencies..."
-    if command -v uv >/dev/null 2>&1; then
-        uv pip install -r scripts/requirements.txt
-    else
-        pip3 install -r scripts/requirements.txt
-    fi
-fi
+  log "Installing Python dependencies for migration checks..."
+  if command -v uv >/dev/null 2>&1; then
+    uv pip install -r scripts/requirements.txt
+  else
+    pip3 install -r scripts/requirements.txt
+  fi
+}
 
-# Run the migration scripts
-echo "🚀 Starting Giphy migration..."
-if python3 scripts/migrate_giphy_to_r2.py; then
-    echo "✅ Giphy migration completed successfully"
-else
-    echo "❌ Giphy migration failed"
-    exit 1
-fi
+run_image_migrations_if_needed() {
+  if ! has_staged_changes_matching '^src/content/'; then
+    log "No staged content changes. Skipping image migration checks."
+    return 0
+  fi
 
-echo "🚀 Starting image migration..."
-if python3 scripts/migrate_images_to_r2.py; then
-    echo "✅ Image migration completed successfully"
-else
-    echo "❌ Image migration failed"
-    exit 1
-fi
+  if [ -z "${R2_ACCESS_KEY_ID:-}" ] || [ -z "${R2_SECRET_ACCESS_KEY:-}" ] || \
+     [ -z "${R2_ENDPOINT_URL:-}" ] || [ -z "${R2_BUCKET_NAME:-}" ]; then
+    log "R2 credentials not configured. Skipping image migrations."
+    return 0
+  fi
 
-echo "🚀 Starting D2 diagram migration..."
-if python3 scripts/migrate_d2_to_r2.py; then
-    echo "✅ D2 diagram migration completed successfully"
-else
-    echo "❌ D2 diagram migration failed"
-    exit 1
-fi
+  install_python_deps_if_needed
 
-# Check if any files were modified by the migrations
-if ! git diff --quiet; then
-    echo "📝 Migrations updated some files. Adding them to the commit..."
+  log "Running Giphy migration..."
+  python3 scripts/migrate_giphy_to_r2.py
+
+  log "Running image migration..."
+  python3 scripts/migrate_images_to_r2.py
+
+  log "Running D2 diagram migration..."
+  python3 scripts/migrate_d2_to_r2.py
+
+  if ! git diff --quiet; then
+    log "Migration scripts changed files. Adding updates to commit."
     git add src/content/blog/
-fi
+  fi
+}
 
-echo "✨ Pre-commit hook completed"
+detect_agent_cli() {
+  if command -v codex >/dev/null 2>&1; then
+    printf 'codex'
+    return 0
+  fi
+
+  if command -v opencode >/dev/null 2>&1; then
+    printf 'opencode'
+    return 0
+  fi
+
+  printf ''
+}
+
+run_agent_prompt() {
+  local cli="$1"
+  local prompt="$2"
+
+  if [ "$cli" = "codex" ]; then
+    codex exec "$prompt"
+    return 0
+  fi
+
+  if [ "$cli" = "opencode" ]; then
+    opencode run "$prompt"
+    return 0
+  fi
+
+  return 1
+}
+
+run_agent_checks() {
+  local cli
+  cli="$(detect_agent_cli)"
+
+  if [ -z "$cli" ]; then
+    if [ "${PRECOMMIT_REQUIRE_AGENT_CLI:-0}" = "1" ]; then
+      log "No codex/opencode CLI found. Set PRECOMMIT_REQUIRE_AGENT_CLI=0 to allow skipping."
+      return 1
+    fi
+    log "No codex/opencode CLI found. Skipping SEO/GEO/Agent checks."
+    return 0
+  fi
+
+  local staged_files
+  staged_files="$(git diff --cached --name-only)"
+
+  if [ -z "$staged_files" ]; then
+    log "No staged files. Skipping agent checks."
+    return 0
+  fi
+
+  log "Running SEO agent check via ${cli}..."
+  run_agent_prompt "$cli" \
+    "Run an SEO pre-commit review on this staged diff. Focus on metadata, internal links, structured data, crawlability, and canonical integrity. Return concise findings only; return 'OK' if no issues."
+
+  log "Running GEO agent check via ${cli}..."
+  run_agent_prompt "$cli" \
+    "Run a GEO (Generative Engine Optimization) pre-commit review on this staged diff. Focus on llms.txt, machine-readable summaries, citation clarity, entity consistency, and discoverability for AI assistants. Return concise findings only; return 'OK' if no issues."
+
+  log "Running Agent-first check via ${cli}..."
+  run_agent_prompt "$cli" \
+    "Run an agent-first pre-commit review on this staged diff. Focus on whether autonomous tools can discover, parse, and act on repository instructions and machine endpoints. Return concise findings only; return 'OK' if no issues."
+}
+
+run_image_migrations_if_needed
+run_agent_checks
+
+log "Pre-commit checks completed."

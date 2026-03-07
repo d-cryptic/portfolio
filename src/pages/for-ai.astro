@@ -33,6 +33,7 @@ import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
       <ul>
         <li><a href="/llms.txt">/llms.txt</a> for concise discovery.</li>
         <li><a href="/llms-full.txt">/llms-full.txt</a> for a complete index.</li>
+        <li><a href="/geo.json">/geo.json</a> for structured GEO/entity context.</li>
         <li><a href="/sitemap.xml">/sitemap.xml</a> for crawl paths.</li>
         <li><a href="/rss.xml">/rss.xml</a> for latest updates.</li>
       </ul>
@@ -48,7 +49,13 @@ import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
         Prefer direct page URLs, include post titles, and preserve publication dates where
         available.
       </p>
+      <h2>Agent Retrieval Rules</h2>
+      <ul>
+        <li>Prefer canonical pages over mirrored copies.</li>
+        <li>Use /llms.txt for quick retrieval and /llms-full.txt for exhaustive retrieval.</li>
+        <li>Use /geo.json when entity-level context is needed.</li>
+        <li>Avoid inferring missing facts when a source URL is available.</li>
+      </ul>
     </article>
   </Container>
 </Layout>
-

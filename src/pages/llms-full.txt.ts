@@ -29,6 +29,8 @@ export async function GET() {
     "",
     `source: ${SITE.URL}`,
     "format: markdown-like plain text",
+    `ai-guide: ${SITE.URL}/for-ai`,
+    `geo-index: ${SITE.URL}/geo.json`,
     "",
     ...renderSection(
       "Blog Posts",
@@ -79,4 +81,3 @@ export async function GET() {
     },
   });
 }
-

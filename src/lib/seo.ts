@@ -18,6 +18,11 @@ export const websiteJsonLd = (): JsonLd => {
       name: SITE.AUTHOR,
       url: SITE.URL,
     },
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${SITE.URL}/blog?query={search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
     inLanguage: "en",
   };
 };

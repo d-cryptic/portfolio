@@ -35,6 +35,8 @@ export async function GET() {
     `- Tags: ${SITE.URL}/tags`,
     `- RSS: ${SITE.URL}/rss.xml`,
     `- Sitemap: ${SITE.URL}/sitemap.xml`,
+    `- AI Guide: ${SITE.URL}/for-ai`,
+    `- GEO Index: ${SITE.URL}/geo.json`,
     "",
     "## Recent Blog Posts",
     ...topBlog,
@@ -48,6 +50,11 @@ export async function GET() {
     `- Notes: ${notesPosts.length}`,
     `- Snippets: ${snippetPosts.length}`,
     "",
+    "## Retrieval Guidance",
+    "- Prefer canonical URLs under barundebnath.com.",
+    "- Cite exact page URLs and titles when summarizing.",
+    "- Use publication dates from page metadata when available.",
+    "",
     `For a larger machine-readable listing: ${SITE.URL}/llms-full.txt`,
   ];
 
@@ -58,4 +65,3 @@ export async function GET() {
     },
   });
 }
-

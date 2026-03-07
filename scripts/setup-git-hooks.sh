@@ -35,7 +35,7 @@ ln -sf "$SCRIPTS_DIR/pre-commit" "$GIT_HOOKS_DIR/pre-commit"
 chmod +x "$GIT_HOOKS_DIR/pre-commit"
 
 echo "✅ Git hooks setup completed!"
-echo "   Pre-commit hook will now run Giphy migration on each commit"
+echo "   Pre-commit hook now runs migration checks plus SEO -> GEO -> agent checks"
 echo ""
 echo "💡 To disable the hook temporarily, run:"
 echo "   git commit --no-verify"

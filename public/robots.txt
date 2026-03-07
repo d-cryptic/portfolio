@@ -2,3 +2,10 @@ User-agent: *
 Allow: /
 
 Sitemap: https://barundebnath.com/sitemap.xml
+Sitemap: https://barundebnath.com/rss.xml
+
+# Agent-first discovery endpoints
+# https://barundebnath.com/llms.txt
+# https://barundebnath.com/llms-full.txt
+# https://barundebnath.com/geo.json
+# https://barundebnath.com/for-ai

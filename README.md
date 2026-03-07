@@ -174,10 +174,9 @@ npm run preview
 
 The project includes an automatic git pre-commit hook that:
 
-- Scans blog posts for Giphy links on every commit
-- Downloads GIFs and uploads them to Cloudflare R2
-- Replaces Giphy links with R2 URLs in your markdown files
-- Automatically adds modified files to the commit
+- Runs content image migration checks when `src/content` files are staged
+- Runs sequential `SEO -> GEO -> Agent-first` checks using `codex` CLI or `opencode` CLI (if available)
+- Automatically adds migration-updated content files to the commit
 
 The hook is automatically set up when you enter the devbox environment. To bypass the hook for a specific commit:
 
