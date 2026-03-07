@@ -1,0 +1,99 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "@layouts/Layout.astro";
+import Container from "@components/Container.astro";
+import LiveFilters from "@components/LiveFilters.astro";
+import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
+import { buildExplorerItems } from "@lib/live-filters";
+
+const blog = (await getCollection("blog"))
+  .filter((post) => !post.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const projects = (await getCollection("projects"))
+  .filter((project) => !project.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const notes = (await getCollection("notes"))
+  .filter((note) => !note.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const snippets = (await getCollection("snippets"))
+  .filter((snippet) => !snippet.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const explorerItems = buildExplorerItems({
+  blog,
+  projects,
+  notes,
+  snippets,
+  pages: [
+    {
+      id: "page:home",
+      title: "Home",
+      description: "Overview page with current highlights and featured content.",
+      href: "/",
+      contentType: "Pages",
+      date: new Date("2025-11-01"),
+      stack: ["Astro", "Tailwind CSS"],
+      roles: ["SRE", "Platform Engineer"],
+      outcomes: ["SEO"],
+    },
+    {
+      id: "page:for-ai",
+      title: "AI / Agent Guide",
+      description: "Indexing guide and retrieval rules for assistants and agents.",
+      href: "/for-ai",
+      contentType: "Pages",
+      date: new Date("2025-11-01"),
+      stack: ["Astro", "MDX"],
+      roles: ["Systems Engineer"],
+      outcomes: ["SEO", "Data"],
+    },
+    {
+      id: "page:tags",
+      title: "Tag Directory",
+      description: "Browse topics and discover related posts by tag.",
+      href: "/tags",
+      contentType: "Pages",
+      date: new Date("2025-11-01"),
+      stack: ["Astro"],
+      roles: ["Software Engineer"],
+      outcomes: ["Data"],
+    },
+  ],
+});
+---
+
+<Layout
+  title="Content Explorer"
+  description="Filter blog posts, projects, notes, snippets, and pages by stack, role, and outcome."
+  keywords={["content explorer", "blog filters", "projects filters", "sre"]}
+  schema={[
+    breadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "Explorer", path: "/explorer" },
+    ]),
+    {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      name: "Content Explorer",
+      description: "Filter site content by stack, role, and outcome.",
+      url: toAbsoluteUrl("/explorer"),
+    },
+  ]}
+>
+  <Container>
+    <aside data-pagefind-ignore>
+      <div class="space-y-8">
+        <div class="animate space-y-2">
+          <h1 class="font-semibold text-black dark:text-white">Content Explorer</h1>
+          <p class="text-sm text-black/70 dark:text-white/70">
+            Filter blog, projects, notes, snippets, and pages by stack, role, and outcome.
+          </p>
+        </div>
+        <LiveFilters items={explorerItems} />
+      </div>
+    </aside>
+  </Container>
+</Layout>

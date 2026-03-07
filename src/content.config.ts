@@ -8,6 +8,9 @@ const blog = defineCollection({
     date: z.coerce.date(),
     draft: z.boolean().optional().default(false),
     tags: z.array(z.string()).optional().default([]),
+    stack: z.array(z.string()).optional().default([]),
+    roles: z.array(z.string()).optional().default([]),
+    outcomes: z.array(z.string()).optional().default([]),
     redirected: z.boolean().optional().default(false),
     redirectedUrl: z.string().url().optional(),
   }),
@@ -21,6 +24,9 @@ const notes = defineCollection({
     date: z.coerce.date(),
     draft: z.boolean().optional().default(false),
     tags: z.array(z.string()).optional().default([]),
+    stack: z.array(z.string()).optional().default([]),
+    roles: z.array(z.string()).optional().default([]),
+    outcomes: z.array(z.string()).optional().default([]),
   }),
 });
 
@@ -32,6 +38,9 @@ const snippets = defineCollection({
     date: z.coerce.date(),
     draft: z.boolean().optional().default(false),
     tags: z.array(z.string()).optional().default([]),
+    stack: z.array(z.string()).optional().default([]),
+    roles: z.array(z.string()).optional().default([]),
+    outcomes: z.array(z.string()).optional().default([]),
   }),
 });
 
@@ -45,6 +54,9 @@ const projects = defineCollection({
     demoURL: z.string().url().optional(),
     repoURL: z.string().url().optional(),
     tags: z.array(z.string()).optional().default([]),
+    stack: z.array(z.string()).optional().default([]),
+    roles: z.array(z.string()).optional().default([]),
+    outcomes: z.array(z.string()).optional().default([]),
   }),
 });
 

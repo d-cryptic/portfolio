@@ -1,0 +1,226 @@
+---
+import type { ExplorerItem } from "@lib/live-filters";
+
+const { items } = Astro.props as { items: ExplorerItem[] };
+
+const uniqueSortedValues = (values: string[]): string[] =>
+  [...new Set(values)].sort((a, b) => a.localeCompare(b));
+
+const stacks = uniqueSortedValues(items.flatMap((item) => item.stack));
+const roles = uniqueSortedValues(items.flatMap((item) => item.roles));
+const outcomes = uniqueSortedValues(items.flatMap((item) => item.outcomes));
+
+const getFilters = (values: string[]): string =>
+  values.map((value) => value.toLowerCase().trim()).filter(Boolean).join("|");
+---
+
+<section class="animate space-y-6" data-live-filters>
+  <div class="flex flex-wrap items-center justify-between gap-2">
+    <h2 class="font-semibold text-black dark:text-white">Content Explorer</h2>
+    <div class="flex items-center gap-3">
+      <span class="text-sm text-black/70 dark:text-white/70">
+        <span data-result-count>{items.length}</span> results
+      </span>
+      <button
+        type="button"
+        data-clear-filters
+        class="rounded-md border border-black/20 px-2 py-1 text-xs hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10"
+      >
+        Clear filters
+      </button>
+    </div>
+  </div>
+
+  <div class="space-y-4 rounded-lg border border-black/10 p-4 dark:border-white/10">
+    <div class="space-y-2">
+      <h3 class="text-sm font-semibold uppercase tracking-wide text-black/70 dark:text-white/70">
+        Stack
+      </h3>
+      <div class="flex flex-wrap gap-2">
+        {
+          stacks.map((value) => (
+            <button
+              type="button"
+              data-filter-button
+              data-filter-group="stack"
+              data-filter-value={value}
+              aria-pressed="false"
+              class="rounded-full border border-black/20 px-3 py-1 text-sm transition-colors hover:bg-black/5 aria-pressed:bg-black aria-pressed:text-white dark:border-white/20 dark:hover:bg-white/10 dark:aria-pressed:bg-white dark:aria-pressed:text-black"
+            >
+              {value}
+            </button>
+          ))
+        }
+      </div>
+    </div>
+
+    <div class="space-y-2">
+      <h3 class="text-sm font-semibold uppercase tracking-wide text-black/70 dark:text-white/70">
+        Role
+      </h3>
+      <div class="flex flex-wrap gap-2">
+        {
+          roles.map((value) => (
+            <button
+              type="button"
+              data-filter-button
+              data-filter-group="roles"
+              data-filter-value={value}
+              aria-pressed="false"
+              class="rounded-full border border-black/20 px-3 py-1 text-sm transition-colors hover:bg-black/5 aria-pressed:bg-black aria-pressed:text-white dark:border-white/20 dark:hover:bg-white/10 dark:aria-pressed:bg-white dark:aria-pressed:text-black"
+            >
+              {value}
+            </button>
+          ))
+        }
+      </div>
+    </div>
+
+    <div class="space-y-2">
+      <h3 class="text-sm font-semibold uppercase tracking-wide text-black/70 dark:text-white/70">
+        Outcome
+      </h3>
+      <div class="flex flex-wrap gap-2">
+        {
+          outcomes.map((value) => (
+            <button
+              type="button"
+              data-filter-button
+              data-filter-group="outcomes"
+              data-filter-value={value}
+              aria-pressed="false"
+              class="rounded-full border border-black/20 px-3 py-1 text-sm transition-colors hover:bg-black/5 aria-pressed:bg-black aria-pressed:text-white dark:border-white/20 dark:hover:bg-white/10 dark:aria-pressed:bg-white dark:aria-pressed:text-black"
+            >
+              {value}
+            </button>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+
+  <ul class="not-prose flex flex-col gap-4" data-filter-results>
+    {
+      items.map((item) => (
+        <li
+          data-filter-item
+          data-stack={getFilters(item.stack)}
+          data-roles={getFilters(item.roles)}
+          data-outcomes={getFilters(item.outcomes)}
+        >
+          <a
+            href={item.href}
+            class="group relative flex flex-nowrap rounded-lg border border-black/15 px-4 py-3 pr-10 transition-colors duration-300 ease-in-out hover:bg-black/5 hover:text-black focus-visible:bg-black/5 focus-visible:text-black dark:border-white/20 dark:hover:bg-white/5 dark:hover:text-white dark:focus-visible:bg-white/5 dark:focus-visible:text-white"
+          >
+            <div class="flex flex-1 flex-col gap-1 truncate">
+              <div class="flex items-center justify-between gap-2">
+                <span class="font-semibold">{item.title}</span>
+                <span class="text-xs uppercase tracking-wide text-black/60 dark:text-white/60">
+                  {item.contentType}
+                </span>
+              </div>
+              <p class="line-clamp-2 text-sm">{item.description}</p>
+              <div class="flex flex-wrap gap-2 text-xs text-black/70 dark:text-white/70">
+                {item.stack.map((value) => <span>#{value}</span>)}
+                {item.roles.map((value) => <span>@{value}</span>)}
+                {item.outcomes.map((value) => <span>!{value}</span>)}
+              </div>
+            </div>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+
+  <p
+    data-empty-state
+    class="hidden rounded-lg border border-dashed border-black/20 p-4 text-sm text-black/70 dark:border-white/20 dark:text-white/70"
+  >
+    No items match these filters.
+  </p>
+</section>
+
+<script>
+  (() => {
+    const root = document.querySelector("[data-live-filters]");
+    if (!root) {
+      return;
+    }
+
+    const filterButtons = Array.from(
+      root.querySelectorAll<HTMLButtonElement>("[data-filter-button]"),
+    );
+    const cards = Array.from(
+      root.querySelectorAll<HTMLElement>("[data-filter-item]"),
+    );
+    const countNode = root.querySelector<HTMLElement>("[data-result-count]");
+    const emptyNode = root.querySelector<HTMLElement>("[data-empty-state]");
+    const clearButton = root.querySelector<HTMLButtonElement>("[data-clear-filters]");
+
+    const activeFilters: Record<string, Set<string>> = {
+      stack: new Set(),
+      roles: new Set(),
+      outcomes: new Set(),
+    };
+
+    const updateVisibility = (): void => {
+      let visibleCount = 0;
+
+      cards.forEach((card) => {
+        const cardValues = {
+          stack: (card.dataset.stack || "").split("|").filter(Boolean),
+          roles: (card.dataset.roles || "").split("|").filter(Boolean),
+          outcomes: (card.dataset.outcomes || "").split("|").filter(Boolean),
+        };
+
+        const isVisible = Object.entries(activeFilters).every(([group, selected]) => {
+          if (selected.size === 0) {
+            return true;
+          }
+          return cardValues[group as keyof typeof cardValues].some((value) =>
+            selected.has(value),
+          );
+        });
+
+        card.hidden = !isVisible;
+        if (isVisible) {
+          visibleCount += 1;
+        }
+      });
+
+      if (countNode) {
+        countNode.textContent = String(visibleCount);
+      }
+      if (emptyNode) {
+        emptyNode.classList.toggle("hidden", visibleCount !== 0);
+      }
+    };
+
+    filterButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const group = button.dataset.filterGroup;
+        const value = button.dataset.filterValue?.toLowerCase().trim();
+        if (!group || !value || !(group in activeFilters)) {
+          return;
+        }
+
+        const isPressed = button.getAttribute("aria-pressed") === "true";
+        button.setAttribute("aria-pressed", String(!isPressed));
+
+        if (isPressed) {
+          activeFilters[group].delete(value);
+        } else {
+          activeFilters[group].add(value);
+        }
+
+        updateVisibility();
+      });
+    });
+
+    clearButton?.addEventListener("click", () => {
+      Object.values(activeFilters).forEach((set) => set.clear());
+      filterButtons.forEach((button) => button.setAttribute("aria-pressed", "false"));
+      updateVisibility();
+    });
+  })();
+</script>

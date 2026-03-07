@@ -15,7 +15,7 @@ import { SITE } from "@consts";
       </Link>
 
       <!-- Desktop Navigation -->
-      <nav class="hidden items-center gap-1 text-sm md:flex">
+      <nav class="hidden items-center gap-1 text-sm lg:flex">
         <Link href="/blog">blog</Link>
         <span>
           {`/`}
@@ -24,14 +24,41 @@ import { SITE } from "@consts";
         <span>
           {`/`}
         </span>
-        <Link href="/notes">notes</Link>
+        <Link href="/explorer">explorer</Link>
         <span>
           {`/`}
         </span>
-        <Link href="/snippets">snippets</Link>
-        <span>
-          {`/`}
-        </span>
+        <div class="group relative">
+          <button
+            type="button"
+            aria-haspopup="true"
+            class="inline-flex items-center gap-1 underline-offset-8 transition-colors duration-200 hover:underline focus-visible:underline"
+          >
+            more
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="mt-0.5"
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          <div
+            class="pointer-events-none absolute right-0 top-full z-20 mt-2 min-w-[9rem] rounded-md border border-black/15 bg-[var(--color-background)] p-2 opacity-0 shadow-lg transition-all duration-150 ease-in-out group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100 dark:border-white/20"
+          >
+            <nav class="flex flex-col gap-1 text-sm">
+              <Link href="/notes">notes</Link>
+              <Link href="/snippets">snippets</Link>
+            </nav>
+          </div>
+        </div>
 
         <ThemeToggle />
         <button
@@ -59,7 +86,7 @@ import { SITE } from "@consts";
       </nav>
 
       <!-- Mobile Navigation -->
-      <div class="flex items-center gap-2 md:hidden">
+      <div class="flex items-center gap-2 lg:hidden">
         <ThemeToggle />
         <button
           id="mobile-search-button"
@@ -132,6 +159,7 @@ import { SITE } from "@consts";
           >
             <Link href="/blog">blog</Link>
             <Link href="/projects">projects</Link>
+            <Link href="/explorer">explorer</Link>
             <Link href="/notes">notes</Link>
             <Link href="/snippets">snippets</Link>
           </nav>

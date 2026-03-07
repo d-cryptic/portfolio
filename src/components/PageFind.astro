@@ -1,5 +1,65 @@
 ---
 import Search from "astro-pagefind/components/Search";
+import { getCollection } from "astro:content";
+
+const [blogPosts, projectPosts, notesPosts, snippetPosts] = await Promise.all([
+  getCollection("blog", ({ data }) => !data.draft),
+  getCollection("projects", ({ data }) => !data.draft),
+  getCollection("notes", ({ data }) => !data.draft),
+  getCollection("snippets", ({ data }) => !data.draft),
+]);
+
+const searchItems = [
+  ...blogPosts.map((post) => ({
+    title: post.data.title,
+    description: post.data.description,
+    url: `/blog/${post.id.replace(/\/index\.mdx?$/, "")}`,
+    type: "blog",
+    tags: post.data.tags || [],
+  })),
+  ...projectPosts.map((project) => ({
+    title: project.data.title,
+    description: project.data.description,
+    url: `/projects/${project.id}`,
+    type: "projects",
+    tags: project.data.tags || [],
+  })),
+  ...notesPosts.map((note) => ({
+    title: note.data.title,
+    description: note.data.description,
+    url: `/notes/${note.id}`,
+    type: "notes",
+    tags: note.data.tags || [],
+  })),
+  ...snippetPosts.map((snippet) => ({
+    title: snippet.data.title,
+    description: snippet.data.description,
+    url: `/snippets/${snippet.id}`,
+    type: "snippets",
+    tags: snippet.data.tags || [],
+  })),
+  {
+    title: "Content Explorer",
+    description: "Filter content by stack, role, and outcome.",
+    url: "/explorer",
+    type: "pages",
+    tags: ["explorer", "filters"],
+  },
+  {
+    title: "Tag Directory",
+    description: "Browse all tags used across blog posts.",
+    url: "/tags",
+    type: "pages",
+    tags: ["tags", "taxonomy"],
+  },
+  {
+    title: "AI / Agent Guide",
+    description: "Machine-friendly guide for assistants and agents.",
+    url: "/for-ai",
+    type: "pages",
+    tags: ["ai", "agents"],
+  },
+];
 ---
 
 <aside data-pagefind-ignore>
@@ -16,6 +76,10 @@ import Search from "astro-pagefind/components/Search";
         className="pagefind-ui"
         uiOptions={{ showImages: false, excerptLength: 15, resetStyles: false }}
       />
+      <div id="search-tips" class="pt-2 text-xs text-black/65 dark:text-white/65">
+        Tip: use <kbd>#tag</kbd> and <kbd>@type</kbd> (for example: <code>#devops @blog</code>)
+      </div>
+      <div id="semantic-suggestions" class="mt-2 hidden"></div>
       <div class="dark:prose-invert mr-2 pt-4 pb-1 text-right text-xs">
         Press <span class="prose dark:prose-invert text-xs"
           ><kbd class="">Esc</kbd></span
@@ -25,10 +89,181 @@ import Search from "astro-pagefind/components/Search";
   </div>
 </aside>
 
-<script is:inline>
+<script is:inline define:vars={{ searchItems }}>
+  const semanticSearchItems = searchItems;
+
   const pagefindStylesheetId = "pagefind-ui-styles";
   const magnifyingGlass = document.getElementById("magnifying-glass");
   const backdrop = document.getElementById("backdrop");
+  const suggestionsRoot = document.getElementById("semantic-suggestions");
+  let semanticSearchInput = null;
+  let semanticBindingsReady = false;
+
+  function tokenize(query) {
+    const tokens = query.trim().split(/\s+/).filter(Boolean);
+    const tags = tokens
+      .filter((token) => token.startsWith("#"))
+      .map((token) => token.slice(1).toLowerCase())
+      .filter(Boolean);
+    const types = tokens
+      .filter((token) => token.startsWith("@"))
+      .map((token) => token.slice(1).toLowerCase())
+      .filter(Boolean);
+    const terms = tokens
+      .filter((token) => !token.startsWith("#") && !token.startsWith("@"))
+      .map((token) => token.toLowerCase());
+
+    return { tags, types, terms };
+  }
+
+  function normalizeType(type) {
+    const aliases = {
+      blog: "blog",
+      blogs: "blog",
+      project: "projects",
+      projects: "projects",
+      note: "notes",
+      notes: "notes",
+      snippet: "snippets",
+      snippets: "snippets",
+      page: "pages",
+      pages: "pages",
+      explorer: "pages",
+    };
+    return aliases[type] || type;
+  }
+
+  function fuzzyScore(text, query) {
+    if (!query) return 0;
+    const haystack = text.toLowerCase();
+    const needle = query.toLowerCase();
+    if (haystack.includes(needle)) {
+      return 100 - haystack.indexOf(needle);
+    }
+
+    let score = 0;
+    let searchIndex = 0;
+    for (let i = 0; i < needle.length; i++) {
+      const foundAt = haystack.indexOf(needle[i], searchIndex);
+      if (foundAt === -1) {
+        return -1;
+      }
+      score += 2;
+      searchIndex = foundAt + 1;
+    }
+    return score;
+  }
+
+  function semanticSearch(query) {
+    const { tags, types, terms } = tokenize(query);
+    if (!query.trim()) {
+      return [];
+    }
+
+    const normalizedTypes = types.map(normalizeType);
+    const termQuery = terms.join(" ");
+
+    return semanticSearchItems
+      .filter((item) => {
+        if (normalizedTypes.length > 0 && !normalizedTypes.includes(item.type)) {
+          return false;
+        }
+        if (tags.length > 0) {
+          const itemTags = (item.tags || []).map((tag) => tag.toLowerCase());
+          const hasEveryTag = tags.every((tag) =>
+            itemTags.some((itemTag) => itemTag.includes(tag)),
+          );
+          if (!hasEveryTag) {
+            return false;
+          }
+        }
+        return true;
+      })
+      .map((item) => {
+        const searchableText = [
+          item.title,
+          item.description,
+          item.url,
+          item.type,
+          ...(item.tags || []),
+        ].join(" ");
+
+        const score =
+          (termQuery ? fuzzyScore(searchableText, termQuery) : 30) +
+          tags.length * 20 +
+          normalizedTypes.length * 20;
+
+        return { item, score };
+      })
+      .filter((entry) => entry.score >= 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 8);
+  }
+
+  function renderSemanticSuggestions(query) {
+    if (!suggestionsRoot) {
+      return;
+    }
+
+    const matches = semanticSearch(query);
+    if (matches.length === 0) {
+      suggestionsRoot.innerHTML = "";
+      suggestionsRoot.classList.add("hidden");
+      return;
+    }
+
+    suggestionsRoot.innerHTML = `
+      <div class="semantic-suggestions-list">
+        ${matches
+          .map(
+            ({ item }) => `
+            <a class="semantic-suggestion-item" href="${item.url}">
+              <div class="semantic-suggestion-title">${item.title}</div>
+              <div class="semantic-suggestion-meta">
+                <span>@${item.type}</span>
+                ${(item.tags || []).slice(0, 3).map((tag) => `<span>#${tag}</span>`).join("")}
+              </div>
+            </a>
+          `,
+          )
+          .join("")}
+      </div>
+    `;
+    suggestionsRoot.classList.remove("hidden");
+  }
+
+  function bindSemanticSearch() {
+    const searchDiv = document.getElementById("search");
+    if (!searchDiv) {
+      return;
+    }
+
+    semanticSearchInput = searchDiv.querySelector("input");
+    if (!semanticSearchInput) {
+      return;
+    }
+
+    if (semanticBindingsReady) {
+      return;
+    }
+
+    semanticSearchInput.addEventListener("input", (event) => {
+      const value = event.target?.value || "";
+      renderSemanticSuggestions(value);
+    });
+
+    semanticSearchInput.addEventListener("focus", () => {
+      renderSemanticSuggestions(semanticSearchInput.value || "");
+    });
+
+    semanticSearchInput.addEventListener("blur", () => {
+      setTimeout(() => {
+        suggestionsRoot?.classList.add("hidden");
+      }, 120);
+    });
+
+    semanticBindingsReady = true;
+  }
 
   function ensurePagefindStyles() {
     if (document.getElementById(pagefindStylesheetId)) {
@@ -49,6 +284,7 @@ import Search from "astro-pagefind/components/Search";
   async function openPagefind() {
     await ensurePagefindStyles();
     const searchDiv = document.getElementById("search");
+    bindSemanticSearch();
     const search = searchDiv.querySelector("input");
     setTimeout(() => {
       search.focus();
@@ -59,9 +295,14 @@ import Search from "astro-pagefind/components/Search";
 
   function closePagefind() {
     const search = document.getElementById("search");
-    search.value = "";
+    const input = search?.querySelector("input");
+    if (input) {
+      input.value = "";
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    }
     backdrop?.classList.remove("visible");
     backdrop?.classList.add("invisible");
+    suggestionsRoot?.classList.add("hidden");
   }
 
   if (!window.__pagefindListenersBound) {
@@ -89,7 +330,16 @@ import Search from "astro-pagefind/components/Search";
 
     // close pagefind when searched result(link) clicked
     document.addEventListener("click", (event) => {
-      if (event.target.classList.contains("pagefind-ui__result-link")) {
+      if (
+        event.target instanceof Element &&
+        event.target.classList.contains("pagefind-ui__result-link")
+      ) {
+        closePagefind();
+      }
+      if (
+        event.target instanceof Element &&
+        event.target.closest(".semantic-suggestion-item")
+      ) {
         closePagefind();
       }
     });
@@ -145,5 +395,50 @@ import Search from "astro-pagefind/components/Search";
   #search .pagefind-ui__message {
     padding: 0;
     padding-bottom: 0.75rem;
+  }
+
+  #search-tips kbd {
+    border: 1px solid var(--pagefind-ui-border);
+    border-radius: 4px;
+    padding: 0.1rem 0.35rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+  }
+
+  .semantic-suggestions-list {
+    border: 1px solid var(--pagefind-ui-border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .semantic-suggestion-item {
+    display: block;
+    padding: 0.5rem 0.625rem;
+    border-bottom: 1px solid var(--pagefind-ui-border);
+    text-decoration: none;
+    color: var(--pagefind-ui-text);
+    transition: background-color 0.15s ease-in-out;
+  }
+
+  .semantic-suggestion-item:last-child {
+    border-bottom: none;
+  }
+
+  .semantic-suggestion-item:hover {
+    background-color: color-mix(in srgb, var(--pagefind-ui-border) 20%, transparent);
+  }
+
+  .semantic-suggestion-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  .semantic-suggestion-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.2rem;
+    font-size: 0.75rem;
+    opacity: 0.75;
   }
 </style>
