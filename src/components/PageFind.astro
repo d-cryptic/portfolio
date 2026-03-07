@@ -506,7 +506,7 @@ const searchItems = [
     --pagefind-ui-scale: 0.75;
     --pagefind-ui-border-width: 1px;
     --pagefind-ui-border-radius: 3px;
-    --pagefind-ui-font: "Geist", sans-serif;
+    --pagefind-ui-font: var(--font-sans);
     --pagefind-ui-primary: var(--color-text);
     --pagefind-ui-text: var(--color-text);
     --pagefind-ui-background: var(--color-background);
@@ -515,27 +515,86 @@ const searchItems = [
   }
 
   .dark {
-    --pagefind-ui-primary: #d4d4d4;
-    --pagefind-ui-text: #d4d4d4;
-    --pagefind-ui-background: #171717;
-    --pagefind-ui-border: #404040;
+    --pagefind-ui-primary: #f1f5ff;
+    --pagefind-ui-text: #e2e8ff;
+    --pagefind-ui-background: #171a2e;
+    --pagefind-ui-border: #3e476e;
+    --pagefind-ui-tag: #28315e;
+  }
+
+  .dark #pagefind-container {
+    background-color: #14182d;
+    border-color: #4a537f;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
   }
 
   #search input {
-    font-weight: normal;
+    font-weight: 500;
   }
 
-  #search p {
-    font-weight: normal;
+  #pagefind-container,
+  #search,
+  #search .pagefind-ui__result,
+  #search .pagefind-ui__result-title,
+  #search .pagefind-ui__result-excerpt,
+  #search .pagefind-ui__message,
+  #search .pagefind-ui__search-input,
+  #search-tips,
+  .semantic-suggestions-list,
+  .semantic-suggestion-item {
+    font-family: var(--font-sans);
+  }
+
+  #search p,
+  #search .pagefind-ui__message,
+  #search .pagefind-ui__result-excerpt {
+    color: var(--pagefind-ui-text);
+    opacity: 0.95;
   }
 
   #search .pagefind-ui__result-title {
-    font-weight: 600;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  #search .pagefind-ui__result-title a {
+    color: var(--pagefind-ui-primary);
+    text-decoration: none;
+  }
+
+  #search .pagefind-ui__result-title a:hover,
+  #search .pagefind-ui__result-title a:focus-visible {
+    color: #ffffff;
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 
   #search .pagefind-ui__message {
     padding: 0;
     padding-bottom: 0.75rem;
+  }
+
+  #search .pagefind-ui__results {
+    border-top: 1px solid color-mix(in srgb, var(--pagefind-ui-border) 70%, transparent);
+    margin-top: 0.5rem;
+  }
+
+  #search .pagefind-ui__result {
+    padding-top: 0.9rem;
+    padding-bottom: 0.9rem;
+    border-bottom-color: color-mix(in srgb, var(--pagefind-ui-border) 70%, transparent);
+  }
+
+  #search mark {
+    background: #ffe454;
+    color: #111111;
+    border-radius: 2px;
+    padding: 0 0.15rem;
+  }
+
+  .dark #search mark {
+    background: #ffe95a;
+    color: #0c1020;
   }
 
   #search-tips kbd {
@@ -544,12 +603,25 @@ const searchItems = [
     padding: 0.1rem 0.35rem;
     font-family: var(--font-mono);
     font-size: 0.75rem;
+    color: var(--pagefind-ui-primary);
+    background: color-mix(in srgb, var(--pagefind-ui-tag) 40%, transparent);
+  }
+
+  #search-tips code {
+    color: var(--pagefind-ui-primary);
+    background: color-mix(in srgb, var(--pagefind-ui-tag) 35%, transparent);
+    border: 1px solid color-mix(in srgb, var(--pagefind-ui-border) 50%, transparent);
+    border-radius: 4px;
+    padding: 0.08rem 0.3rem;
+    font-size: 0.72rem;
+    margin-right: 0.12rem;
   }
 
   .semantic-suggestions-list {
     border: 1px solid var(--pagefind-ui-border);
     border-radius: 6px;
     overflow: hidden;
+    background-color: color-mix(in srgb, var(--pagefind-ui-background) 85%, #000 15%);
   }
 
   .semantic-suggestion-item {
@@ -584,6 +656,6 @@ const searchItems = [
     gap: 0.35rem;
     margin-top: 0.2rem;
     font-size: 0.75rem;
-    opacity: 0.75;
+    opacity: 0.9;
   }
 </style>
