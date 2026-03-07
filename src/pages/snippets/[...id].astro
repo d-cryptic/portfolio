@@ -7,6 +7,8 @@ import { readingTime } from "@lib/utils";
 import BackToPrevious from "@components/BackToPrevious.astro";
 import PostNavigation from "@components/PostNavigation.astro";
 import TableOfContents from "@components/TableOfContents.astro";
+import { SITE } from "@consts";
+import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
 // import Giscus from "@components/Giscus.astro";
 
 export async function getStaticPaths() {
@@ -49,9 +51,40 @@ const prevSnippet = getPrevSnippet();
 
 const snippet = Astro.props;
 const { Content, headings } = await render(snippet);
+const snippetPath = `/snippets/${snippet.id}`;
+const snippetUrl = toAbsoluteUrl(snippetPath);
 ---
 
-<Layout title={snippet.data.title} description={snippet.data.description}>
+<Layout
+  title={snippet.data.title}
+  description={snippet.data.description}
+  ogType="article"
+  publishedTime={snippet.data.date}
+  modifiedTime={snippet.data.date}
+  keywords={snippet.data.tags || ["snippets", "code"]}
+  schema={[
+    breadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "Snippets", path: "/snippets" },
+      { name: snippet.data.title, path: snippetPath },
+    ]),
+    {
+      "@context": "https://schema.org",
+      "@type": "TechArticle",
+      headline: snippet.data.title,
+      description: snippet.data.description,
+      datePublished: snippet.data.date,
+      dateModified: snippet.data.date,
+      author: {
+        "@type": "Person",
+        name: SITE.AUTHOR,
+      },
+      mainEntityOfPage: snippetUrl,
+      url: snippetUrl,
+      inLanguage: "en",
+    },
+  ]}
+>
   <Container>
     <div class="animate">
       <BackToPrevious href="/snippets">Back to snippets</BackToPrevious>

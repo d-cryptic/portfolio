@@ -4,6 +4,7 @@ import Layout from "@layouts/Layout.astro";
 import Container from "@components/Container.astro";
 import ArrowCard from "@components/ArrowCard.astro";
 import { SNIPPETS } from "@consts";
+import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
 
 
 const data = (await getCollection("snippets"))
@@ -26,7 +27,24 @@ const posts = data.reduce((acc: Acc, post) => {
 const years = Object.keys(posts).sort((a, b) => parseInt(b) - parseInt(a));
 ---
 
-<Layout title={SNIPPETS.TITLE} description={SNIPPETS.DESCRIPTION}>
+<Layout
+  title={SNIPPETS.TITLE}
+  description={SNIPPETS.DESCRIPTION}
+  keywords={["code snippets", "developer snippets", "shell", "devops snippets"]}
+  schema={[
+    breadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "Snippets", path: "/snippets" },
+    ]),
+    {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      name: SNIPPETS.TITLE,
+      description: SNIPPETS.DESCRIPTION,
+      url: toAbsoluteUrl("/snippets"),
+    },
+  ]}
+>
   <Container>
     <aside data-pagefind-ignore>
       <div class="space-y-10">

@@ -7,6 +7,8 @@ import { readingTime } from "@lib/utils";
 import BackToPrevious from "@components/BackToPrevious.astro";
 import PostNavigation from "@components/PostNavigation.astro";
 import TableOfContents from "@components/TableOfContents.astro";
+import { SITE } from "@consts";
+import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
 // import Giscus from "@components/Giscus.astro";
 
 export async function getStaticPaths() {
@@ -49,9 +51,45 @@ const prevPost = getPrevPost();
 
 const post = Astro.props;
 const { Content, headings } = await render(post);
+const postPath = `/blog/${post.id.replace(/\/index\.mdx?$/, "")}`;
+const postUrl = toAbsoluteUrl(postPath);
 ---
 
-<Layout title={post.data.title} description={post.data.description}>
+<Layout
+  title={post.data.title}
+  description={post.data.description}
+  ogType="article"
+  publishedTime={post.data.date}
+  modifiedTime={post.data.date}
+  keywords={post.data.tags || ["blog", "sre", "systems"]}
+  schema={[
+    breadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "Blog", path: "/blog" },
+      { name: post.data.title, path: postPath },
+    ]),
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      headline: post.data.title,
+      description: post.data.description,
+      datePublished: post.data.date,
+      dateModified: post.data.date,
+      author: {
+        "@type": "Person",
+        name: SITE.AUTHOR,
+      },
+      publisher: {
+        "@type": "Person",
+        name: SITE.AUTHOR,
+      },
+      mainEntityOfPage: postUrl,
+      url: postUrl,
+      keywords: (post.data.tags || []).join(", "),
+      inLanguage: "en",
+    },
+  ]}
+>
   <Container>
     <div class="animate">
       <BackToPrevious href="/blog">Back to blog</BackToPrevious>

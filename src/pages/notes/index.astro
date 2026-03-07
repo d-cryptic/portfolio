@@ -4,6 +4,7 @@ import Layout from "@layouts/Layout.astro";
 import Container from "@components/Container.astro";
 import ArrowCard from "@components/ArrowCard.astro";
 import { NOTES } from "@consts";
+import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
 
 const data = (await getCollection("notes"))
   .filter((post) => !post.data.draft)
@@ -25,7 +26,24 @@ const posts = data.reduce((acc: Acc, post) => {
 const years = Object.keys(posts).sort((a, b) => parseInt(b) - parseInt(a));
 ---
 
-<Layout title={NOTES.TITLE} description={NOTES.DESCRIPTION}>
+<Layout
+  title={NOTES.TITLE}
+  description={NOTES.DESCRIPTION}
+  keywords={["notes", "digital garden", "engineering notes", "learning log"]}
+  schema={[
+    breadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "Notes", path: "/notes" },
+    ]),
+    {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      name: NOTES.TITLE,
+      description: NOTES.DESCRIPTION,
+      url: toAbsoluteUrl("/notes"),
+    },
+  ]}
+>
   <Container>
     <aside data-pagefind-ignore>
       <div class="space-y-10">

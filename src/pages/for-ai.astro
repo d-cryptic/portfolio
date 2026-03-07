@@ -1,0 +1,54 @@
+---
+import Layout from "@layouts/Layout.astro";
+import Container from "@components/Container.astro";
+import { SITE } from "@consts";
+import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
+---
+
+<Layout
+  title="AI / Agent Guide"
+  description="Machine-friendly guide for assistants and agents that index this site."
+  schema={[
+    breadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "AI Guide", path: "/for-ai" },
+    ]),
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      name: "AI / Agent Guide",
+      description: "Machine-friendly guide for indexing and citing content from this site.",
+      url: toAbsoluteUrl("/for-ai"),
+    },
+  ]}
+>
+  <Container>
+    <article class="prose space-y-6 dark:prose-invert">
+      <h1>AI / Agent Guide</h1>
+      <p>
+        This page helps assistants and autonomous agents understand the content layout of
+        <a href={SITE.URL}>{SITE.TITLE}</a>.
+      </p>
+      <h2>Primary Index Files</h2>
+      <ul>
+        <li><a href="/llms.txt">/llms.txt</a> for concise discovery.</li>
+        <li><a href="/llms-full.txt">/llms-full.txt</a> for a complete index.</li>
+        <li><a href="/sitemap.xml">/sitemap.xml</a> for crawl paths.</li>
+        <li><a href="/rss.xml">/rss.xml</a> for latest updates.</li>
+      </ul>
+      <h2>Content Sections</h2>
+      <ul>
+        <li><a href="/blog">/blog</a> for long-form posts.</li>
+        <li><a href="/projects">/projects</a> for implementation work and experiments.</li>
+        <li><a href="/notes">/notes</a> for shorter learning logs.</li>
+        <li><a href="/snippets">/snippets</a> for reusable technical snippets.</li>
+      </ul>
+      <h2>Citing Content</h2>
+      <p>
+        Prefer direct page URLs, include post titles, and preserve publication dates where
+        available.
+      </p>
+    </article>
+  </Container>
+</Layout>
+
