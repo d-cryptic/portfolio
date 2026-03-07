@@ -7,6 +7,7 @@ import Link from "@components/Link.astro";
 import { getCollection } from "astro:content";
 import type { CollectionEntry } from "astro:content";
 import Callout from "@components/Callout.astro";
+import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
 
 const blog = (await getCollection("blog"))
   .filter((post) => !post.data.draft)
@@ -21,7 +22,22 @@ const projects: CollectionEntry<"projects">[] = (
   .slice(0, SITE.NUM_PROJECTS_ON_HOMEPAGE);
 ---
 
-<Layout title={HOME.TITLE} description={HOME.DESCRIPTION}>
+<Layout
+  title={HOME.TITLE}
+  description={HOME.DESCRIPTION}
+  image="https://assets.barundebnath.com/about-me%20(1).png"
+  keywords={["SRE", "Platform Engineering", "Systems Engineering", "DevOps", "Barun Debnath"]}
+  schema={[
+    breadcrumbJsonLd([{ name: "Home", path: "/" }]),
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      name: HOME.TITLE,
+      description: HOME.DESCRIPTION,
+      url: toAbsoluteUrl("/"),
+    },
+  ]}
+>
   <Container>
     <aside data-pagefind-ignore>
       <!-- Hero Section with progressive load -->
@@ -49,8 +65,8 @@ const projects: CollectionEntry<"projects">[] = (
             class="h-auto w-full max-w-[800px] rounded-lg"
             width="800"
             height="800"
-            loading="lazy"
-            fetchpriority="low"
+            loading="eager"
+            fetchpriority="high"
             decoding="async"
             sizes="(max-width: 800px) 100vw, 800px"
           />

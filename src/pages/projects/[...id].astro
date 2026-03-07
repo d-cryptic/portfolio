@@ -7,6 +7,8 @@ import { readingTime } from "@lib/utils";
 import BackToPrevious from "@components/BackToPrevious.astro";
 import Link from "@components/Link.astro";
 import TableOfContents from "@components/TableOfContents.astro";
+import { SITE } from "@consts";
+import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
 
 export async function getStaticPaths() {
   const projects = (await getCollection("projects"))
@@ -21,9 +23,40 @@ type Props = CollectionEntry<"projects">;
 
 const project = Astro.props;
 const { Content, headings } = await render(project);
+const projectPath = `/projects/${project.id}`;
+const projectUrl = toAbsoluteUrl(projectPath);
 ---
 
-<Layout title={project.data.title} description={project.data.description}>
+<Layout
+  title={project.data.title}
+  description={project.data.description}
+  ogType="article"
+  publishedTime={project.data.date}
+  modifiedTime={project.data.date}
+  keywords={project.data.tags || ["projects", "engineering"]}
+  schema={[
+    breadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "Projects", path: "/projects" },
+      { name: project.data.title, path: projectPath },
+    ]),
+    {
+      "@context": "https://schema.org",
+      "@type": "CreativeWork",
+      name: project.data.title,
+      description: project.data.description,
+      datePublished: project.data.date,
+      dateModified: project.data.date,
+      author: {
+        "@type": "Person",
+        name: SITE.AUTHOR,
+      },
+      url: projectUrl,
+      mainEntityOfPage: projectUrl,
+      codeRepository: project.data.repoURL || undefined,
+    },
+  ]}
+>
   <Container>
     <div class="animate">
       <BackToPrevious href="/projects">Back to projects</BackToPrevious>

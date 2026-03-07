@@ -7,6 +7,8 @@ import { readingTime } from "@lib/utils";
 import BackToPrevious from "@components/BackToPrevious.astro";
 import PostNavigation from "@components/PostNavigation.astro";
 import TableOfContents from "@components/TableOfContents.astro";
+import { SITE } from "@consts";
+import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
 // import Giscus from "@components/Giscus.astro";
 
 export async function getStaticPaths() {
@@ -49,9 +51,40 @@ const prevNote = getPrevNote();
 
 const note = Astro.props;
 const { Content, headings } = await render(note);
+const notePath = `/notes/${note.id}`;
+const noteUrl = toAbsoluteUrl(notePath);
 ---
 
-<Layout title={note.data.title} description={note.data.description}>
+<Layout
+  title={note.data.title}
+  description={note.data.description}
+  ogType="article"
+  publishedTime={note.data.date}
+  modifiedTime={note.data.date}
+  keywords={note.data.tags || ["notes", "digital garden"]}
+  schema={[
+    breadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "Notes", path: "/notes" },
+      { name: note.data.title, path: notePath },
+    ]),
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline: note.data.title,
+      description: note.data.description,
+      datePublished: note.data.date,
+      dateModified: note.data.date,
+      author: {
+        "@type": "Person",
+        name: SITE.AUTHOR,
+      },
+      mainEntityOfPage: noteUrl,
+      url: noteUrl,
+      inLanguage: "en",
+    },
+  ]}
+>
   <Container>
     <div class="animate">
       <BackToPrevious href="/notes">Back to notes</BackToPrevious>

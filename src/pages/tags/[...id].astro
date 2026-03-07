@@ -4,6 +4,7 @@ import Layout from "@layouts/Layout.astro";
 import Container from "@components/Container.astro";
 import ArrowCard from "@components/ArrowCard.astro";
 import BackToPrevious from "@components/BackToPrevious.astro";
+import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
 
 export async function getStaticPaths() {
   const posts = await getCollection("blog", ({ data }) => !data.draft);
@@ -29,7 +30,25 @@ const sortedPosts = posts.sort(
 );
 ---
 
-<Layout title={`Tag: ${id}`} description={`Posts with the tag: ${id}`}>
+<Layout
+  title={`Tag: ${id}`}
+  description={`Posts with the tag: ${id}`}
+  keywords={["tag archive", id]}
+  schema={[
+    breadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "Tags", path: "/tags" },
+      { name: id || "Tag", path: `/tags/${id}` },
+    ]),
+    {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      name: `Posts tagged ${id}`,
+      description: `Posts with the tag: ${id}`,
+      url: toAbsoluteUrl(`/tags/${id}`),
+    },
+  ]}
+>
   <Container>
     <div class="space-y-10" data-pagefind-ignore>
       <BackToPrevious href="/tags"> All tags </BackToPrevious>
