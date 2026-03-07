@@ -10,6 +10,9 @@ import { remarkD2 } from "./src/plugins/remark-d2.js";
 export default defineConfig({
   site: "https://barundebnath.com",
   trailingSlash: "never",
+  image: {
+    domains: ["assets.barundebnath.com"],
+  },
   integrations: [
     mermaid({
       theme: "default",

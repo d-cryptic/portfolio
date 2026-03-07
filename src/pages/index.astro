@@ -2,6 +2,7 @@
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/Container.astro";
 import { SITE, HOME, SOCIALS } from "@consts";
+import { Image } from "astro:assets";
 import ArrowCard from "@components/ArrowCard.astro";
 import Link from "@components/Link.astro";
 import { getCollection } from "astro:content";
@@ -59,16 +60,17 @@ const projects: CollectionEntry<"projects">[] = (
           </p>
         </div>
         <div class="flex w-full justify-center">
-          <img
+          <Image
             src="https://assets.barundebnath.com/about-me%20(1).png"
             alt="Ninja coding on laptop - Barun's digital avatar"
             class="h-auto w-full max-w-[800px] rounded-lg"
-            width="800"
-            height="800"
+            width={800}
+            height={800}
             loading="eager"
             fetchpriority="high"
             decoding="async"
             sizes="(max-width: 800px) 100vw, 800px"
+            format="webp"
           />
         </div>
       </div>

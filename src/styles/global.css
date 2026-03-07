@@ -83,7 +83,13 @@
 
   /* Link animations */
   a {
-    @apply relative inline-block transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)];
+    @apply relative inline-block;
+    transition:
+      color 0.3s ease,
+      background-color 0.3s ease,
+      border-color 0.3s ease,
+      opacity 0.3s ease,
+      transform 0.3s ease;
     text-decoration: none;
   }
 
@@ -111,7 +117,11 @@
 
   /* Icon animations */
   svg {
-    @apply transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)];
+    transition:
+      transform 0.3s ease,
+      opacity 0.3s ease,
+      fill 0.3s ease,
+      stroke 0.3s ease;
   }
 
   button:hover svg,

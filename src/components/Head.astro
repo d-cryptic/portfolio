@@ -4,13 +4,9 @@ import { SITE } from "@consts";
 import { toAbsoluteUrl } from "@lib/seo";
 
 import "@fontsource/recursive/400.css";
-import "@fontsource/recursive/500.css";
 import "@fontsource/recursive/600.css";
-import "@fontsource/recursive/700.css";
 import "@fontsource/ibm-plex-mono/400.css";
-import "@fontsource/ibm-plex-mono/500.css";
 import "@fontsource/ibm-plex-mono/600.css";
-import "@fontsource/ibm-plex-mono/700.css";
 
 interface Props {
   title: string;
@@ -101,7 +97,13 @@ const jsonLd = Array.isArray(schema) ? schema : schema ? [schema] : [];
 <meta property="twitter:creator" content={SITE.X_HANDLE} />
 
 <!-- PageFind -->
-<link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
+<link
+  rel="preload"
+  href="/pagefind/pagefind-ui.css"
+  as="style"
+  onload="this.onload=null;this.rel='stylesheet'"
+/>
+<noscript><link href="/pagefind/pagefind-ui.css" rel="stylesheet" /></noscript>
 
 {
   jsonLd.map((entry) => (
@@ -110,6 +112,8 @@ const jsonLd = Array.isArray(schema) ? schema : schema ? [schema] : [];
 }
 
 <script is:inline>
+  const hasWindow = typeof window !== "undefined";
+
   function init() {
     preloadTheme();
     onScroll();
@@ -153,7 +157,10 @@ const jsonLd = Array.isArray(schema) ? schema : schema ? [schema] : [];
         }
       });
 
-    document.addEventListener("scroll", onScroll);
+    if (hasWindow && !window.__siteGlobalListenersBound) {
+      document.addEventListener("scroll", onScroll);
+      window.__siteGlobalListenersBound = true;
+    }
   }
 
   function updateThemeButtons() {
@@ -266,6 +273,10 @@ const jsonLd = Array.isArray(schema) ? schema : schema ? [schema] : [];
     }
 
     for (let codeBlock of codeBlocks) {
+      if (codeBlock.dataset.copyCodeReady === "true") {
+        continue;
+      }
+
       const wrapper = document.createElement("div");
       wrapper.style.position = "relative";
 
@@ -274,6 +285,7 @@ const jsonLd = Array.isArray(schema) ? schema : schema ? [schema] : [];
       copyButton.classList = "copy-code";
 
       codeBlock.setAttribute("tabindex", "0");
+      codeBlock.dataset.copyCodeReady = "true";
       codeBlock.appendChild(copyButton);
 
       codeBlock.parentNode.insertBefore(wrapper, codeBlock);
