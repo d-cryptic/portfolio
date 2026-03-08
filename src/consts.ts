@@ -50,6 +50,24 @@ export const NOW: Metadata = {
     "A living snapshot of what I am focused on, shipping, learning, and exploring right now.",
 };
 
+export const OOF: Metadata = {
+  TITLE: "OOF",
+  DESCRIPTION:
+    "Non-work updates covering hobbies, side interests, travel, and current media.",
+};
+
+export const WINS: Metadata = {
+  TITLE: "Wins",
+  DESCRIPTION:
+    "A running list of wins since the last update and upcoming events.",
+};
+
+export const USES: Metadata = {
+  TITLE: "Uses",
+  DESCRIPTION:
+    "A focused look at the tooling setup I use across development and workflows.",
+};
+
 export const SOCIALS: Socials = [
   { NAME: "X (formerly Twitter)", HREF: "https://x.com/barundebnath" },
   { NAME: "GitHub", HREF: "https://github.com/d-cryptic" },

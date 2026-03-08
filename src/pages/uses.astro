@@ -1,0 +1,48 @@
+---
+import Container from "@components/Container.astro";
+import Layout from "@layouts/Layout.astro";
+import { USES } from "@consts";
+import { usesPageData } from "@data/personal-pages";
+import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
+---
+
+<Layout
+  title={USES.TITLE}
+  description={USES.DESCRIPTION}
+  keywords={[
+    "Uses",
+    "Tooling setup",
+    "Developer tools",
+    "Productivity setup",
+    "Barun Debnath",
+  ]}
+  schema={[
+    breadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "Uses", path: "/uses" },
+    ]),
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      name: USES.TITLE,
+      description: USES.DESCRIPTION,
+      url: toAbsoluteUrl("/uses"),
+    },
+  ]}
+>
+  <Container>
+    <section class="space-y-6">
+      <div class="space-y-3">
+        <h1 class="font-semibold text-black dark:text-white">uses</h1>
+        <p class="text-black/80 dark:text-white/80">{usesPageData.intro}</p>
+      </div>
+
+      <article class="rounded-lg border border-black/15 p-4 dark:border-white/20">
+        <h2 class="m-0 font-semibold text-black dark:text-white">Tooling Setup</h2>
+        <ul class="mt-3 mb-0 list-disc space-y-2 pl-5">
+          {usesPageData.toolingSetup.map((item) => <li>{item}</li>)}
+        </ul>
+      </article>
+    </section>
+  </Container>
+</Layout>

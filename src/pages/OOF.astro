@@ -1,0 +1,64 @@
+---
+import Container from "@components/Container.astro";
+import Layout from "@layouts/Layout.astro";
+import { OOF as OOF_META } from "@consts";
+import { oofPageData } from "@data/personal-pages";
+import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
+---
+
+<Layout
+  title={OOF_META.TITLE}
+  description={OOF_META.DESCRIPTION}
+  keywords={[
+    "Non-work updates",
+    "Hobbies",
+    "Travel",
+    "Reading watching listening",
+    "Barun Debnath",
+  ]}
+  schema={[
+    breadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "OOF", path: "/OOF" },
+    ]),
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      name: OOF_META.TITLE,
+      description: OOF_META.DESCRIPTION,
+      url: toAbsoluteUrl("/OOF"),
+    },
+  ]}
+>
+  <Container>
+    <section class="space-y-6">
+      <div class="space-y-3">
+        <h1 class="font-semibold text-black dark:text-white">OOF</h1>
+        <p class="text-black/80 dark:text-white/80">{oofPageData.intro}</p>
+      </div>
+
+      <article class="rounded-lg border border-black/15 p-4 dark:border-white/20">
+        <h2 class="m-0 font-semibold text-black dark:text-white">
+          Non-work updates: hobbies, family, side interests
+        </h2>
+        <ul class="mt-3 mb-0 list-disc space-y-2 pl-5">
+          {oofPageData.nonWorkUpdates.map((item) => <li>{item}</li>)}
+        </ul>
+      </article>
+
+      <article class="rounded-lg border border-black/15 p-4 dark:border-white/20">
+        <h2 class="m-0 font-semibold text-black dark:text-white">Travel</h2>
+        <ul class="mt-3 mb-0 list-disc space-y-2 pl-5">
+          {oofPageData.travel.map((item) => <li>{item}</li>)}
+        </ul>
+      </article>
+
+      <article class="rounded-lg border border-black/15 p-4 dark:border-white/20">
+        <h2 class="m-0 font-semibold text-black dark:text-white">Reading / Watching / Listening</h2>
+        <ul class="mt-3 mb-0 list-disc space-y-2 pl-5">
+          {oofPageData.readingWatchingListening.map((item) => <li>{item}</li>)}
+        </ul>
+      </article>
+    </section>
+  </Container>
+</Layout>

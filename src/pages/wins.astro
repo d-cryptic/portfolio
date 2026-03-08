@@ -1,0 +1,58 @@
+---
+import Container from "@components/Container.astro";
+import Layout from "@layouts/Layout.astro";
+import { WINS } from "@consts";
+import { winsPageData } from "@data/personal-pages";
+import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
+---
+
+<Layout
+  title={WINS.TITLE}
+  description={WINS.DESCRIPTION}
+  keywords={[
+    "Wins",
+    "Wins since last update",
+    "Upcoming events",
+    "Conferences",
+    "Meetups",
+    "Barun Debnath",
+  ]}
+  schema={[
+    breadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "Wins", path: "/wins" },
+    ]),
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      name: WINS.TITLE,
+      description: WINS.DESCRIPTION,
+      url: toAbsoluteUrl("/wins"),
+    },
+  ]}
+>
+  <Container>
+    <section class="space-y-6">
+      <div class="space-y-3">
+        <h1 class="font-semibold text-black dark:text-white">wins</h1>
+        <p class="text-black/80 dark:text-white/80">{winsPageData.intro}</p>
+      </div>
+
+      <article class="rounded-lg border border-black/15 p-4 dark:border-white/20">
+        <h2 class="m-0 font-semibold text-black dark:text-white">Wins Since Last Update</h2>
+        <ul class="mt-3 mb-0 list-disc space-y-2 pl-5">
+          {winsPageData.winsSinceLastUpdate.map((item) => <li>{item}</li>)}
+        </ul>
+      </article>
+
+      <article class="rounded-lg border border-black/15 p-4 dark:border-white/20">
+        <h2 class="m-0 font-semibold text-black dark:text-white">
+          Events: upcoming conferences, meetups, or trips
+        </h2>
+        <ul class="mt-3 mb-0 list-disc space-y-2 pl-5">
+          {winsPageData.events.map((item) => <li>{item}</li>)}
+        </ul>
+      </article>
+    </section>
+  </Container>
+</Layout>
