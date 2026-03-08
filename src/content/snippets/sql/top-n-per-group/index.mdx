@@ -1,0 +1,27 @@
+---
+title: SQL top N per group
+description: Generic window-function pattern for top-N per group queries.
+date: 2026-03-08
+updatedAt: 2026-03-08
+tags: [sql, analytics]
+stack: [sql, clickhouse]
+roles: [data]
+outcomes: [data]
+language: sql
+maturity: evergreen
+relatedNotes:
+  - reliability-checklist
+---
+
+```sql
+SELECT *
+FROM (
+  SELECT
+    team,
+    player,
+    score,
+    ROW_NUMBER() OVER (PARTITION BY team ORDER BY score DESC) AS rank_in_team
+  FROM scores
+)
+WHERE rank_in_team <= 3;
+```

@@ -1,0 +1,29 @@
+---
+title: Digital garden workflow
+description: Lightweight workflow for keeping notes and snippets connected.
+date: 2026-03-08
+updatedAt: 2026-03-08
+tags: [notes, workflow, knowledge]
+stack: [astro, markdown]
+roles: [sre]
+outcomes: [documentation]
+maturity: growing
+relatedSnippets:
+  - shell/git-changed-files
+changelog:
+  - date: 2026-03-08
+    summary: Added first pass structure and linking conventions.
+---
+
+# Workflow
+
+Keep each note short and link outward.
+
+## Linking rules
+
+- Use wikilinks like [[notes/reliability-checklist]].
+- Link snippets when there is executable context: [[snippets/shell/git-changed-files]].
+
+## Review
+
+Run the local link checker before builds.

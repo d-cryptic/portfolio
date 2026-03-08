@@ -1,0 +1,49 @@
+<svg width="960" height="720" viewBox="0 0 960 720" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Confused robot looking at a broken 404 monitor">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="960" y2="720" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#EDF7F3"/>
+      <stop offset="1" stop-color="#DCEBE5"/>
+    </linearGradient>
+    <linearGradient id="screen" x1="200" y1="120" x2="760" y2="500" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2D3533"/>
+      <stop offset="1" stop-color="#1E2523"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="960" height="720" rx="36" fill="url(#bg)"/>
+
+  <ellipse cx="480" cy="620" rx="290" ry="44" fill="#B9D1C7" fill-opacity="0.55"/>
+
+  <rect x="230" y="90" width="500" height="360" rx="26" fill="#F6FCFA" stroke="#8FB4A6" stroke-width="8"/>
+  <rect x="264" y="124" width="432" height="250" rx="16" fill="url(#screen)"/>
+  <rect x="420" y="450" width="120" height="38" rx="14" fill="#8FB4A6"/>
+  <rect x="350" y="488" width="260" height="22" rx="10" fill="#7AA695"/>
+
+  <text x="300" y="194" fill="#7AD7F0" font-size="42" font-family="'IBM Plex Mono', monospace" font-weight="700">ERROR 404</text>
+  <text x="300" y="244" fill="#D7EFE7" font-size="22" font-family="'IBM Plex Mono', monospace">page.exe stopped responding</text>
+  <text x="300" y="284" fill="#9CC9BA" font-size="20" font-family="'IBM Plex Mono', monospace">reason: caffeine dependency missing</text>
+  <text x="300" y="324" fill="#9CC9BA" font-size="20" font-family="'IBM Plex Mono', monospace">attempting dramatic recovery...</text>
+
+  <circle cx="256" cy="126" r="8" fill="#FF8DA1"/>
+  <circle cx="280" cy="126" r="8" fill="#FFE55C"/>
+  <circle cx="304" cy="126" r="8" fill="#7AD7F0"/>
+
+  <g transform="translate(315 504)">
+    <rect x="0" y="0" width="330" height="150" rx="38" fill="#7AA695"/>
+    <rect x="18" y="16" width="294" height="118" rx="30" fill="#D6EAE3"/>
+
+    <circle cx="96" cy="74" r="31" fill="#2E4942"/>
+    <circle cx="234" cy="74" r="31" fill="#2E4942"/>
+    <circle cx="96" cy="74" r="15" fill="#9EF0D7"/>
+    <circle cx="234" cy="74" r="15" fill="#9EF0D7"/>
+
+    <path d="M105 108C132 127 198 127 225 108" stroke="#2E4942" stroke-width="10" stroke-linecap="round"/>
+    <rect x="150" y="42" width="30" height="50" rx="14" fill="#2E4942"/>
+    <circle cx="165" cy="26" r="12" fill="#FF8DA1"/>
+  </g>
+
+  <path d="M176 176L124 132" stroke="#7AA695" stroke-width="8" stroke-linecap="round"/>
+  <path d="M152 246L86 246" stroke="#7AA695" stroke-width="8" stroke-linecap="round"/>
+  <path d="M782 168L836 130" stroke="#7AA695" stroke-width="8" stroke-linecap="round"/>
+  <path d="M808 246L874 246" stroke="#7AA695" stroke-width="8" stroke-linecap="round"/>
+</svg>

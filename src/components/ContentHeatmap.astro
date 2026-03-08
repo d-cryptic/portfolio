@@ -1,0 +1,57 @@
+---
+type HeatmapEntry = {
+  date: Date;
+};
+
+const { entries, title = "Activity" } = Astro.props as {
+  entries: HeatmapEntry[];
+  title?: string;
+};
+
+const normalized = entries
+  .map((entry) => entry.date)
+  .filter((date): date is Date => date instanceof Date && !Number.isNaN(date.valueOf()));
+
+const counts = new Map<string, number>();
+for (const date of normalized) {
+  const key = date.toISOString().slice(0, 10);
+  counts.set(key, (counts.get(key) ?? 0) + 1);
+}
+
+const days = Array.from({ length: 84 }).map((_, index) => {
+  const date = new Date();
+  date.setDate(date.getDate() - (83 - index));
+  return date;
+});
+
+const maxCount = Math.max(...counts.values(), 1);
+
+const intensity = (count: number): string => {
+  if (count <= 0) return "bg-black/5 dark:bg-white/10";
+  if (count / maxCount < 0.34) return "bg-[var(--color-primary)]/30";
+  if (count / maxCount < 0.67) return "bg-[var(--color-primary)]/55";
+  return "bg-[var(--color-primary)]";
+};
+---
+
+<section class="rounded-lg border border-black/15 p-4 dark:border-white/20" data-pagefind-ignore>
+  <div class="mb-3 flex items-center justify-between gap-3">
+    <h2 class="m-0 text-sm font-semibold text-black dark:text-white">{title}</h2>
+    <p class="m-0 text-xs text-black/65 dark:text-white/65">Last 12 weeks</p>
+  </div>
+  <div class="grid grid-cols-12 gap-1">
+    {
+      days.map((day) => {
+        const key = day.toISOString().slice(0, 10);
+        const count = counts.get(key) ?? 0;
+        return (
+          <div
+            class={`h-4 rounded-sm ${intensity(count)}`}
+            title={`${key}: ${count} update${count === 1 ? "" : "s"}`}
+            aria-label={`${key}: ${count} update${count === 1 ? "" : "s"}`}
+          />
+        );
+      })
+    }
+  </div>
+</section>

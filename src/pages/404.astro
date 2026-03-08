@@ -1,19 +1,302 @@
 ---
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/Container.astro";
-import BackToPrevious from "@components/BackToPrevious.astro";
 import { SITE } from "@consts";
+
+const memeLines = [
+  "You found the secret page. The secret is: there is no page.",
+  "This URL was promoted to production before QA arrived.",
+  "404 means the page rage-quit and took the docs with it.",
+  "The page is in another deploy. Try again after snacks.",
+  "Congratulations. You clicked faster than my routing table.",
+  "Looks like this link trusted me. That was brave.",
+  "I checked the logs. They checked out emotionally.",
+];
 ---
 
 <Layout title="404" description={SITE.DESCRIPTION} noindex={true}>
   <Container>
-    <div class="mt-16 grid place-items-center gap-3">
-      <h4 class="animate text-2xl font-semibold text-black dark:text-white">
-        404: Page not found
-      </h4>
-      <span class="animate">
-        <BackToPrevious href="/">Go to home page</BackToPrevious>
-      </span>
-    </div>
+    <section class="not-found-shell" aria-live="polite">
+      <article class="meme-404">
+        <div class="meme-media">
+          <img
+            src="https://camo.githubusercontent.com/38e265a63ceeb65a5a4e26a251570104667a03a0134cac92c69083d7a5068549/68747470733a2f2f692e70696e696d672e636f6d2f6f726967696e616c732f30342f39302f32372f30343930323730313132653661663430393662626239313261316163623734372e6a7067"
+            width="480"
+            height="360"
+            alt="Funny 404 meme image"
+            loading="eager"
+            decoding="async"
+          />
+        </div>
+
+        <div class="meme-copy">
+          <p class="status-chip">Error 404</p>
+
+          <h1 class="mt-3 text-3xl font-bold text-black dark:text-white md:text-5xl">
+            This page took an unscheduled coffee break.
+          </h1>
+
+          <p id="meme-line" class="mt-4 text-base leading-relaxed text-black/75 dark:text-white/75">
+            {memeLines[0]}
+          </p>
+
+          <div class="meter mt-6">
+            <div class="flex items-center justify-between gap-3">
+              <span class="text-sm font-medium">Panic level</span>
+              <span id="panic-label" class="text-sm font-semibold">1 / 10</span>
+            </div>
+            <div class="mt-2 h-2 w-full overflow-hidden rounded-full bg-black/10 dark:bg-white/15">
+              <div id="panic-bar" class="h-full w-[10%] rounded-full bg-[var(--color-primary)] transition-all duration-300"></div>
+            </div>
+          </div>
+
+          <div class="actions mt-6">
+            <button
+              id="next-joke"
+              type="button"
+              class="rounded-lg border border-black/15 px-4 py-2 text-sm font-semibold transition hover:-translate-y-0.5 hover:bg-black/5 dark:border-white/25 dark:hover:bg-white/10"
+            >
+              Next excuse
+            </button>
+
+            <button
+              id="panic-btn"
+              type="button"
+              class="rounded-lg border border-black/15 px-4 py-2 text-sm font-semibold transition hover:-translate-y-0.5 hover:bg-black/5 dark:border-white/25 dark:hover:bg-white/10"
+            >
+              Increase panic
+            </button>
+
+            <button
+              id="home-link"
+              type="button"
+              class="home-link rounded-lg bg-[var(--color-primary)] px-4 py-2 text-sm font-semibold transition hover:opacity-90"
+              aria-label="Take me home"
+            >
+              <span class="home-link-label">Take me home</span>
+            </button>
+          </div>
+
+          <p id="home-hint" class="mt-3 text-sm text-black/60 dark:text-white/60">
+            Tip: the home button is shy. Hover it a few times.
+          </p>
+        </div>
+      </article>
+    </section>
   </Container>
 </Layout>
+
+<script is:inline define:vars={{ memeLines }}>
+  const lineNode = document.getElementById("meme-line");
+  const nextJokeButton = document.getElementById("next-joke");
+  const panicButton = document.getElementById("panic-btn");
+  const panicBar = document.getElementById("panic-bar");
+  const panicLabel = document.getElementById("panic-label");
+  const homeLink = document.getElementById("home-link");
+  const homeHint = document.getElementById("home-hint");
+
+  let panic = 1;
+  let dodgeCount = 0;
+  let lineIndex = 0;
+  let homeUnlocked = false;
+
+  const renderPanic = () => {
+    const nextPanic = Math.min(Math.max(panic, 1), 10);
+    if (panicLabel instanceof HTMLElement) panicLabel.textContent = `${nextPanic} / 10`;
+    if (panicBar instanceof HTMLElement) panicBar.style.width = `${nextPanic * 10}%`;
+  };
+
+  const showNextLine = () => {
+    lineIndex = (lineIndex + 1) % memeLines.length;
+    if (lineNode instanceof HTMLElement) {
+      lineNode.textContent = memeLines[lineIndex];
+    }
+  };
+
+  nextJokeButton?.addEventListener("click", showNextLine);
+
+  panicButton?.addEventListener("click", () => {
+    panic = panic >= 10 ? 1 : panic + 1;
+    renderPanic();
+    if (panic === 10 && lineNode instanceof HTMLElement) {
+      lineNode.textContent = "Maximum panic reached. Opening incident channel: snacks.";
+    }
+  });
+
+  const dodgeHome = () => {
+    if (!(homeLink instanceof HTMLElement)) return;
+    if (window.matchMedia("(hover: none)").matches) {
+      if (homeHint instanceof HTMLElement) {
+        homeHint.textContent = "On touch screens, the button behaves normally. You can tap it.";
+      }
+      return;
+    }
+
+    dodgeCount += 1;
+
+    if (dodgeCount > 2) {
+      if (homeHint instanceof HTMLElement) {
+        homeHint.textContent = "You won. Home button unlocked.";
+      }
+      homeLink.style.transform = "translate(0, 0)";
+      homeUnlocked = true;
+      return;
+    }
+
+    const x = Math.floor(Math.random() * 32) - 16;
+    const y = Math.floor(Math.random() * 18) - 9;
+    homeLink.style.transform = `translate(${x}px, ${y}px)`;
+    if (homeHint instanceof HTMLElement) {
+      homeHint.textContent = "Still running. Keep trying.";
+    }
+  };
+
+  homeLink?.addEventListener("mouseenter", () => {
+    if (homeUnlocked) return;
+    dodgeHome();
+  });
+  homeLink?.addEventListener("click", () => {
+    window.location.href = "/";
+  });
+
+  renderPanic();
+</script>
+
+<style>
+  .not-found-shell {
+    min-height: calc(100vh - 12rem);
+    display: grid;
+    place-items: center;
+    padding-block: 1.25rem;
+  }
+
+  .meme-404 {
+    width: 100%;
+    max-width: 58rem;
+    display: grid;
+    gap: 1.15rem;
+    border: 1px solid color-mix(in srgb, var(--color-text) 16%, transparent);
+    border-radius: 1.2rem;
+    padding: 1.1rem;
+    background: color-mix(in srgb, var(--color-background) 96%, white);
+    box-shadow: 0 14px 42px -28px color-mix(in srgb, var(--color-text) 65%, transparent);
+  }
+
+  .meme-media {
+    overflow: hidden;
+    border-radius: 0.9rem;
+    border: 1px solid color-mix(in srgb, var(--color-text) 20%, transparent);
+    background: color-mix(in srgb, var(--color-background) 75%, white);
+    padding: 0.45rem;
+    align-self: start;
+  }
+
+  .meme-media img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    object-position: top center;
+    border-radius: 0.7rem;
+  }
+
+  .meme-copy {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.2rem;
+  }
+
+  .meter {
+    border-radius: 0.8rem;
+    border: 1px solid color-mix(in srgb, var(--color-text) 20%, transparent);
+    background: color-mix(in srgb, var(--color-background) 92%, white);
+    padding: 0.8rem 0.85rem;
+  }
+
+  .status-chip {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.28rem 0.72rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border: 1px solid color-mix(in srgb, var(--color-text) 24%, transparent);
+    background: color-mix(in srgb, var(--color-primary) 14%, transparent);
+    color: color-mix(in srgb, var(--color-text) 90%, black);
+    width: fit-content;
+  }
+
+  .actions {
+    display: grid;
+    gap: 0.55rem;
+    grid-template-columns: 1fr;
+    align-items: center;
+  }
+
+  .actions > * {
+    text-align: center;
+    justify-content: center;
+  }
+
+  .home-link {
+    border: 0;
+    cursor: pointer;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 2.5rem;
+    background-color: var(--color-primary);
+    color: #ffffff;
+    font-weight: 700;
+    will-change: transform;
+  }
+
+  .home-link-label {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff;
+    line-height: 1;
+    white-space: nowrap;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  .dark .home-link {
+    color: #1c1f2e;
+  }
+
+  .dark .home-link-label {
+    color: #1c1f2e !important;
+    -webkit-text-fill-color: #1c1f2e;
+  }
+
+  @media (min-width: 640px) {
+    .meme-404 {
+      padding: 1.35rem;
+      gap: 1.5rem;
+    }
+
+    .actions {
+      grid-template-columns: repeat(3, max-content);
+      justify-content: flex-start;
+    }
+
+    .actions > * {
+      text-align: left;
+      justify-content: initial;
+    }
+  }
+
+  @media (min-width: 960px) {
+    .meme-404 {
+      grid-template-columns: minmax(280px, 42%) minmax(0, 1fr);
+      align-items: center;
+      padding: 1.75rem;
+      gap: 2rem;
+    }
+  }
+</style>

@@ -1,0 +1,625 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "@layouts/Layout.astro";
+import { buildLinkGraph } from "@lib/content-links";
+import { shouldIncludeDraftContent } from "@lib/content-visibility";
+import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
+
+const notes = (await getCollection("notes")).filter((entry) => shouldIncludeDraftContent(entry.data.draft));
+const snippets = (await getCollection("snippets")).filter((entry) => shouldIncludeDraftContent(entry.data.draft));
+
+const graph = buildLinkGraph([...notes, ...snippets]);
+
+const width = 2200;
+const height = 1300;
+const centerX = width / 2;
+const centerY = height / 2;
+const showLabelsByDefault = graph.nodes.length <= 22;
+
+const sortedNodes = [...graph.nodes].sort((a, b) => a.title.localeCompare(b.title));
+
+const nodePositions = sortedNodes.map((node, index) => {
+  const angle = (index / Math.max(sortedNodes.length, 1)) * Math.PI * 2;
+  const ringRadius = Math.min(width, height) * 0.12 + ((index % 11) * 8);
+  return {
+    ...node,
+    x: centerX + Math.cos(angle) * ringRadius,
+    y: centerY + Math.sin(angle) * ringRadius,
+  };
+});
+
+const lineEdges = graph.edges
+  .map((edge) => {
+    const source = nodePositions.find((node) => node.id === edge.from);
+    const target = nodePositions.find((node) => node.id === edge.to);
+    if (!source || !target) return null;
+    return {
+      from: edge.from,
+      to: edge.to,
+      fromCollection: source.collection,
+      toCollection: target.collection,
+    };
+  })
+  .filter(
+    (edge): edge is { from: string; to: string; fromCollection: "notes" | "snippets"; toCollection: "notes" | "snippets" } =>
+      Boolean(edge),
+  );
+---
+
+<Layout
+  title="Knowledge Graph"
+  description="Global graph across notes and snippets"
+  schema={[
+    breadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "Knowledge Graph", path: "/knowledge-graph" },
+    ]),
+    {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      name: "Knowledge Graph",
+      description: "Global graph across notes and snippets",
+      url: toAbsoluteUrl("/knowledge-graph"),
+    },
+  ]}
+>
+  <section
+    class="relative h-[100dvh] min-h-[100dvh] w-full overflow-hidden"
+    data-graph-canvas
+    tabindex="0"
+    role="region"
+    aria-label="Interactive knowledge graph canvas"
+  >
+    <div class="pointer-events-none absolute inset-0 bg-[#080b12]"></div>
+    <div class="pointer-events-none absolute inset-0 opacity-30 [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.12)_1px,transparent_0)] [background-size:18px_18px]"></div>
+    <div class="absolute top-4 left-4 z-20 space-y-2 rounded-md bg-[var(--color-background)]/82 p-2 text-xs backdrop-blur-sm">
+      <div class="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          data-filter="notes"
+          aria-pressed="true"
+          class="rounded-sm border border-black/20 px-2 py-1 transition-colors hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/5"
+        >
+          Notes
+        </button>
+        <button
+          type="button"
+          data-filter="snippets"
+          aria-pressed="true"
+          class="rounded-sm border border-black/20 px-2 py-1 transition-colors hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/5"
+        >
+          Snippets
+        </button>
+        <button
+          type="button"
+          data-action="zoom-in"
+          class="rounded-sm border border-black/20 px-2 py-1 transition-colors hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/5"
+        >
+          +
+        </button>
+        <button
+          type="button"
+          data-action="zoom-out"
+          class="rounded-sm border border-black/20 px-2 py-1 transition-colors hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/5"
+        >
+          -
+        </button>
+        <button
+          type="button"
+          data-action="reset"
+          class="rounded-sm border border-black/20 px-2 py-1 transition-colors hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/5"
+        >
+          Reset
+        </button>
+        <button
+          type="button"
+          data-action="toggle-labels"
+          aria-pressed="false"
+          class="rounded-sm border border-black/20 px-2 py-1 transition-colors hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/5"
+        >
+          Labels
+        </button>
+        <span data-graph-stats class="text-black/70 dark:text-white/70">
+          {nodePositions.length} nodes · {lineEdges.length} edges
+        </span>
+      </div>
+      <div class="flex items-center gap-3 text-[11px] text-black/70 dark:text-white/70">
+        <span class="inline-flex items-center gap-1.5">
+          <span class="h-2.5 w-2.5 rounded-full bg-sky-500/85 dark:bg-sky-400/85"></span>
+          Note
+        </span>
+        <span class="inline-flex items-center gap-1.5">
+          <span class="h-2.5 w-2.5 rounded-full bg-pink-500/80 dark:bg-pink-400/80"></span>
+          Snippet
+        </span>
+      </div>
+      <p class="m-0 text-[11px] leading-none text-black/60 dark:text-white/60">Drag, wheel zoom, `+` / `-`, `0`, arrows</p>
+    </div>
+
+    <div
+      class="pointer-events-none fixed z-30 hidden rounded-md border border-white/20 bg-[#0d111b]/92 px-2.5 py-1.5 text-xs text-white/90 shadow-lg backdrop-blur-sm"
+      data-node-info
+    ></div>
+
+    <svg viewBox={`0 0 ${width} ${height}`} class="h-full w-full cursor-grab touch-none select-none active:cursor-grabbing" data-graph-svg>
+      <g data-graph-viewport>
+        {lineEdges.map((edge) => (
+          <line
+            x1={centerX}
+            y1={centerY}
+            x2={centerX}
+            y2={centerY}
+            stroke="currentColor"
+            stroke-width="1"
+            class="text-black/22 dark:text-white/12"
+            data-edge
+            data-from={edge.from}
+            data-to={edge.to}
+            data-from-collection={edge.fromCollection}
+            data-to-collection={edge.toCollection}
+          />
+        ))}
+        {nodePositions.map((node) => (
+          <g
+            data-node
+            data-node-id={node.id}
+            data-collection={node.collection}
+            data-node-title={node.title}
+            data-node-kind={node.collection === "notes" ? "Note" : "Snippet"}
+          >
+            <a href={node.href}>
+              <circle
+                cx={node.x}
+                cy={node.y}
+                r={node.collection === "notes" ? 7 : 6}
+                data-base-r={node.collection === "notes" ? "7" : "6"}
+                class={node.collection === "notes"
+                  ? "fill-sky-300/75"
+                  : "fill-violet-300/70"}
+              />
+              <title>{node.title}</title>
+              <text
+                x={node.x + 10}
+                y={node.y + 4}
+                class="fill-current text-[11px] text-white/80"
+                data-label
+                display={showLabelsByDefault ? "inline" : "none"}
+              >
+                {node.title}
+              </text>
+            </a>
+          </g>
+        ))}
+      </g>
+    </svg>
+  </section>
+</Layout>
+
+<script is:inline define:vars={{ width, height, centerX, centerY }}>
+  const graphRoot = document.querySelector("[data-graph-canvas]");
+  if (graphRoot instanceof HTMLElement && graphRoot.dataset.ready !== "true") {
+    graphRoot.dataset.ready = "true";
+
+    const svg = graphRoot.querySelector("[data-graph-svg]");
+    const viewport = graphRoot.querySelector("[data-graph-viewport]");
+    const stats = graphRoot.querySelector("[data-graph-stats]");
+    const notesToggle = graphRoot.querySelector("[data-filter='notes']");
+    const snippetsToggle = graphRoot.querySelector("[data-filter='snippets']");
+    const zoomInButton = graphRoot.querySelector("[data-action='zoom-in']");
+    const zoomOutButton = graphRoot.querySelector("[data-action='zoom-out']");
+    const resetButton = graphRoot.querySelector("[data-action='reset']");
+    const toggleLabelsButton = graphRoot.querySelector("[data-action='toggle-labels']");
+    const nodeInfo = graphRoot.querySelector("[data-node-info]");
+    if (svg instanceof SVGSVGElement && viewport instanceof SVGGElement) {
+      let showNotes = true;
+      let showSnippets = true;
+      let forceShowLabels = false;
+      let rafId = null;
+
+      let scale = 1;
+      let tx = 0;
+      let ty = 0;
+      const minScale = 0.35;
+      const maxScale = 3.5;
+      const zoomStep = 1.15;
+
+      let pointerId = null;
+      let startX = 0;
+      let startY = 0;
+      let startTx = 0;
+      let startTy = 0;
+      let moved = false;
+      let suppressClick = false;
+
+      const applyTransform = () => {
+        viewport.setAttribute("transform", `translate(${tx} ${ty}) scale(${scale})`);
+      };
+
+      const isCollectionVisible = (collection) =>
+        (collection === "notes" && showNotes) || (collection === "snippets" && showSnippets);
+
+      const labels = graphRoot.querySelectorAll("[data-label]");
+      const nodeGroups = graphRoot.querySelectorAll("[data-node]");
+      const edgeElements = graphRoot.querySelectorAll("[data-edge]");
+      let hoveredNodeId = null;
+
+      const simNodes = Array.from(nodeGroups)
+        .map((node) => {
+          if (!(node instanceof SVGGElement)) return null;
+          const circle = node.querySelector("circle");
+          const label = node.querySelector("[data-label]");
+          if (!(circle instanceof SVGCircleElement)) return null;
+          const id = node.getAttribute("data-node-id");
+          if (!id) return null;
+          return {
+            id,
+            collection: node.getAttribute("data-collection") ?? "notes",
+            node,
+            circle,
+            label,
+            x: Number(circle.getAttribute("cx") ?? centerX),
+            y: Number(circle.getAttribute("cy") ?? centerY),
+            vx: 0,
+            vy: 0,
+          };
+        })
+        .filter((entry) => Boolean(entry));
+
+      const nodeById = new Map(simNodes.map((node) => [node.id, node]));
+      const simEdges = Array.from(edgeElements)
+        .map((edge) => {
+          if (!(edge instanceof SVGLineElement)) return null;
+          const from = edge.getAttribute("data-from");
+          const to = edge.getAttribute("data-to");
+          if (!from || !to) return null;
+          const source = nodeById.get(from);
+          const target = nodeById.get(to);
+          if (!source || !target) return null;
+          return { edge, source, target };
+        })
+        .filter((entry) => Boolean(entry));
+
+      const updateGraphVisibility = () => {
+        const nodes = graphRoot.querySelectorAll("[data-node]");
+        const edges = graphRoot.querySelectorAll("[data-edge]");
+
+        let visibleNodes = 0;
+        let visibleEdges = 0;
+
+        nodes.forEach((node) => {
+          const collection = node.getAttribute("data-collection");
+          const visible = isCollectionVisible(collection);
+          node.setAttribute("display", visible ? "inline" : "none");
+          if (visible) visibleNodes += 1;
+        });
+
+        edges.forEach((edge) => {
+          const fromCollection = edge.getAttribute("data-from-collection");
+          const toCollection = edge.getAttribute("data-to-collection");
+          const visible = isCollectionVisible(fromCollection) && isCollectionVisible(toCollection);
+          edge.setAttribute("display", visible ? "inline" : "none");
+          if (visible) visibleEdges += 1;
+        });
+
+        if (stats) stats.textContent = `${visibleNodes} nodes · ${visibleEdges} edges`;
+        if (notesToggle instanceof HTMLElement) notesToggle.setAttribute("aria-pressed", String(showNotes));
+        if (snippetsToggle instanceof HTMLElement) snippetsToggle.setAttribute("aria-pressed", String(showSnippets));
+      };
+
+      const updateLabelVisibility = () => {
+        const showLabels = forceShowLabels || scale >= 1.45;
+        labels.forEach((label) => {
+          label.setAttribute("display", showLabels ? "inline" : "none");
+        });
+        if (toggleLabelsButton instanceof HTMLElement) {
+          toggleLabelsButton.setAttribute("aria-pressed", String(forceShowLabels));
+        }
+      };
+
+      const updateHoverStyles = () => {
+        const activeEdgeStroke = () =>
+          document.documentElement.classList.contains("dark")
+            ? "rgba(255,255,255,0.82)"
+            : "rgba(14,103,79,0.94)";
+
+        if (!hoveredNodeId) {
+          simNodes.forEach((node) => {
+            node.node.setAttribute("opacity", "1");
+            node.circle.setAttribute("r", node.circle.getAttribute("data-base-r") ?? "6");
+          });
+          simEdges.forEach(({ edge }) => {
+            edge.setAttribute("opacity", "0.6");
+            edge.setAttribute("stroke-width", "1");
+            edge.setAttribute("stroke", "currentColor");
+          });
+          return;
+        }
+
+        const neighborIds = new Set([hoveredNodeId]);
+        simEdges.forEach(({ source, target }) => {
+          if (source.id === hoveredNodeId) neighborIds.add(target.id);
+          if (target.id === hoveredNodeId) neighborIds.add(source.id);
+        });
+
+        simNodes.forEach((node) => {
+          const isHovered = node.id === hoveredNodeId;
+          const isNeighbor = neighborIds.has(node.id);
+          node.node.setAttribute("opacity", isNeighbor ? "1" : "0.16");
+          const baseRadius = Number(node.circle.getAttribute("data-base-r") ?? "6");
+          const radius = isHovered ? baseRadius + 2.4 : isNeighbor ? baseRadius + 0.9 : baseRadius;
+          node.circle.setAttribute("r", `${radius}`);
+        });
+
+        simEdges.forEach(({ edge, source, target }) => {
+          const active = source.id === hoveredNodeId || target.id === hoveredNodeId;
+          edge.setAttribute("opacity", active ? "1" : "0.1");
+          edge.setAttribute("stroke-width", active ? "2.4" : "1");
+          edge.setAttribute("stroke", active ? activeEdgeStroke() : "currentColor");
+        });
+      };
+
+      const tick = () => {
+        const visibleNodes = simNodes.filter((node) => isCollectionVisible(node.collection));
+
+        for (let i = 0; i < visibleNodes.length; i += 1) {
+          const a = visibleNodes[i];
+          for (let j = i + 1; j < visibleNodes.length; j += 1) {
+            const b = visibleNodes[j];
+            const dx = b.x - a.x;
+            const dy = b.y - a.y;
+            const distSq = Math.max(80, dx * dx + dy * dy);
+            const force = 3000 / distSq;
+            const dist = Math.sqrt(distSq);
+            const nx = dx / dist;
+            const ny = dy / dist;
+            a.vx -= nx * force;
+            a.vy -= ny * force;
+            b.vx += nx * force;
+            b.vy += ny * force;
+          }
+        }
+
+        simEdges.forEach(({ source, target }) => {
+          if (!isCollectionVisible(source.collection) || !isCollectionVisible(target.collection)) return;
+          const dx = target.x - source.x;
+          const dy = target.y - source.y;
+          const dist = Math.max(1, Math.sqrt(dx * dx + dy * dy));
+          const desired = 125;
+          const stretch = dist - desired;
+          const k = 0.0022;
+          const fx = (dx / dist) * stretch * k;
+          const fy = (dy / dist) * stretch * k;
+          source.vx += fx;
+          source.vy += fy;
+          target.vx -= fx;
+          target.vy -= fy;
+        });
+
+        visibleNodes.forEach((node) => {
+          const pull = 0.0005;
+          node.vx += (centerX - node.x) * pull;
+          node.vy += (centerY - node.y) * pull;
+          node.vx *= 0.9;
+          node.vy *= 0.9;
+          node.x += node.vx;
+          node.y += node.vy;
+          node.x = Math.max(40, Math.min(width - 40, node.x));
+          node.y = Math.max(40, Math.min(height - 40, node.y));
+        });
+
+        simNodes.forEach((node) => {
+          node.circle.setAttribute("cx", `${node.x}`);
+          node.circle.setAttribute("cy", `${node.y}`);
+          if (node.label instanceof SVGTextElement) {
+            node.label.setAttribute("x", `${node.x + 10}`);
+            node.label.setAttribute("y", `${node.y + 4}`);
+          }
+        });
+
+        simEdges.forEach(({ edge, source, target }) => {
+          edge.setAttribute("x1", `${source.x}`);
+          edge.setAttribute("y1", `${source.y}`);
+          edge.setAttribute("x2", `${target.x}`);
+          edge.setAttribute("y2", `${target.y}`);
+        });
+
+        rafId = requestAnimationFrame(tick);
+      };
+
+      const zoomAround = (targetScale, focusX, focusY) => {
+        const nextScale = Math.min(maxScale, Math.max(minScale, targetScale));
+        if (nextScale === scale) return;
+        tx = tx + (scale - nextScale) * focusX;
+        ty = ty + (scale - nextScale) * focusY;
+        scale = nextScale;
+        applyTransform();
+        updateLabelVisibility();
+      };
+
+      const zoomAtCenter = (factor) => {
+        zoomAround(scale * factor, width / 2, height / 2);
+      };
+
+      const toSvgPoint = (clientX, clientY) => {
+        const rect = svg.getBoundingClientRect();
+        return {
+          x: ((clientX - rect.left) / rect.width) * width,
+          y: ((clientY - rect.top) / rect.height) * height,
+        };
+      };
+
+      const resetView = () => {
+        scale = 1;
+        tx = 0;
+        ty = 0;
+        applyTransform();
+        updateLabelVisibility();
+      };
+
+      applyTransform();
+      updateGraphVisibility();
+      updateLabelVisibility();
+      updateHoverStyles();
+      tick();
+
+      notesToggle?.addEventListener("click", () => {
+        showNotes = !showNotes;
+        updateGraphVisibility();
+      });
+      snippetsToggle?.addEventListener("click", () => {
+        showSnippets = !showSnippets;
+        updateGraphVisibility();
+      });
+      zoomInButton?.addEventListener("click", () => zoomAtCenter(zoomStep));
+      zoomOutButton?.addEventListener("click", () => zoomAtCenter(1 / zoomStep));
+      resetButton?.addEventListener("click", () => resetView());
+      toggleLabelsButton?.addEventListener("click", () => {
+        forceShowLabels = !forceShowLabels;
+        updateLabelVisibility();
+      });
+
+      const hideNodeInfo = () => {
+        if (!(nodeInfo instanceof HTMLElement)) return;
+        nodeInfo.classList.add("hidden");
+      };
+
+      const showNodeInfo = (event, node) => {
+        if (!(nodeInfo instanceof HTMLElement)) return;
+        const title = node.getAttribute("data-node-title") ?? "Untitled";
+        const kind = node.getAttribute("data-node-kind") ?? "Node";
+        nodeInfo.textContent = `${kind}: ${title}`;
+        nodeInfo.classList.remove("hidden");
+        nodeInfo.style.left = `${event.clientX + 12}px`;
+        nodeInfo.style.top = `${event.clientY + 12}px`;
+      };
+
+      const clearHover = () => {
+        if (!hoveredNodeId) return;
+        hoveredNodeId = null;
+        updateHoverStyles();
+        hideNodeInfo();
+      };
+
+      svg.addEventListener("pointermove", (event) => {
+        if (pointerId !== null) return;
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+
+        const node = target.closest("[data-node]");
+        if (!(node instanceof SVGGElement) || node.getAttribute("display") === "none") {
+          clearHover();
+          return;
+        }
+
+        const nodeId = node.getAttribute("data-node-id");
+        if (!nodeId) {
+          clearHover();
+          return;
+        }
+
+        if (hoveredNodeId !== nodeId) {
+          hoveredNodeId = nodeId;
+          updateHoverStyles();
+        }
+        showNodeInfo(event, node);
+      });
+
+      svg.addEventListener("pointerleave", () => {
+        clearHover();
+      });
+
+      window.addEventListener("beforeunload", () => {
+        if (rafId !== null) cancelAnimationFrame(rafId);
+      });
+
+      svg.addEventListener(
+        "wheel",
+        (event) => {
+          event.preventDefault();
+          const point = toSvgPoint(event.clientX, event.clientY);
+          const factor = event.deltaY < 0 ? zoomStep : 1 / zoomStep;
+          zoomAround(scale * factor, point.x, point.y);
+        },
+        { passive: false },
+      );
+
+      svg.addEventListener("pointerdown", (event) => {
+        clearHover();
+        pointerId = event.pointerId;
+        svg.setPointerCapture(pointerId);
+        startX = event.clientX;
+        startY = event.clientY;
+        startTx = tx;
+        startTy = ty;
+        moved = false;
+      });
+
+      svg.addEventListener("pointermove", (event) => {
+        if (pointerId !== event.pointerId) return;
+        const dx = ((event.clientX - startX) / svg.clientWidth) * width;
+        const dy = ((event.clientY - startY) / svg.clientHeight) * height;
+        if (Math.abs(dx) > 1 || Math.abs(dy) > 1) moved = true;
+        tx = startTx + dx;
+        ty = startTy + dy;
+        applyTransform();
+      });
+
+      const finishPointer = (event) => {
+        if (pointerId !== event.pointerId) return;
+        svg.releasePointerCapture(pointerId);
+        pointerId = null;
+        suppressClick = moved;
+      };
+
+      svg.addEventListener("pointerup", finishPointer);
+      svg.addEventListener("pointercancel", finishPointer);
+
+      svg.addEventListener(
+        "click",
+        (event) => {
+          if (!suppressClick) return;
+          suppressClick = false;
+          event.preventDefault();
+          event.stopPropagation();
+        },
+        true,
+      );
+
+      graphRoot.addEventListener("keydown", (event) => {
+        const panStep = 26 / scale;
+        let handled = true;
+
+        if (event.key === "+" || event.key === "=") {
+          zoomAtCenter(zoomStep);
+        } else if (event.key === "-" || event.key === "_") {
+          zoomAtCenter(1 / zoomStep);
+        } else if (event.key === "0") {
+          resetView();
+        } else if (event.key === "ArrowLeft") {
+          tx += panStep;
+          applyTransform();
+        } else if (event.key === "ArrowRight") {
+          tx -= panStep;
+          applyTransform();
+        } else if (event.key === "ArrowUp") {
+          ty += panStep;
+          applyTransform();
+        } else if (event.key === "ArrowDown") {
+          ty -= panStep;
+          applyTransform();
+        } else {
+          handled = false;
+        }
+
+        if (handled) event.preventDefault();
+      });
+    }
+  }
+</script>
+
+<style is:global>
+  body:has([data-graph-canvas]) main {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+</style>

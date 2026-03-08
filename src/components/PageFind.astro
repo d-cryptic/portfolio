@@ -1,6 +1,7 @@
 ---
 import Search from "astro-pagefind/components/Search";
 import { getCollection } from "astro:content";
+import { cleanContentId } from "@lib/content-paths";
 
 const [blogPosts, projectPosts, notesPosts, snippetPosts] = await Promise.all([
   getCollection("blog", ({ data }) => !data.draft),
@@ -35,7 +36,7 @@ const searchItems = [
   ...notesPosts.map((note) => ({
     title: note.data.title,
     description: note.data.description,
-    url: `/notes/${note.id}`,
+    url: `/notes/${cleanContentId(note.id)}`,
     type: "notes",
     tags: note.data.tags || [],
     stack: note.data.stack || [],
@@ -46,7 +47,7 @@ const searchItems = [
   ...snippetPosts.map((snippet) => ({
     title: snippet.data.title,
     description: snippet.data.description,
-    url: `/snippets/${snippet.id}`,
+    url: `/snippets/${cleanContentId(snippet.id)}`,
     type: "snippets",
     tags: snippet.data.tags || [],
     stack: snippet.data.stack || [],
@@ -93,7 +94,7 @@ const searchItems = [
 <aside data-pagefind-ignore>
   <div
     id="backdrop"
-    class="bg-[rgba(0, 0, 0, 0.5] invisible fixed top-0 left-0 z-50 flex h-screen w-full justify-center p-6 backdrop-blur-xs"
+    class="bg-[rgba(0, 0, 0, 0.5] invisible hidden fixed top-0 left-0 z-50 flex h-screen w-full justify-center p-6 backdrop-blur-xs"
   >
     <div
       id="pagefind-container"
@@ -454,20 +455,26 @@ const searchItems = [
     setTimeout(() => {
       search.focus();
     }, 0);
+    backdrop?.classList.remove("hidden");
     backdrop?.classList.remove("invisible");
     backdrop?.classList.add("visible");
   }
 
   function closePagefind() {
+    // Hide overlay first to avoid visible suggestion flicker while inputs reset.
+    backdrop?.classList.remove("visible");
+    backdrop?.classList.add("invisible");
+    backdrop?.classList.add("hidden");
+    suggestionsRoot?.classList.add("hidden");
+    currentSuggestions = [];
+    activeSuggestionIndex = -1;
+
     const search = document.getElementById("search");
     const input = search?.querySelector("input");
     if (input) {
       input.value = "";
       input.dispatchEvent(new Event("input", { bubbles: true }));
     }
-    backdrop?.classList.remove("visible");
-    backdrop?.classList.add("invisible");
-    suggestionsRoot?.classList.add("hidden");
   }
 
   if (!window.__pagefindListenersBound) {

@@ -19,3 +19,9 @@ export function readingTime(html: string) {
   const readingTimeMinutes = (wordCount / 200 + 1).toFixed();
   return `${readingTimeMinutes} min read`;
 }
+
+export function wordCount(html: string): number {
+  const textOnly = html.replace(/<[^>]+>/g, " ").trim();
+  if (!textOnly) return 0;
+  return textOnly.split(/\s+/).length;
+}

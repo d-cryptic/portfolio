@@ -19,16 +19,14 @@ interface Entry {
 }
 
 const { entry } = Astro.props as { entry: Entry };
+const cleanContentId = (id: string): string => id.replace(/\/index\.mdx?$/, "").replace(/\.mdx?$/, "");
 
 // Generate the URL based on the collection and ID
 const getUrl = (entry: Entry) => {
   if (entry.data.redirected && entry.data.redirectedUrl) {
     return entry.data.redirectedUrl;
   }
-  // Remove /index.mdx or /index.md from blog post IDs
-  const cleanId = entry.collection === 'blog' 
-    ? entry.id.replace(/\/index\.mdx?$/, '') 
-    : entry.id;
+  const cleanId = cleanContentId(entry.id);
   return `/${entry.collection}/${cleanId}`;
 };
 

@@ -1,5 +1,6 @@
 import { SITE } from "@consts";
 import { getCollection } from "astro:content";
+import { cleanContentId } from "@lib/content-paths";
 
 const renderSection = (
   label: string,
@@ -58,7 +59,7 @@ export async function GET() {
         title: note.data.title,
         description: note.data.description,
         date: note.data.date,
-        url: `${SITE.URL}/notes/${note.id}`,
+        url: `${SITE.URL}/notes/${cleanContentId(note.id)}`,
         tags: note.data.tags || [],
       })),
     ),
@@ -68,7 +69,7 @@ export async function GET() {
         title: snippet.data.title,
         description: snippet.data.description,
         date: snippet.data.date,
-        url: `${SITE.URL}/snippets/${snippet.id}`,
+        url: `${SITE.URL}/snippets/${cleanContentId(snippet.id)}`,
         tags: snippet.data.tags || [],
       })),
     ),

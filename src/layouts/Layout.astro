@@ -136,5 +136,19 @@ const mergedSchema = Array.isArray(schema)
     <Footer />
     <Pagefind />
     <CommandPalette />
+    <script is:inline>
+      if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+        const isProd = import.meta.env.PROD;
+        window.addEventListener("load", async () => {
+          if (isProd) {
+            navigator.serviceWorker.register("/sw.js").catch(() => undefined);
+            return;
+          }
+
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(registrations.map((registration) => registration.unregister()));
+        });
+      }
+    </script>
   </body>
 </html>

@@ -1,0 +1,25 @@
+---
+import { getCollection } from "astro:content";
+import { cleanContentId } from "@lib/content-paths";
+import { shouldIncludeDraftContent } from "@lib/content-visibility";
+
+const notes = (await getCollection("notes", ({ data }) => shouldIncludeDraftContent(data.draft))).map(
+  (entry) => `/notes/${cleanContentId(entry.id)}`,
+);
+const fallback = "/notes";
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex" />
+    <title>Random Note</title>
+  </head>
+  <body>
+    <script is:inline define:vars={{ notes, fallback }}>
+      const targets = Array.isArray(notes) ? notes : [];
+      const target = targets.length > 0 ? targets[Math.floor(Math.random() * targets.length)] : fallback;
+      window.location.replace(target);
+    </script>
+  </body>
+</html>

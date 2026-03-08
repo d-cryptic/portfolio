@@ -5,6 +5,7 @@ import mermaid from "astro-mermaid";
 import pagefind from "astro-pagefind";
 import { defineConfig } from "astro/config";
 import { remarkD2 } from "./src/plugins/remark-d2.js";
+import { remarkWikilinks } from "./src/plugins/remark-wikilinks.js";
 
 // https://astro.build/config
 export default defineConfig({
@@ -40,7 +41,7 @@ export default defineConfig({
     plugins: [tailwindcss()],
   },
   markdown: {
-    remarkPlugins: [remarkD2],
+    remarkPlugins: [remarkD2, remarkWikilinks],
     shikiConfig: {
       theme: "css-variables",
     },

@@ -1,0 +1,23 @@
+---
+title: Reliability checklist
+description: Pre-deploy checklist for small infra and app changes.
+date: 2026-03-08
+updatedAt: 2026-03-08
+tags: [reliability, infra, checklist]
+stack: [terraform, aws]
+roles: [sre]
+outcomes: [infra]
+maturity: evergreen
+relatedSnippets:
+  - sql/top-n-per-group
+---
+
+# Reliability checklist
+
+## Deploy gates
+
+- Validate IaC plan.
+- Confirm rollback path.
+- Review error budget impact.
+
+See [[notes/digital-garden-workflow]] and [snippet reference](/snippets/sql/top-n-per-group).

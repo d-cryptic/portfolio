@@ -1,0 +1,19 @@
+---
+title: Git changed files
+description: List unique changed files in current branch.
+date: 2026-03-08
+updatedAt: 2026-03-08
+tags: [git, shell]
+stack: [shell]
+roles: [platform]
+outcomes: [automation]
+language: shell
+runnerUrl: https://www.git-scm.com/docs/git-diff
+maturity: growing
+relatedNotes:
+  - digital-garden-workflow
+---
+
+```sh
+git diff --name-only origin/main...HEAD | sort -u
+```

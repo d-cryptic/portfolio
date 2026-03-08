@@ -1,0 +1,427 @@
+---
+import type { ContentLinkEdge, ContentLinkNode } from "@lib/content-links";
+
+const {
+  title = "Knowledge Graph",
+  nodes,
+  edges,
+  currentNodeId,
+} = Astro.props as {
+  title?: string;
+  nodes: ContentLinkNode[];
+  edges: ContentLinkEdge[];
+  currentNodeId?: string;
+};
+
+const width = 800;
+const height = 340;
+const centerX = width / 2;
+const centerY = height / 2;
+const radius = Math.min(width, height) * 0.34;
+
+const sortedNodes = [...nodes].sort((a, b) => a.title.localeCompare(b.title));
+
+const nodePositions = sortedNodes.map((node, index) => {
+  const angle = (index / Math.max(sortedNodes.length, 1)) * Math.PI * 2;
+  return {
+    ...node,
+    x: centerX + Math.cos(angle) * radius,
+    y: centerY + Math.sin(angle) * radius,
+    isCurrent: node.id === currentNodeId,
+  };
+});
+
+const positionMap = new Map(nodePositions.map((node) => [node.id, node]));
+
+const lineEdges = edges
+  .map((edge) => {
+    const source = positionMap.get(edge.from);
+    const target = positionMap.get(edge.to);
+    if (!source || !target) return null;
+    return { source, target };
+  })
+  .filter((edge): edge is { source: (typeof nodePositions)[number]; target: (typeof nodePositions)[number] } => Boolean(edge));
+---
+
+<section class="rounded-lg border border-black/15 p-4 dark:border-white/20" data-pagefind-ignore>
+  <div class="mb-3 flex items-center justify-between gap-3">
+    <h2 class="m-0 text-sm font-semibold text-black dark:text-white">{title}</h2>
+    <p class="m-0 text-xs text-black/65 dark:text-white/65">{nodes.length} nodes · {edges.length} edges</p>
+  </div>
+
+  {
+    nodes.length > 0 ? (
+      <div
+        class="relative rounded-md border border-black/10 p-2 dark:border-white/10"
+        data-knowledge-graph
+        tabindex="0"
+        role="region"
+        aria-label={`${title} interactive graph`}
+      >
+        <div
+          class="pointer-events-none fixed z-30 hidden rounded-md border border-white/20 bg-[#0d111b]/92 px-2.5 py-1.5 text-xs text-white/90 shadow-lg backdrop-blur-sm"
+          data-kg-node-info
+        ></div>
+        <div class="mb-2 flex items-center justify-between gap-2">
+          <p class="m-0 text-[11px] text-black/60 dark:text-white/60">Drag, mouse wheel, `+` / `-`, `0`, arrow keys</p>
+          <div class="flex items-center gap-1.5">
+            <button
+              type="button"
+              class="rounded-sm border border-black/20 px-1.5 py-0.5 text-[11px] transition-colors hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/5"
+              data-kg-action="zoom-in"
+              aria-label="Zoom in"
+            >
+              +
+            </button>
+            <button
+              type="button"
+              class="rounded-sm border border-black/20 px-1.5 py-0.5 text-[11px] transition-colors hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/5"
+              data-kg-action="zoom-out"
+              aria-label="Zoom out"
+            >
+              -
+            </button>
+            <button
+              type="button"
+              class="rounded-sm border border-black/20 px-1.5 py-0.5 text-[11px] transition-colors hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/5"
+              data-kg-action="reset"
+              aria-label="Reset view"
+            >
+              Reset
+            </button>
+          </div>
+        </div>
+        <svg
+          viewBox={`0 0 ${width} ${height}`}
+          class="h-[280px] w-full cursor-grab touch-none select-none active:cursor-grabbing"
+          data-kg-svg
+        >
+          <g data-kg-viewport>
+            {lineEdges.map((edge) => (
+              <line
+                x1={edge.source.x}
+                y1={edge.source.y}
+                x2={edge.target.x}
+                y2={edge.target.y}
+                stroke="currentColor"
+                stroke-width="1"
+                class="text-black/30 dark:text-white/20"
+                data-edge
+                data-from={edge.source.id}
+                data-to={edge.target.id}
+              />
+            ))}
+            {nodePositions.map((node) => (
+              <g
+                data-node
+                data-node-id={node.id}
+                data-node-title={node.title}
+                data-node-kind={node.collection === "notes" ? "Note" : "Snippet"}
+              >
+                <a href={node.href}>
+                  <circle
+                    cx={node.x}
+                    cy={node.y}
+                    r={node.isCurrent ? 10 : 7}
+                    data-base-r={node.isCurrent ? "10" : "7"}
+                    class={node.isCurrent
+                      ? "fill-[var(--color-primary)]"
+                      : "fill-black/45 dark:fill-white/55"}
+                  />
+                  <title>{node.title}</title>
+                  <text
+                    x={node.x + 12}
+                    y={node.y + 4}
+                    class="fill-current text-[11px] text-black/75 dark:text-white/75"
+                    data-label
+                  >
+                    {node.title}
+                  </text>
+                </a>
+              </g>
+            ))}
+          </g>
+        </svg>
+      </div>
+    ) : (
+      <p class="m-0 text-sm text-black/65 dark:text-white/65">Add notes/snippets with internal links to see graph connections.</p>
+    )
+  }
+</section>
+
+<script is:inline define:vars={{ width, height }}>
+  const initKnowledgeGraphs = () => {
+    const roots = document.querySelectorAll("[data-knowledge-graph]");
+
+    roots.forEach((root) => {
+      if (!(root instanceof HTMLElement) || root.dataset.kgReady === "true") return;
+      root.dataset.kgReady = "true";
+
+      const svg = root.querySelector("[data-kg-svg]");
+      const viewport = root.querySelector("[data-kg-viewport]");
+      const zoomInButton = root.querySelector("[data-kg-action='zoom-in']");
+      const zoomOutButton = root.querySelector("[data-kg-action='zoom-out']");
+      const resetButton = root.querySelector("[data-kg-action='reset']");
+      const nodeInfo = root.querySelector("[data-kg-node-info]");
+      if (!(svg instanceof SVGSVGElement) || !(viewport instanceof SVGGElement)) return;
+
+      let scale = 1;
+      let tx = 0;
+      let ty = 0;
+      const minScale = 0.45;
+      const maxScale = 3;
+      const zoomStep = 1.15;
+
+      let pointerId = null;
+      let startX = 0;
+      let startY = 0;
+      let startTx = 0;
+      let startTy = 0;
+      let moved = false;
+      let suppressClick = false;
+      let hoveredNodeId = null;
+
+      const nodeGroups = Array.from(root.querySelectorAll("[data-node]"));
+      const edgeElements = Array.from(root.querySelectorAll("[data-edge]"));
+      const simNodes = nodeGroups
+        .map((node) => {
+          if (!(node instanceof SVGGElement)) return null;
+          const id = node.getAttribute("data-node-id");
+          const circle = node.querySelector("circle");
+          if (!id || !(circle instanceof SVGCircleElement)) return null;
+          return { id, node, circle };
+        })
+        .filter((entry) => Boolean(entry));
+
+      const nodeById = new Map(simNodes.map((node) => [node.id, node]));
+      const simEdges = edgeElements
+        .map((edge) => {
+          if (!(edge instanceof SVGLineElement)) return null;
+          const from = edge.getAttribute("data-from");
+          const to = edge.getAttribute("data-to");
+          if (!from || !to) return null;
+          const source = nodeById.get(from);
+          const target = nodeById.get(to);
+          if (!source || !target) return null;
+          return { edge, source, target };
+        })
+        .filter((entry) => Boolean(entry));
+
+      const activeEdgeColor = () =>
+        document.documentElement.classList.contains("dark")
+          ? "rgba(255,255,255,0.82)"
+          : "rgba(14,103,79,0.94)";
+
+      const updateHoverStyles = () => {
+        if (!hoveredNodeId) {
+          simNodes.forEach((node) => {
+            node.node.setAttribute("opacity", "1");
+            node.circle.setAttribute("r", node.circle.getAttribute("data-base-r") ?? "7");
+          });
+          simEdges.forEach(({ edge }) => {
+            edge.setAttribute("opacity", "0.6");
+            edge.setAttribute("stroke-width", "1");
+            edge.setAttribute("stroke", "currentColor");
+          });
+          return;
+        }
+
+        const neighborIds = new Set([hoveredNodeId]);
+        simEdges.forEach(({ source, target }) => {
+          if (source.id === hoveredNodeId) neighborIds.add(target.id);
+          if (target.id === hoveredNodeId) neighborIds.add(source.id);
+        });
+
+        simNodes.forEach((node) => {
+          const isHovered = node.id === hoveredNodeId;
+          const isNeighbor = neighborIds.has(node.id);
+          node.node.setAttribute("opacity", isNeighbor ? "1" : "0.2");
+          const baseRadius = Number(node.circle.getAttribute("data-base-r") ?? "7");
+          const radius = isHovered ? baseRadius + 2.2 : isNeighbor ? baseRadius + 0.7 : baseRadius;
+          node.circle.setAttribute("r", `${radius}`);
+        });
+
+        simEdges.forEach(({ edge, source, target }) => {
+          const active = source.id === hoveredNodeId || target.id === hoveredNodeId;
+          edge.setAttribute("opacity", active ? "1" : "0.1");
+          edge.setAttribute("stroke-width", active ? "2.2" : "1");
+          edge.setAttribute("stroke", active ? activeEdgeColor() : "currentColor");
+        });
+      };
+
+      const hideNodeInfo = () => {
+        if (!(nodeInfo instanceof HTMLElement)) return;
+        nodeInfo.classList.add("hidden");
+      };
+
+      const showNodeInfo = (event, node) => {
+        if (!(nodeInfo instanceof HTMLElement)) return;
+        const title = node.getAttribute("data-node-title") ?? "Untitled";
+        const kind = node.getAttribute("data-node-kind") ?? "Node";
+        nodeInfo.textContent = `${kind}: ${title}`;
+        nodeInfo.classList.remove("hidden");
+        nodeInfo.style.left = `${event.clientX + 12}px`;
+        nodeInfo.style.top = `${event.clientY + 12}px`;
+      };
+
+      const clearHover = () => {
+        if (!hoveredNodeId) return;
+        hoveredNodeId = null;
+        updateHoverStyles();
+        hideNodeInfo();
+      };
+
+      const applyTransform = () => {
+        viewport.setAttribute("transform", `translate(${tx} ${ty}) scale(${scale})`);
+      };
+
+      const zoomAround = (targetScale, focusX, focusY) => {
+        const nextScale = Math.min(maxScale, Math.max(minScale, targetScale));
+        if (nextScale === scale) return;
+        tx = tx + (scale - nextScale) * focusX;
+        ty = ty + (scale - nextScale) * focusY;
+        scale = nextScale;
+        applyTransform();
+      };
+
+      const zoomAtCenter = (factor) => {
+        zoomAround(scale * factor, width / 2, height / 2);
+      };
+
+      const toSvgPoint = (clientX, clientY) => {
+        const rect = svg.getBoundingClientRect();
+        return {
+          x: ((clientX - rect.left) / rect.width) * width,
+          y: ((clientY - rect.top) / rect.height) * height,
+        };
+      };
+
+      const resetView = () => {
+        scale = 1;
+        tx = 0;
+        ty = 0;
+        applyTransform();
+      };
+
+      applyTransform();
+      updateHoverStyles();
+
+      zoomInButton?.addEventListener("click", () => zoomAtCenter(zoomStep));
+      zoomOutButton?.addEventListener("click", () => zoomAtCenter(1 / zoomStep));
+      resetButton?.addEventListener("click", () => resetView());
+
+      svg.addEventListener(
+        "wheel",
+        (event) => {
+          event.preventDefault();
+          const point = toSvgPoint(event.clientX, event.clientY);
+          const factor = event.deltaY < 0 ? zoomStep : 1 / zoomStep;
+          zoomAround(scale * factor, point.x, point.y);
+        },
+        { passive: false },
+      );
+
+      svg.addEventListener("pointerdown", (event) => {
+        clearHover();
+        pointerId = event.pointerId;
+        svg.setPointerCapture(pointerId);
+        startX = event.clientX;
+        startY = event.clientY;
+        startTx = tx;
+        startTy = ty;
+        moved = false;
+      });
+
+      svg.addEventListener("pointermove", (event) => {
+        if (pointerId !== event.pointerId) return;
+        const dx = ((event.clientX - startX) / svg.clientWidth) * width;
+        const dy = ((event.clientY - startY) / svg.clientHeight) * height;
+        if (Math.abs(dx) > 1 || Math.abs(dy) > 1) moved = true;
+        tx = startTx + dx;
+        ty = startTy + dy;
+        applyTransform();
+      });
+
+      const finishPointer = (event) => {
+        if (pointerId !== event.pointerId) return;
+        svg.releasePointerCapture(pointerId);
+        pointerId = null;
+        suppressClick = moved;
+      };
+
+      svg.addEventListener("pointerup", finishPointer);
+      svg.addEventListener("pointercancel", finishPointer);
+
+      svg.addEventListener("pointermove", (event) => {
+        if (pointerId !== null && pointerId === event.pointerId) return;
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+        const node = target.closest("[data-node]");
+        if (!(node instanceof SVGGElement)) {
+          clearHover();
+          return;
+        }
+        const nodeId = node.getAttribute("data-node-id");
+        if (!nodeId) {
+          clearHover();
+          return;
+        }
+        if (hoveredNodeId !== nodeId) {
+          hoveredNodeId = nodeId;
+          updateHoverStyles();
+        }
+        showNodeInfo(event, node);
+      });
+
+      svg.addEventListener("pointerleave", () => {
+        clearHover();
+      });
+
+      svg.addEventListener(
+        "click",
+        (event) => {
+          if (!suppressClick) return;
+          suppressClick = false;
+          event.preventDefault();
+          event.stopPropagation();
+        },
+        true,
+      );
+
+      root.addEventListener("keydown", (event) => {
+        const panStep = 24 / scale;
+        let handled = true;
+
+        if (event.key === "+" || event.key === "=") {
+          zoomAtCenter(zoomStep);
+        } else if (event.key === "-" || event.key === "_") {
+          zoomAtCenter(1 / zoomStep);
+        } else if (event.key === "0") {
+          resetView();
+        } else if (event.key === "ArrowLeft") {
+          tx += panStep;
+          applyTransform();
+        } else if (event.key === "ArrowRight") {
+          tx -= panStep;
+          applyTransform();
+        } else if (event.key === "ArrowUp") {
+          ty += panStep;
+          applyTransform();
+        } else if (event.key === "ArrowDown") {
+          ty -= panStep;
+          applyTransform();
+        } else {
+          handled = false;
+        }
+
+        if (handled) event.preventDefault();
+      });
+    });
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initKnowledgeGraphs);
+  } else {
+    initKnowledgeGraphs();
+  }
+</script>

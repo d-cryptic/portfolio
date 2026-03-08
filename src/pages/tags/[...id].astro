@@ -7,7 +7,12 @@ import BackToPrevious from "@components/BackToPrevious.astro";
 import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
 
 export async function getStaticPaths() {
-  const posts = await getCollection("blog", ({ data }) => !data.draft);
+  const [blogPosts, notePosts, snippetPosts] = await Promise.all([
+    getCollection("blog", ({ data }) => !data.draft),
+    getCollection("notes", ({ data }) => !data.draft),
+    getCollection("snippets", ({ data }) => !data.draft),
+  ]);
+  const posts = [...blogPosts, ...notePosts, ...snippetPosts];
 
   // Get unique tags
   const tags = [...new Set(posts.flatMap((post) => post.data.tags || []))];
@@ -53,10 +58,10 @@ const sortedPosts = posts.sort(
     <div class="space-y-10" data-pagefind-ignore>
       <BackToPrevious href="/tags"> All tags </BackToPrevious>
       <h1 class="animate font-semibold text-black dark:text-white">
-        Posts tagged with "{id}"
+        Content tagged with "{id}"
       </h1>
       <ul class="animate flex flex-col gap-4">
-        {sortedPosts.map((post) => <ArrowCard entry={post} />)}
+        {sortedPosts.map((post) => <li><ArrowCard entry={post} /></li>)}
       </ul>
     </div>
   </Container>

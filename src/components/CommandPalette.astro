@@ -1,6 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 import { SITE, RESUME_URL } from "@consts";
+import { cleanContentId } from "@lib/content-paths";
 
 const [blogPosts, projectPosts, notesPosts, snippetPosts] = await Promise.all([
   getCollection("blog", ({ data }) => !data.draft),
@@ -35,7 +36,7 @@ const searchItems = [
   ...notesPosts.map((note) => ({
     title: note.data.title,
     description: note.data.description,
-    url: `/notes/${note.id}`,
+    url: `/notes/${cleanContentId(note.id)}`,
     type: "notes",
     tags: note.data.tags || [],
     stack: note.data.stack || [],
@@ -46,7 +47,7 @@ const searchItems = [
   ...snippetPosts.map((snippet) => ({
     title: snippet.data.title,
     description: snippet.data.description,
-    url: `/snippets/${snippet.id}`,
+    url: `/snippets/${cleanContentId(snippet.id)}`,
     type: "snippets",
     tags: snippet.data.tags || [],
     stack: snippet.data.stack || [],
@@ -93,7 +94,7 @@ const searchItems = [
 <aside data-pagefind-ignore>
   <div
     id="command-palette-backdrop"
-    class="invisible fixed inset-0 z-50 bg-black/30 p-4 backdrop-blur-xs md:p-8"
+    class="invisible hidden fixed inset-0 z-50 bg-black/30 p-4 backdrop-blur-xs md:p-8"
   >
     <div
       id="command-palette"
@@ -710,7 +711,7 @@ const searchItems = [
   const closePalette = () => {
     const { backdrop, input, suggestions } = getPaletteElements();
     if (!backdrop || !input || !suggestions) return;
-    backdrop.classList.add("invisible");
+    backdrop.classList.add("invisible", "hidden");
     input.value = "";
     suggestions.innerHTML = "";
     currentResults = [];
@@ -801,6 +802,7 @@ const searchItems = [
     if (!backdrop || !input) return;
     activeIndex = 0;
     renderResults();
+    backdrop.classList.remove("hidden");
     backdrop.classList.remove("invisible");
     setTimeout(() => {
       input.focus();
@@ -827,7 +829,9 @@ const searchItems = [
       }
 
       const { backdrop } = getPaletteElements();
-      if (backdrop?.classList.contains("invisible")) return;
+      if (backdrop?.classList.contains("hidden") || backdrop?.classList.contains("invisible")) {
+        return;
+      }
 
       if (event.key === "ArrowDown") {
         event.preventDefault();

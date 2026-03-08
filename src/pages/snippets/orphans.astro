@@ -1,0 +1,56 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "@layouts/Layout.astro";
+import Container from "@components/Container.astro";
+import ArrowCard from "@components/ArrowCard.astro";
+import { buildLinkGraph, findOrphans } from "@lib/content-links";
+import { toContentNodeId } from "@lib/content-paths";
+import { shouldIncludeDraftContent } from "@lib/content-visibility";
+import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
+
+const notes = (await getCollection("notes")).filter((entry) => shouldIncludeDraftContent(entry.data.draft));
+const snippets = (await getCollection("snippets")).filter((entry) => shouldIncludeDraftContent(entry.data.draft));
+
+const graph = buildLinkGraph([...notes, ...snippets]);
+const orphanNodes = findOrphans(graph.nodes, graph.edges, "snippets");
+const orphanEntries = snippets.filter((entry) =>
+  orphanNodes.some((node) => node.id === toContentNodeId("snippets", entry.id)),
+);
+---
+
+<Layout
+  title="Orphan Snippets"
+  description="Snippets without inbound links"
+  schema={[
+    breadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "Snippets", path: "/snippets" },
+      { name: "Orphans", path: "/snippets/orphans" },
+    ]),
+    {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      name: "Orphan Snippets",
+      description: "Snippets without inbound links",
+      url: toAbsoluteUrl("/snippets/orphans"),
+    },
+  ]}
+>
+  <Container>
+    <section class="space-y-4">
+      <h1 class="text-2xl font-semibold text-black dark:text-white">Orphan Snippets</h1>
+      <p class="text-sm text-black/70 dark:text-white/70">These snippets currently have no backlinks from notes/snippets.</p>
+      {
+        orphanEntries.length > 0 ? (
+          <ul class="not-prose flex flex-col gap-3">
+            {orphanEntries.map((entry) => (
+              <li><ArrowCard entry={entry} /></li>
+            ))}
+          </ul>
+        ) : (
+          <p class="text-sm text-black/70 dark:text-white/70">No orphan snippets detected.</p>
+        )
+      }
+    </section>
+  </Container>
+</Layout>

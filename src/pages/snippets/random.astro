@@ -1,0 +1,25 @@
+---
+import { getCollection } from "astro:content";
+import { cleanContentId } from "@lib/content-paths";
+import { shouldIncludeDraftContent } from "@lib/content-visibility";
+
+const snippets = (await getCollection("snippets", ({ data }) => shouldIncludeDraftContent(data.draft))).map(
+  (entry) => `/snippets/${cleanContentId(entry.id)}`,
+);
+const fallback = "/snippets";
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex" />
+    <title>Random Snippet</title>
+  </head>
+  <body>
+    <script is:inline define:vars={{ snippets, fallback }}>
+      const targets = Array.isArray(snippets) ? snippets : [];
+      const target = targets.length > 0 ? targets[Math.floor(Math.random() * targets.length)] : fallback;
+      window.location.replace(target);
+    </script>
+  </body>
+</html>

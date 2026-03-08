@@ -1,58 +1,105 @@
 ---
+import { existsSync } from "node:fs";
+import path from "node:path";
 import { type CollectionEntry, getCollection, render } from "astro:content";
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/Container.astro";
 import FormattedDate from "@components/FormattedDate.astro";
-import { readingTime } from "@lib/utils";
 import BackToPrevious from "@components/BackToPrevious.astro";
 import PostNavigation from "@components/PostNavigation.astro";
 import TableOfContents from "@components/TableOfContents.astro";
+import KnowledgeGraph from "@components/KnowledgeGraph.astro";
+import Giscus from "@components/Giscus.astro";
 import { SITE } from "@consts";
 import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
-// import Giscus from "@components/Giscus.astro";
+import { getGitLastModified } from "@lib/git-last-modified";
+import { buildBacklinks, buildLinkGraph, getRelatedByTags } from "@lib/content-links";
+import { cleanContentId, toContentNodeId, toContentPath } from "@lib/content-paths";
+import { shouldIncludeDraftContent } from "@lib/content-visibility";
+import { readingTime, wordCount } from "@lib/utils";
+
+const MATURITY_STYLES: Record<string, string> = {
+  seed: "border-yellow-600/30 bg-yellow-500/10 text-yellow-900 dark:text-yellow-200",
+  growing: "border-blue-600/30 bg-blue-500/10 text-blue-900 dark:text-blue-200",
+  evergreen: "border-green-600/30 bg-green-500/10 text-green-900 dark:text-green-200",
+  archived: "border-black/25 bg-black/5 text-black/80 dark:border-white/30 dark:bg-white/10 dark:text-white/80",
+};
+
+const getContentFilePath = (collection: "notes" | "snippets", id: string): string | null => {
+  const candidates = [
+    path.join(process.cwd(), "src", "content", collection, `${id}.md`),
+    path.join(process.cwd(), "src", "content", collection, `${id}.mdx`),
+    path.join(process.cwd(), "src", "content", collection, id, "index.md"),
+    path.join(process.cwd(), "src", "content", collection, id, "index.mdx"),
+  ];
+
+  const matched = candidates.find((candidate) => existsSync(candidate));
+  return matched ?? null;
+};
 
 export async function getStaticPaths() {
   const notes = (await getCollection("notes"))
-    .filter((note) => !note.data.draft)
+    .filter((note) => shouldIncludeDraftContent(note.data.draft))
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
-  return notes.map((post) => ({
-    params: { id: post.id },
-    props: post,
-  }));
+  return notes.map((note) => ({ params: { id: cleanContentId(note.id) }, props: note }));
 }
+
 type Props = CollectionEntry<"notes">;
 
 const notes = (await getCollection("notes"))
-  .filter((post) => !post.data.draft)
+  .filter((entry) => shouldIncludeDraftContent(entry.data.draft))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
-function getNextNote() {
-  let noteIndex;
-  for (const note of notes) {
-    if (note.id === Astro.params.id) {
-      noteIndex = notes.indexOf(note);
-      return notes[noteIndex + 1];
-    }
-  }
-}
+const snippets = (await getCollection("snippets"))
+  .filter((entry) => shouldIncludeDraftContent(entry.data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
-function getPrevNote() {
-  let noteIndex;
-  for (const note of notes) {
-    if (note.id === Astro.params.id) {
-      noteIndex = notes.indexOf(note);
-      return notes[noteIndex - 1];
-    }
-  }
-}
+const note = Astro.props as Props;
+const noteIndex = notes.findIndex((entry) => cleanContentId(entry.id) === cleanContentId(note.id));
+const nextNote = noteIndex >= 0 ? notes[noteIndex + 1] : undefined;
+const prevNote = noteIndex > 0 ? notes[noteIndex - 1] : undefined;
 
-const nextNote = getNextNote();
-const prevNote = getPrevNote();
-
-const note = Astro.props;
 const { Content, headings } = await render(note);
-const notePath = `/notes/${note.id}`;
+const notePath = toContentPath("notes", note.id);
 const noteUrl = toAbsoluteUrl(notePath);
+
+const graph = buildLinkGraph([...notes, ...snippets]);
+const currentNodeId = toContentNodeId("notes", note.id);
+const currentNode = graph.nodes.find((node) => node.id === currentNodeId);
+const backlinks = buildBacklinks(currentNodeId, graph.nodes, graph.edges);
+const relatedByTags = currentNode ? getRelatedByTags(currentNode, graph.nodes, 4) : [];
+
+const manualRelatedNotes = (note.data.relatedNotes ?? [])
+  .map((id) => notes.find((entry) => entry.id === id))
+  .filter((entry): entry is CollectionEntry<"notes"> => Boolean(entry));
+
+const manualRelatedSnippets = (note.data.relatedSnippets ?? [])
+  .map((id) => snippets.find((entry) => entry.id === id))
+  .filter((entry): entry is CollectionEntry<"snippets"> => Boolean(entry));
+
+const relatedNodes = relatedByTags.filter((entry) => entry.id !== currentNodeId);
+const localNodeIds = new Set([currentNodeId, ...backlinks.map((entry) => entry.id), ...relatedNodes.map((entry) => entry.id)]);
+const localNodes = graph.nodes.filter((entry) => localNodeIds.has(entry.id));
+const localEdges = graph.edges.filter((edge) => localNodeIds.has(edge.from) && localNodeIds.has(edge.to));
+
+const previewMap = graph.nodes.reduce(
+  (acc, node) => ({
+    ...acc,
+    [node.href]: {
+      title: node.title,
+      description: node.description,
+      tags: node.tags,
+    },
+  }),
+  {} as Record<string, { title: string; description: string; tags: string[] }>,
+);
+
+const contentFilePath = getContentFilePath("notes", note.id);
+const gitLastModified = contentFilePath ? getGitLastModified(contentFilePath) : null;
+const lastModified = gitLastModified ?? note.data.updatedAt ?? note.data.date;
+const totalWords = note.body ? wordCount(note.body) : 0;
+const maturity = note.data.maturity ?? "seed";
+const maturityClass = MATURITY_STYLES[maturity] ?? MATURITY_STYLES.seed;
 ---
 
 <Layout
@@ -60,7 +107,7 @@ const noteUrl = toAbsoluteUrl(notePath);
   description={note.data.description}
   ogType="article"
   publishedTime={note.data.date}
-  modifiedTime={note.data.date}
+  modifiedTime={lastModified}
   keywords={note.data.tags || ["notes", "digital garden"]}
   schema={[
     breadcrumbJsonLd([
@@ -74,7 +121,7 @@ const noteUrl = toAbsoluteUrl(notePath);
       headline: note.data.title,
       description: note.data.description,
       datePublished: note.data.date,
-      dateModified: note.data.date,
+      dateModified: lastModified,
       author: {
         "@type": "Person",
         name: SITE.AUTHOR,
@@ -89,23 +136,52 @@ const noteUrl = toAbsoluteUrl(notePath);
     <div class="animate">
       <BackToPrevious href="/notes">Back to notes</BackToPrevious>
     </div>
-    <div class="my-10 space-y-1">
-      <div class="animate flex items-center gap-1.5">
-        <div class="font-base text-sm">
-          <FormattedDate date={note.data.date} />
-        </div>
-        &bull;
-        {note.body && (
-          <div class="font-base text-sm">
-            {readingTime(note.body)}
-          </div>
-        )}        
+
+    <section class="my-8 space-y-3" data-pagefind-ignore>
+      <div class="flex flex-wrap items-center gap-2 text-sm">
+        <FormattedDate date={note.data.date} />
+        <span>&bull;</span>
+        <span>{readingTime(note.body)}</span>
+        <span>&bull;</span>
+        <span>{totalWords} words</span>
+        <span>&bull;</span>
+        <span>Updated <FormattedDate date={lastModified} /></span>
       </div>
-      <h1 class="animate text-3xl font-semibold text-black dark:text-white">
-        {note.data.title}
-      </h1>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <span class={`rounded-full border px-2 py-1 text-xs font-medium ${maturityClass}`}>
+          {maturity}
+        </span>
+        <a
+          href={`/notes/source/${cleanContentId(note.id)}.txt`}
+          class="inline-flex items-center gap-1.5 rounded-sm border border-black/20 px-2 py-1 text-xs transition-colors hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/5"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4 shrink-0 fill-none stroke-current stroke-2">
+            <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 3 14 8 19 8"></polyline>
+            <line x1="9" y1="13" x2="15" y2="13"></line>
+            <line x1="9" y1="17" x2="15" y2="17"></line>
+          </svg>
+          Export Markdown
+        </a>
+        <button
+          id="print-content-button"
+          type="button"
+          class="inline-flex items-center gap-1.5 rounded-sm border border-black/20 px-2 py-1 text-xs transition-colors hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/5"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4 shrink-0 fill-none stroke-current stroke-2">
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+          </svg>
+          Export PDF
+        </button>
+      </div>
+
+      <h1 class="animate text-3xl font-semibold text-black dark:text-white">{note.data.title}</h1>
+
       {
-        note.data.tags && note.data.tags?.length > 0 ? (
+        note.data.tags && note.data.tags.length > 0 ? (
           <div class="animate flex flex-wrap gap-2 pt-1">
             {note.data.tags.map((tag) => (
               <a
@@ -118,16 +194,76 @@ const noteUrl = toAbsoluteUrl(notePath);
           </div>
         ) : null
       }
-    </div>
-    {headings.length > 0 && <TableOfContents headings={headings} />}
-    <article class="animate">
-      <Content />
-      <div class="mt-24">
-        <PostNavigation prevPost={prevNote} nextPost={nextNote} path={"notes"} />
+    </section>
+
+    <article class="animate" id="content-article">
+      {headings.length > 0 && <TableOfContents headings={headings} />}
+
+      <div class="mt-6" data-md-content>
+        <Content />
       </div>
-      <div class="mt-24">
-        {/* <Giscus /> */}
-      </div>
-    </article>
+
+        {
+          backlinks.length > 0 ? (
+            <section class="mt-12 rounded-lg border border-black/15 p-4 dark:border-white/20" data-pagefind-ignore>
+              <h2 class="m-0 text-lg font-semibold">Backlinks</h2>
+              <ul class="mt-3 space-y-2">
+                {backlinks.map((entry) => (
+                  <li>
+                    <a href={entry.href} class="font-medium underline-offset-2 hover:underline">{entry.title}</a>
+                    <p class="m-0 text-sm text-black/70 dark:text-white/70">{entry.description}</p>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null
+        }
+
+        {
+          relatedNodes.length > 0 || manualRelatedNotes.length > 0 || manualRelatedSnippets.length > 0 ? (
+            <section class="mt-12 rounded-lg border border-black/15 p-4 dark:border-white/20" data-pagefind-ignore>
+              <h2 class="m-0 text-lg font-semibold">Related</h2>
+              <div class="mt-3 grid gap-4 md:grid-cols-2">
+                <div>
+                  <h3 class="m-0 text-sm font-semibold uppercase tracking-wide text-black/60 dark:text-white/60">Auto</h3>
+                  <ul class="mt-2 space-y-2 text-sm">
+                    {relatedNodes.map((entry) => (
+                      <li><a href={entry.href}>{entry.title}</a></li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <h3 class="m-0 text-sm font-semibold uppercase tracking-wide text-black/60 dark:text-white/60">Manual</h3>
+                  <ul class="mt-2 space-y-2 text-sm">
+                    {manualRelatedNotes.map((entry) => (
+                      <li><a href={toContentPath("notes", entry.id)}>Note: {entry.data.title}</a></li>
+                    ))}
+                    {manualRelatedSnippets.map((entry) => (
+                      <li><a href={toContentPath("snippets", entry.id)}>Snippet: {entry.data.title}</a></li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </section>
+          ) : null
+        }
+
+        <div class="mt-12" data-pagefind-ignore>
+          <KnowledgeGraph title="Local Graph" nodes={localNodes} edges={localEdges} currentNodeId={currentNodeId} />
+        </div>
+
+        <div class="mt-16" data-pagefind-ignore>
+          <PostNavigation prevPost={prevNote} nextPost={nextNote} path="notes" />
+        </div>
+
+        <div class="mt-16" data-pagefind-ignore>
+          <Giscus />
+        </div>
+      </article>
   </Container>
+
+  <script is:inline define:vars={{ previewMap }}>
+    window.__CONTENT_PREVIEW_MAP__ = previewMap;
+  </script>
+  <script type="module" src="/utils/content-enhancements.js"></script>
 </Layout>
