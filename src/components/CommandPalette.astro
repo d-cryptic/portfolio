@@ -143,6 +143,83 @@ const searchItems = [
     results: document.getElementById("command-palette-results"),
   });
 
+  const VIEW_MODE_STORAGE_KEY = "portfolio:view-modes";
+  const VIEW_MODE_VALUES = ["zen", "wide-text"];
+  const VIEW_MODE_CLASS_MAP = {
+    zen: "mode-zen",
+    "wide-text": "mode-wide-text",
+  };
+
+  const getSavedViewModes = () => {
+    try {
+      const raw = localStorage.getItem(VIEW_MODE_STORAGE_KEY);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return [];
+      return parsed.filter((mode) => VIEW_MODE_VALUES.includes(mode));
+    } catch {
+      return [];
+    }
+  };
+
+  const saveViewModes = (modes) => {
+    try {
+      localStorage.setItem(VIEW_MODE_STORAGE_KEY, JSON.stringify(modes));
+    } catch {
+    }
+  };
+
+  const getActiveViewModes = () =>
+    VIEW_MODE_VALUES.filter((mode) => document.body.classList.contains(VIEW_MODE_CLASS_MAP[mode]));
+
+  const applyViewModes = (modes) => {
+    for (const mode of VIEW_MODE_VALUES) {
+      const className = VIEW_MODE_CLASS_MAP[mode];
+      document.body.classList.toggle(className, modes.includes(mode));
+    }
+  };
+
+  const setViewModes = (modes) => {
+    const uniqueModes = [...new Set(modes)].filter((mode) => VIEW_MODE_VALUES.includes(mode));
+    applyViewModes(uniqueModes);
+    saveViewModes(uniqueModes);
+  };
+
+  const enableViewModes = (modes) => {
+    const nextModes = new Set(getActiveViewModes());
+    for (const mode of modes) {
+      if (VIEW_MODE_VALUES.includes(mode)) nextModes.add(mode);
+    }
+    setViewModes([...nextModes]);
+  };
+
+  const syncFullscreenModeClass = () => {
+    document.body.classList.toggle("mode-fullscreen", Boolean(document.fullscreenElement));
+  };
+
+  const enterFullscreen = async () => {
+    if (document.fullscreenElement) return;
+    await document.documentElement.requestFullscreen();
+    syncFullscreenModeClass();
+  };
+
+  const exitFullscreen = async () => {
+    if (!document.fullscreenElement) {
+      syncFullscreenModeClass();
+      return;
+    }
+    await document.exitFullscreen();
+    syncFullscreenModeClass();
+  };
+
+  const resetToNormalMode = async () => {
+    setViewModes([]);
+    await exitFullscreen();
+  };
+
+  applyViewModes(getSavedViewModes());
+  syncFullscreenModeClass();
+
   const actions = [
     {
       title: "Go to Projects",
@@ -190,6 +267,63 @@ const searchItems = [
       keywords: ["search", "find", "query"],
       run: () => {
         window.dispatchEvent(new CustomEvent("site-search:open"));
+      },
+    },
+    {
+      title: "Zen Mode",
+      subtitle: "Hide header and footer for a distraction-free view",
+      keywords: ["zen", "focus", "minimal", "distraction free"],
+      run: () => {
+        enableViewModes(["zen"]);
+      },
+    },
+    {
+      title: "Fullscreen Mode",
+      subtitle: "Expand the page to fullscreen",
+      keywords: ["fullscreen", "full screen", "immersive"],
+      run: async () => {
+        try {
+          await enterFullscreen();
+        } catch {
+          window.alert("Unable to enter fullscreen mode. Try again from a direct key/click action.");
+        }
+      },
+    },
+    {
+      title: "Wide Text Area Mode",
+      subtitle: "Use a wider content container in main pages",
+      keywords: ["wide", "text area", "reading", "layout"],
+      run: () => {
+        enableViewModes(["wide-text"]);
+      },
+    },
+    {
+      title: "Focus Mode (Zen + Wide)",
+      subtitle: "Enable zen and wide text area together",
+      keywords: ["focus", "zen wide", "combined", "mode"],
+      run: () => {
+        enableViewModes(["zen", "wide-text"]);
+      },
+    },
+    {
+      title: "Deep Focus Mode (Zen + Fullscreen + Wide)",
+      subtitle: "Enable zen, fullscreen, and wide text together",
+      keywords: ["deep focus", "full immersive", "combined", "all modes"],
+      run: async () => {
+        enableViewModes(["zen", "wide-text"]);
+        try {
+          await enterFullscreen();
+        } catch {
+          window.alert("Fullscreen was blocked. Zen + wide mode is enabled.");
+        }
+      },
+    },
+    {
+      title: "Switch to Normal Mode",
+      subtitle: "Disable zen, fullscreen, and wide text area",
+      keywords: ["normal", "default", "reset", "disable modes"],
+      run: async () => {
+        await resetToNormalMode();
       },
     },
     {
@@ -589,7 +723,12 @@ const searchItems = [
     closePalette();
 
     if (selected.kind === "action") {
-      selected.run();
+      const result = selected.run();
+      if (result && typeof result.then === "function") {
+        result.catch(() => {
+          window.alert("Unable to complete that command.");
+        });
+      }
       return;
     }
 
@@ -606,6 +745,21 @@ const searchItems = [
       .replaceAll('"', "&quot;")
       .replaceAll("'", "&#39;");
 
+  const updateActiveResultState = () => {
+    const { results } = getPaletteElements();
+    if (!results) return;
+
+    const buttons = [...results.querySelectorAll("button[data-command-index]")];
+    buttons.forEach((button, index) => {
+      button.classList.toggle("active", index === activeIndex);
+    });
+
+    const activeButton = buttons[activeIndex];
+    if (activeButton instanceof HTMLElement) {
+      activeButton.scrollIntoView({ block: "nearest" });
+    }
+  };
+
   const renderResults = () => {
     const { results } = getPaletteElements();
     if (!results) return;
@@ -613,6 +767,7 @@ const searchItems = [
     currentResults = buildResults();
 
     if (currentResults.length === 0) {
+      activeIndex = 0;
       results.innerHTML =
         '<li class="rounded-md px-3 py-2 text-sm text-black/60 dark:text-white/60">No matching commands or results.</li>';
       return;
@@ -627,7 +782,7 @@ const searchItems = [
             <button
               type="button"
               data-command-index="${index}"
-              class="command-palette-item ${index === activeIndex ? "active" : ""}"
+              class="command-palette-item"
             >
               <span class="command-palette-title">${escapeHtml(entry.title)}</span>
               <span class="command-palette-subtitle">${escapeHtml(entry.subtitle)}</span>
@@ -637,6 +792,8 @@ const searchItems = [
         `,
       )
       .join("");
+
+    updateActiveResultState();
   };
 
   const openPalette = () => {
@@ -651,6 +808,8 @@ const searchItems = [
   };
 
   if (!window.__commandPaletteListenersBound) {
+    document.addEventListener("fullscreenchange", syncFullscreenModeClass);
+
     window.addEventListener("command-palette:open", () => {
       openPalette();
     });
@@ -673,12 +832,12 @@ const searchItems = [
       if (event.key === "ArrowDown") {
         event.preventDefault();
         activeIndex = (activeIndex + 1) % Math.max(currentResults.length, 1);
-        renderResults();
+        updateActiveResultState();
       } else if (event.key === "ArrowUp") {
         event.preventDefault();
         activeIndex =
           (activeIndex - 1 + Math.max(currentResults.length, 1)) % Math.max(currentResults.length, 1);
-        renderResults();
+        updateActiveResultState();
       } else if (event.key === "Enter") {
         event.preventDefault();
         executeResult(activeIndex);
