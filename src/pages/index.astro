@@ -9,6 +9,7 @@ import { getCollection } from "astro:content";
 import type { CollectionEntry } from "astro:content";
 import Callout from "@components/Callout.astro";
 import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
+import { nowPageData } from "@data/now";
 
 const allBlogPosts = (await getCollection("blog"))
   .filter((post) => !post.data.draft);
@@ -78,6 +79,38 @@ const projects = [...allProjects]
             widths={[320, 480, 640, 800]}
             format="webp"
           />
+        </div>
+        <div class="open-to-row">
+          <span class="text-sm font-semibold text-black dark:text-white">Open To Opportunities</span>
+          <div class="open-to-marquee" aria-label="Open to opportunities">
+            <div class="open-to-track">
+              <ul class="open-to-list">
+                {
+                  nowPageData.openTo.map((item) => (
+                    <li>
+                      <span class="rounded-full border border-black/20 bg-black/[0.03] px-3 py-1 text-xs leading-none whitespace-nowrap dark:border-white/25 dark:bg-white/[0.04]">
+                        {item}
+                      </span>
+                    </li>
+                  ))
+                }
+              </ul>
+              <ul class="open-to-list" aria-hidden="true">
+                {
+                  nowPageData.openTo.map((item) => (
+                    <li>
+                      <span class="rounded-full border border-black/20 bg-black/[0.03] px-3 py-1 text-xs leading-none whitespace-nowrap dark:border-white/25 dark:bg-white/[0.04]">
+                        {item}
+                      </span>
+                    </li>
+                  ))
+                }
+              </ul>
+            </div>
+          </div>
+          <span class="text-xs shrink-0">
+            <Link href="/now" underline={true}>See /now</Link>
+          </span>
         </div>
       </div>
 
@@ -236,3 +269,56 @@ const projects = [...allProjects]
     </aside>
   </Container>
 </Layout>
+
+<style>
+  .open-to-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+
+  .open-to-marquee {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    padding-block: 0.2rem;
+    mask-image: linear-gradient(to right, transparent 0, black 8%, black 92%, transparent 100%);
+  }
+
+  .open-to-track {
+    display: flex;
+    width: max-content;
+    animation: open-to-slide 20s linear infinite;
+  }
+
+  .open-to-list {
+    display: flex;
+    flex-shrink: 0;
+    gap: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .open-to-list li {
+    display: flex;
+    align-items: center;
+    list-style: none;
+  }
+
+  @keyframes open-to-slide {
+    from {
+      transform: translateX(0);
+    }
+
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .open-to-track {
+      animation: none;
+    }
+  }
+</style>

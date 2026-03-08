@@ -1,0 +1,63 @@
+---
+import Container from "@components/Container.astro";
+import Layout from "@layouts/Layout.astro";
+import { NOW } from "@consts";
+import { nowPageData } from "@data/now";
+import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
+---
+
+<Layout
+  title={NOW.TITLE}
+  description={NOW.DESCRIPTION}
+  keywords={[
+    "Now page",
+    "Current focus",
+    "What I am shipping",
+    "Learning and experiments",
+    "Barun Debnath",
+  ]}
+  schema={[
+    breadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "Now", path: "/now" },
+    ]),
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      name: NOW.TITLE,
+      description: NOW.DESCRIPTION,
+      url: toAbsoluteUrl("/now"),
+    },
+  ]}
+>
+  <Container>
+    <section class="space-y-8">
+      <div class="space-y-3">
+        <h1 class="font-semibold text-black dark:text-white">Now</h1>
+        <p class="text-black/80 dark:text-white/80">{nowPageData.intro}</p>
+      </div>
+
+      <section class="space-y-3">
+        <h2 class="font-semibold text-black dark:text-white">Open To Opportunities</h2>
+        <div class="flex flex-wrap gap-2">
+          {nowPageData.openTo.map((item) => (
+            <span class="rounded-full border border-black/20 bg-black/[0.03] px-3 py-1 text-xs dark:border-white/25 dark:bg-white/[0.04]">
+              {item}
+            </span>
+          ))}
+        </div>
+      </section>
+
+      <section class="grid gap-4">
+        {nowPageData.sections.map((section) => (
+          <article class="rounded-lg border border-black/15 p-4 dark:border-white/20">
+            <h2 class="m-0 font-semibold text-black dark:text-white">{section.title}</h2>
+            <ul class="mt-3 mb-0 list-disc space-y-2 pl-5">
+              {section.items.map((item) => <li>{item}</li>)}
+            </ul>
+          </article>
+        ))}
+      </section>
+    </section>
+  </Container>
+</Layout>
