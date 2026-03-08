@@ -121,7 +121,26 @@ run_agent_checks() {
     "Run an agent-first pre-commit review on this staged diff. Focus on whether autonomous tools can discover, parse, and act on repository instructions and machine endpoints. Return concise findings only; return 'OK' if no issues."
 }
 
+confirm_agent_checks() {
+  local answer
+
+  if [ ! -t 0 ]; then
+    log "Interactive confirmation required for SEO/GEO/agentic checks."
+    log "Commit aborted. Re-run in a terminal and answer 'yes' to continue."
+    return 1
+  fi
+
+  printf "Run SEO, GEO, and agentic pre-commit checks? Type 'yes' to continue: "
+  IFS= read -r answer
+
+  if [ "$answer" != "yes" ]; then
+    log "Confirmation not provided. Commit aborted."
+    return 1
+  fi
+}
+
 run_image_migrations_if_needed
+confirm_agent_checks
 run_agent_checks
 
 log "Pre-commit checks completed."

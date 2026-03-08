@@ -36,6 +36,7 @@ chmod +x "$GIT_HOOKS_DIR/pre-commit"
 
 echo "✅ Git hooks setup completed!"
 echo "   Pre-commit hook now runs migration checks plus SEO -> GEO -> agent checks"
+echo "   Manual confirmation is required: type 'yes' at commit time to run them"
 echo ""
 echo "💡 To disable the hook temporarily, run:"
 echo "   git commit --no-verify"
