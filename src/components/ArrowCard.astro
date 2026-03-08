@@ -55,11 +55,11 @@ const linkProps = isExternal
       {
         entry.collection === "blog" &&
           !entry.data.redirected &&
-          entry.data.series &&
-          entry.data.seriesPartCount &&
-          entry.data.seriesPartCount > 1 && (
+          entry.data.series && (
             <span class="mr-2 inline-flex rounded-full border border-black/20 bg-black/[0.03] px-2 py-0.5 text-xs leading-none align-middle dark:border-white/25 dark:bg-white/[0.04]">
-              {entry.data.seriesPartCount}-part series
+              {entry.data.seriesPartCount && entry.data.seriesPartCount > 1
+                ? `${entry.data.seriesPartCount}-part series`
+                : "Series"}
             </span>
           )
       }
