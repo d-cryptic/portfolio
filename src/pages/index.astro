@@ -1,7 +1,7 @@
 ---
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/Container.astro";
-import { SITE, HOME, SOCIALS } from "@consts";
+import { SITE, HOME, SOCIALS, RESUME_URL } from "@consts";
 import { Image } from "astro:assets";
 import ArrowCard from "@components/ArrowCard.astro";
 import Link from "@components/Link.astro";
@@ -145,7 +145,7 @@ const projects = [...allProjects]
               >
               <span>
                 Know more about my work experience from my <Link
-                  href="https://drive.google.com/file/d/1qpCeTwHtvS2UFqIznY_P8QKHBEedbnOL/view?usp=drive_link"
+                  href={RESUME_URL}
                   external>RESUME</Link
                 >
               </span>

@@ -132,7 +132,6 @@ const searchItems = [
   const semanticSearchItems = searchItems;
 
   const pagefindStylesheetId = "pagefind-ui-styles";
-  const magnifyingGlass = document.getElementById("magnifying-glass");
   const backdrop = document.getElementById("backdrop");
   const suggestionsRoot = document.getElementById("semantic-suggestions");
   let semanticSearchInput = null;
@@ -472,16 +471,13 @@ const searchItems = [
   }
 
   if (!window.__pagefindListenersBound) {
-    // open pagefind
-    magnifyingGlass?.addEventListener("click", () => {
+    // open pagefind (triggered from command palette action or `/`)
+    window.addEventListener("site-search:open", () => {
       openPagefind();
     });
 
     document.addEventListener("keydown", (e) => {
       if (e.key === "/") {
-        e.preventDefault();
-        openPagefind();
-      } else if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
         openPagefind();
       }

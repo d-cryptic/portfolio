@@ -9,6 +9,7 @@ interface Entry {
     date: Date;
     draft?: boolean;
     tags?: string[];
+    outcomes?: string[];
     redirected?: boolean;
     redirectedUrl?: string;
   };
@@ -47,9 +48,20 @@ const linkProps = isExternal
     <div class="font-semibold">
       {entry.data.title}
     </div>
-    <div class="text-sm">
+    <div class="text-sm leading-relaxed">
       {entry.data.description}
     </div>
+    {
+      entry.data.outcomes && entry.data.outcomes.length > 0 && (
+        <ul class="mt-2 flex flex-wrap gap-1.5 text-xs">
+          {entry.data.outcomes.slice(0, 3).map((outcome) => (
+            <li class="rounded-full border border-black/20 bg-black/[0.03] px-2 py-0.5 dark:border-white/25 dark:bg-white/[0.04]">
+              {outcome}
+            </li>
+          ))}
+        </ul>
+      )
+    }
   </div>
   <svg
     xmlns="http://www.w3.org/2000/svg"

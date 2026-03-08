@@ -12,6 +12,9 @@ export const SITE: Site = {
   NUM_PROJECTS_ON_HOMEPAGE: 3,
 };
 
+export const RESUME_URL =
+  "https://drive.google.com/file/d/1qpCeTwHtvS2UFqIznY_P8QKHBEedbnOL/view?usp=drive_link";
+
 export const HOME: Metadata = {
   TITLE: "Barun Debnath | SRE & Systems Explorer",
   DESCRIPTION:

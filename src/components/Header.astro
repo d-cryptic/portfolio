@@ -67,7 +67,7 @@ import { SITE } from "@consts";
         <button
           id="magnifying-glass"
           aria-label="Search"
-          class="flex h-8 items-center gap-1 rounded-sm border border-black/15 bg-neutral-100 px-2 text-xs transition-colors duration-300 ease-in-out hover:bg-black/5 hover:text-black focus-visible:bg-black/5 focus-visible:text-black dark:border-white/20 dark:bg-neutral-900 dark:hover:bg-white/5 dark:hover:text-white dark:focus-visible:bg-white/5 dark:focus-visible:text-white"
+          class="flex h-8 items-center gap-2 rounded-sm border border-black/15 bg-neutral-100 px-2 text-xs transition-colors duration-300 ease-in-out hover:bg-black/5 hover:text-black focus-visible:bg-black/5 focus-visible:text-black dark:border-white/20 dark:bg-neutral-900 dark:hover:bg-white/5 dark:hover:text-white dark:focus-visible:bg-white/5 dark:focus-visible:text-white"
         >
           <span class="sr-only">Search</span>
           <svg
@@ -84,7 +84,10 @@ import { SITE } from "@consts";
               fill-rule="evenodd"
               clip-rule="evenodd"></path>
           </svg>
-          &nbsp;Search
+          <span>Search</span>
+          <kbd class="hidden rounded border border-black/20 px-1 py-0.5 text-[10px] leading-none tracking-wide dark:border-white/25 xl:inline">
+            ⌘K
+          </kbd>
         </button>
       </nav>
 
@@ -256,7 +259,9 @@ import { SITE } from "@consts";
   mobileSearchButton?.addEventListener("click", () => {
     magnifyingGlass?.click();
   });
-
+  magnifyingGlass?.addEventListener("click", () => {
+    window.dispatchEvent(new CustomEvent("command-palette:open"));
+  });
   document.addEventListener("click", (event) => {
     if (!desktopMoreOpen) return;
     if (

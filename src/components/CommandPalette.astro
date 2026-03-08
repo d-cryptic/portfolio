@@ -1,0 +1,791 @@
+---
+import { getCollection } from "astro:content";
+import { SITE, RESUME_URL } from "@consts";
+
+const [blogPosts, projectPosts, notesPosts, snippetPosts] = await Promise.all([
+  getCollection("blog", ({ data }) => !data.draft),
+  getCollection("projects", ({ data }) => !data.draft),
+  getCollection("notes", ({ data }) => !data.draft),
+  getCollection("snippets", ({ data }) => !data.draft),
+]);
+
+const searchItems = [
+  ...blogPosts.map((post) => ({
+    title: post.data.title,
+    description: post.data.description,
+    url: `/blog/${post.id.replace(/\/index\.mdx?$/, "")}`,
+    type: "blog",
+    tags: post.data.tags || [],
+    stack: post.data.stack || [],
+    roles: post.data.roles || [],
+    outcomes: post.data.outcomes || [],
+    date: post.data.date.toISOString().slice(0, 10),
+  })),
+  ...projectPosts.map((project) => ({
+    title: project.data.title,
+    description: project.data.description,
+    url: `/projects/${project.id}`,
+    type: "projects",
+    tags: project.data.tags || [],
+    stack: project.data.stack || [],
+    roles: project.data.roles || [],
+    outcomes: project.data.outcomes || [],
+    date: project.data.date.toISOString().slice(0, 10),
+  })),
+  ...notesPosts.map((note) => ({
+    title: note.data.title,
+    description: note.data.description,
+    url: `/notes/${note.id}`,
+    type: "notes",
+    tags: note.data.tags || [],
+    stack: note.data.stack || [],
+    roles: note.data.roles || [],
+    outcomes: note.data.outcomes || [],
+    date: note.data.date.toISOString().slice(0, 10),
+  })),
+  ...snippetPosts.map((snippet) => ({
+    title: snippet.data.title,
+    description: snippet.data.description,
+    url: `/snippets/${snippet.id}`,
+    type: "snippets",
+    tags: snippet.data.tags || [],
+    stack: snippet.data.stack || [],
+    roles: snippet.data.roles || [],
+    outcomes: snippet.data.outcomes || [],
+    date: snippet.data.date.toISOString().slice(0, 10),
+  })),
+  {
+    title: "Content Explorer",
+    description: "Filter content by stack, role, and outcome.",
+    url: "/explorer",
+    type: "pages",
+    tags: ["explorer", "filters"],
+    stack: ["astro"],
+    roles: ["platform engineer"],
+    outcomes: ["data", "seo"],
+    date: "2025-11-01",
+  },
+  {
+    title: "Tag Directory",
+    description: "Browse all tags used across blog posts.",
+    url: "/tags",
+    type: "pages",
+    tags: ["tags", "taxonomy"],
+    stack: ["astro"],
+    roles: ["software engineer"],
+    outcomes: ["data"],
+    date: "2025-11-01",
+  },
+  {
+    title: "AI / Agent Guide",
+    description: "Machine-friendly guide for assistants and agents.",
+    url: "/for-ai",
+    type: "pages",
+    tags: ["ai", "agents"],
+    stack: ["astro", "mdx"],
+    roles: ["systems engineer"],
+    outcomes: ["seo", "data"],
+    date: "2025-11-01",
+  },
+];
+---
+
+<aside data-pagefind-ignore>
+  <div
+    id="command-palette-backdrop"
+    class="invisible fixed inset-0 z-50 bg-black/30 p-4 backdrop-blur-xs md:p-8"
+  >
+    <div
+      id="command-palette"
+      class="mx-auto mt-12 w-full max-w-xl rounded-lg border border-black/15 bg-[var(--color-background)] p-3 shadow-xl dark:border-white/20"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Command palette"
+    >
+      <input
+        id="command-palette-input"
+        type="text"
+        placeholder="Search"
+        class="w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm text-inherit outline-none focus-visible:border-black/35 dark:border-white/20 dark:focus-visible:border-white/40"
+        autocomplete="off"
+      />
+      <div id="command-palette-tips" class="pt-2 text-xs text-black/65 dark:text-white/65">
+        <span class="tips-label">Tip:</span>
+        <code>#tag</code>
+        <code>@type</code>
+        <code>type:</code>
+        <code>tag:</code>
+        <code>stack:</code>
+        <code>role:</code>
+        <code>outcome:</code>
+        <code>since:</code>
+        <code>until:</code>
+        <span class="tips-text">and exclusions with</span>
+        <code>-</code>
+      </div>
+      <div id="command-palette-suggestions" class="mt-2 flex flex-wrap gap-1.5"></div>
+      <ul id="command-palette-results" class="mt-3 max-h-72 overflow-auto"></ul>
+      <div class="pt-2 text-right text-xs text-black/70 dark:text-white/70">
+        Press <kbd>Esc</kbd> or click anywhere to close
+      </div>
+    </div>
+  </div>
+</aside>
+
+<script is:inline define:vars={{ email: SITE.EMAIL, resumeUrl: RESUME_URL, searchItems }}>
+  let activeIndex = 0;
+  let currentResults = [];
+
+  const getPaletteElements = () => ({
+    backdrop: document.getElementById("command-palette-backdrop"),
+    input: document.getElementById("command-palette-input"),
+    suggestions: document.getElementById("command-palette-suggestions"),
+    results: document.getElementById("command-palette-results"),
+  });
+
+  const actions = [
+    {
+      title: "Go to Projects",
+      subtitle: "View recent and archived work",
+      keywords: ["projects", "work", "portfolio"],
+      run: () => {
+        window.location.href = "/projects";
+      },
+    },
+    {
+      title: "Go to Blog",
+      subtitle: "Read posts and writeups",
+      keywords: ["blog", "posts", "articles", "pages"],
+      run: () => {
+        window.location.href = "/blog";
+      },
+    },
+    {
+      title: "Go to Notes",
+      subtitle: "Browse notes and learnings",
+      keywords: ["notes", "wiki", "pages"],
+      run: () => {
+        window.location.href = "/notes";
+      },
+    },
+    {
+      title: "Go to Snippets",
+      subtitle: "Open snippets library",
+      keywords: ["snippets", "code", "pages"],
+      run: () => {
+        window.location.href = "/snippets";
+      },
+    },
+    {
+      title: "Open Explorer",
+      subtitle: "Search across all pages and content",
+      keywords: ["explorer", "pages", "content", "search"],
+      run: () => {
+        window.location.href = "/explorer";
+      },
+    },
+    {
+      title: "Search Site",
+      subtitle: "Open search modal",
+      keywords: ["search", "find", "query"],
+      run: () => {
+        window.dispatchEvent(new CustomEvent("site-search:open"));
+      },
+    },
+    {
+      title: "Contact",
+      subtitle: "Open default mail app",
+      keywords: ["contact", "email", "mail", "reach"],
+      run: () => {
+        window.location.href = `mailto:${email}`;
+      },
+    },
+    {
+      title: "Open Resume",
+      subtitle: "Open resume link",
+      keywords: ["resume", "cv", "experience"],
+      run: () => {
+        window.open(resumeUrl, "_blank", "noopener,noreferrer");
+      },
+    },
+    {
+      title: "Toggle Theme",
+      subtitle: "Switch between light and dark",
+      keywords: ["theme", "dark", "light"],
+      run: () => {
+        const themeToggle = document.querySelector("#theme-toggle");
+        if (themeToggle instanceof HTMLButtonElement) {
+          themeToggle.click();
+        }
+      },
+    },
+  ];
+
+  const normalizeValue = (value) => value.toLowerCase().trim();
+  const parseDate = (value) => {
+    if (!value) return null;
+    const timestamp = new Date(value).getTime();
+    return Number.isNaN(timestamp) ? null : timestamp;
+  };
+
+  const normalizeType = (type) => {
+    const aliases = {
+      blog: "blog",
+      blogs: "blog",
+      project: "projects",
+      projects: "projects",
+      note: "notes",
+      notes: "notes",
+      snippet: "snippets",
+      snippets: "snippets",
+      page: "pages",
+      pages: "pages",
+      explorer: "pages",
+    };
+    return aliases[type] || type;
+  };
+
+  const uniqueSortedValues = (values) =>
+    [...new Set(values.map((value) => normalizeValue(value)).filter(Boolean))].sort();
+
+  const suggestionIndex = {
+    types: uniqueSortedValues(searchItems.map((item) => normalizeType(item.type || ""))),
+    tags: uniqueSortedValues(searchItems.flatMap((item) => item.tags || [])),
+    stack: uniqueSortedValues(searchItems.flatMap((item) => item.stack || [])),
+    roles: uniqueSortedValues(searchItems.flatMap((item) => item.roles || [])),
+    outcomes: uniqueSortedValues(searchItems.flatMap((item) => item.outcomes || [])),
+  };
+
+  const operatorHints = [
+    "#tag",
+    "@type",
+    "type:",
+    "tag:",
+    "stack:",
+    "role:",
+    "outcome:",
+    "since:",
+    "until:",
+    "-",
+  ];
+
+  function tokenize(query) {
+    const parsed = {
+      include: { types: [], tags: [], stack: [], roles: [], outcomes: [], terms: [] },
+      exclude: { types: [], tags: [], stack: [], roles: [], outcomes: [], terms: [] },
+      since: "",
+      until: "",
+    };
+
+    const tokens = query.trim().split(/\s+/).filter(Boolean);
+    for (const raw of tokens) {
+      const isNegative = raw.startsWith("-");
+      const token = isNegative ? raw.slice(1) : raw;
+      if (!token) continue;
+      const target = isNegative ? parsed.exclude : parsed.include;
+      const lowered = token.toLowerCase();
+
+      if (lowered.startsWith("#")) {
+        target.tags.push(normalizeValue(lowered.slice(1)));
+        continue;
+      }
+      if (lowered.startsWith("@")) {
+        target.types.push(normalizeType(normalizeValue(lowered.slice(1))));
+        continue;
+      }
+
+      const separatorIndex = lowered.indexOf(":");
+      if (separatorIndex !== -1) {
+        const key = lowered.slice(0, separatorIndex);
+        const value = normalizeValue(lowered.slice(separatorIndex + 1));
+        if (!value) continue;
+        if (key === "type") target.types.push(normalizeType(value));
+        else if (key === "tag") target.tags.push(value);
+        else if (key === "stack") target.stack.push(value);
+        else if (key === "role") target.roles.push(value);
+        else if (key === "outcome") target.outcomes.push(value);
+        else if (key === "since" || key === "from") parsed.since = value;
+        else if (key === "until" || key === "to") parsed.until = value;
+        else target.terms.push(value);
+        continue;
+      }
+
+      target.terms.push(lowered);
+    }
+
+    return parsed;
+  }
+
+  function fuzzyScore(text, query) {
+    if (!query) return 0;
+    const haystack = text.toLowerCase();
+    const needle = query.toLowerCase();
+    if (haystack.includes(needle)) {
+      return 100 - haystack.indexOf(needle);
+    }
+
+    let score = 0;
+    let searchIndex = 0;
+    for (let i = 0; i < needle.length; i += 1) {
+      const foundAt = haystack.indexOf(needle[i], searchIndex);
+      if (foundAt === -1) return -1;
+      score += 2;
+      searchIndex = foundAt + 1;
+    }
+    return score;
+  }
+
+  function semanticSearch(query) {
+    const { include, exclude, since, until } = tokenize(query);
+    if (!query.trim()) return [];
+
+    const sinceTs = parseDate(since);
+    const untilTs = parseDate(until);
+
+    return searchItems
+      .filter((item) => {
+        const itemType = normalizeType(normalizeValue(item.type || ""));
+        const itemTags = (item.tags || []).map((tag) => normalizeValue(tag));
+        const itemStack = (item.stack || []).map((value) => normalizeValue(value));
+        const itemRoles = (item.roles || []).map((value) => normalizeValue(value));
+        const itemOutcomes = (item.outcomes || []).map((value) => normalizeValue(value));
+        const itemDate = parseDate(item.date);
+
+        const matchesOrEmpty = (selected, values) =>
+          selected.length === 0 || selected.some((value) => values.includes(value));
+        const hasExcluded = (selected, values) =>
+          selected.length > 0 && selected.some((value) => values.includes(value));
+
+        if (!matchesOrEmpty(include.types, [itemType])) return false;
+        if (!matchesOrEmpty(include.tags, itemTags)) return false;
+        if (!matchesOrEmpty(include.stack, itemStack)) return false;
+        if (!matchesOrEmpty(include.roles, itemRoles)) return false;
+        if (!matchesOrEmpty(include.outcomes, itemOutcomes)) return false;
+        if (hasExcluded(exclude.types, [itemType])) return false;
+        if (hasExcluded(exclude.tags, itemTags)) return false;
+        if (hasExcluded(exclude.stack, itemStack)) return false;
+        if (hasExcluded(exclude.roles, itemRoles)) return false;
+        if (hasExcluded(exclude.outcomes, itemOutcomes)) return false;
+
+        if (sinceTs && itemDate && itemDate < sinceTs) return false;
+        if (untilTs && itemDate && itemDate > untilTs) return false;
+
+        const searchableText = [
+          item.title,
+          item.description,
+          item.url,
+          item.type,
+          ...(item.tags || []),
+          ...(item.stack || []),
+          ...(item.roles || []),
+          ...(item.outcomes || []),
+        ].join(" ");
+
+        const hasAllTerms = include.terms.every((term) => fuzzyScore(searchableText, term) >= 0);
+        if (!hasAllTerms) return false;
+
+        const hasExcludedTerm = exclude.terms.some((term) => fuzzyScore(searchableText, term) >= 0);
+        if (hasExcludedTerm) return false;
+
+        return true;
+      })
+      .map((item) => {
+        const searchableText = [
+          item.title,
+          item.description,
+          item.url,
+          item.date,
+          item.type,
+          ...(item.tags || []),
+          ...(item.stack || []),
+          ...(item.roles || []),
+          ...(item.outcomes || []),
+        ].join(" ");
+
+        const score =
+          (include.terms.length > 0
+            ? include.terms.reduce(
+                (sum, term) => sum + Math.max(0, fuzzyScore(searchableText, term)),
+                0,
+              )
+            : 20) +
+          include.tags.length * 20 +
+          include.types.length * 20 +
+          include.stack.length * 15 +
+          include.roles.length * 15 +
+          include.outcomes.length * 15;
+
+        return { item, score };
+      })
+      .filter((entry) => entry.score >= 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 8);
+  }
+
+  function getActionMatches(query) {
+    const normalized = normalizeValue(query);
+    if (!normalized) return actions;
+
+    return actions.filter((entry) => {
+      const haystack = [entry.title, entry.subtitle, ...entry.keywords].join(" ").toLowerCase();
+      return haystack.includes(normalized);
+    });
+  }
+
+  function buildResults() {
+    const { input } = getPaletteElements();
+    const query = input?.value || "";
+    const actionResults = getActionMatches(query).map((entry) => ({
+      kind: "action",
+      title: entry.title,
+      subtitle: entry.subtitle,
+      meta: "command",
+      run: entry.run,
+    }));
+
+    if (!query.trim()) return actionResults;
+
+    const contentResults = semanticSearch(query).map(({ item }) => ({
+      kind: "content",
+      title: item.title,
+      subtitle: item.description,
+      meta: `@${item.type} ${item.date}`,
+      href: item.url,
+    }));
+
+    return [...actionResults, ...contentResults].slice(0, 12);
+  }
+
+  function getPatternSuggestions(query) {
+    const trimmed = query.trim();
+    const tokens = trimmed.length > 0 ? trimmed.split(/\s+/) : [];
+    const currentTokenRaw = tokens.length > 0 ? tokens[tokens.length - 1] : "";
+    const hasTrailingSpace = /\s$/.test(query);
+
+    if (!currentTokenRaw || hasTrailingSpace) {
+      return [
+        "type:projects",
+        "tag:devops",
+        "stack:astro",
+        "role:platform engineer",
+        "outcome:seo",
+        "since:2025-01-01",
+      ];
+    }
+
+    const negative = currentTokenRaw.startsWith("-");
+    const currentToken = negative ? currentTokenRaw.slice(1) : currentTokenRaw;
+    const addNegation = (value) => (negative ? `-${value}` : value);
+
+    if (currentToken.startsWith("#")) {
+      const prefix = normalizeValue(currentToken.slice(1));
+      return suggestionIndex.tags
+        .filter((value) => value.startsWith(prefix))
+        .slice(0, 8)
+        .map((value) => addNegation(`#${value}`));
+    }
+
+    if (currentToken.startsWith("@")) {
+      const prefix = normalizeValue(currentToken.slice(1));
+      return suggestionIndex.types
+        .filter((value) => value.startsWith(prefix))
+        .slice(0, 8)
+        .map((value) => addNegation(`@${value}`));
+    }
+
+    const separatorIndex = currentToken.indexOf(":");
+    if (separatorIndex !== -1) {
+      const key = normalizeValue(currentToken.slice(0, separatorIndex));
+      const valuePrefix = normalizeValue(currentToken.slice(separatorIndex + 1));
+      const byKey = {
+        type: suggestionIndex.types,
+        tag: suggestionIndex.tags,
+        stack: suggestionIndex.stack,
+        role: suggestionIndex.roles,
+        outcome: suggestionIndex.outcomes,
+      };
+
+      if (key === "since" || key === "until") {
+        return [`${key}:2025-01-01`, `${key}:2025-06-01`, `${key}:2026-01-01`]
+          .filter((value) => value.includes(valuePrefix))
+          .map((value) => addNegation(value));
+      }
+
+      const pool = byKey[key];
+      if (pool) {
+        return pool
+          .filter((value) => value.startsWith(valuePrefix))
+          .slice(0, 8)
+          .map((value) => addNegation(`${key}:${value}`));
+      }
+    }
+
+    const queryPrefix = normalizeValue(currentToken);
+    return operatorHints
+      .filter((value) => value.startsWith(queryPrefix))
+      .slice(0, 8)
+      .map((value) => addNegation(value));
+  }
+
+  function applySuggestion(value) {
+    const { input } = getPaletteElements();
+    if (!input) return;
+
+    const current = input.value;
+    const hasTrailingSpace = /\s$/.test(current);
+    const tokens = current.trim().length > 0 ? current.trim().split(/\s+/) : [];
+
+    if (tokens.length === 0 || hasTrailingSpace) tokens.push(value);
+    else tokens[tokens.length - 1] = value;
+
+    input.value = `${tokens.join(" ")} `;
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.focus();
+  }
+
+  function renderSuggestions() {
+    const { input, suggestions } = getPaletteElements();
+    if (!input || !suggestions) return;
+
+    const items = getPatternSuggestions(input.value || "");
+    suggestions.innerHTML = items
+      .map(
+        (item) => `
+          <button type="button" class="command-pattern-suggestion" data-pattern-suggestion="${escapeHtml(item)}">
+            ${escapeHtml(item)}
+          </button>
+        `,
+      )
+      .join("");
+  }
+
+  const normalizeInternalHref = (href) => {
+    if (!href) return href;
+    try {
+      const url = new URL(href, window.location.origin);
+      if (url.origin !== window.location.origin) return href;
+      if (url.pathname.length > 1 && url.pathname.endsWith("/")) {
+        url.pathname = url.pathname.replace(/\/+$/, "");
+      }
+      return `${url.pathname}${url.search}${url.hash}`;
+    } catch {
+      return href;
+    }
+  };
+
+  const closePalette = () => {
+    const { backdrop, input, suggestions } = getPaletteElements();
+    if (!backdrop || !input || !suggestions) return;
+    backdrop.classList.add("invisible");
+    input.value = "";
+    suggestions.innerHTML = "";
+    currentResults = [];
+    activeIndex = 0;
+  };
+
+  const executeResult = (index) => {
+    const selected = currentResults[index];
+    if (!selected) return;
+    closePalette();
+
+    if (selected.kind === "action") {
+      selected.run();
+      return;
+    }
+
+    if (selected.kind === "content" && selected.href) {
+      window.location.href = normalizeInternalHref(selected.href);
+    }
+  };
+
+  const escapeHtml = (value) =>
+    value
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+
+  const renderResults = () => {
+    const { results } = getPaletteElements();
+    if (!results) return;
+    renderSuggestions();
+    currentResults = buildResults();
+
+    if (currentResults.length === 0) {
+      results.innerHTML =
+        '<li class="rounded-md px-3 py-2 text-sm text-black/60 dark:text-white/60">No matching commands or results.</li>';
+      return;
+    }
+
+    activeIndex = Math.min(activeIndex, currentResults.length - 1);
+
+    results.innerHTML = currentResults
+      .map(
+        (entry, index) => `
+          <li>
+            <button
+              type="button"
+              data-command-index="${index}"
+              class="command-palette-item ${index === activeIndex ? "active" : ""}"
+            >
+              <span class="command-palette-title">${escapeHtml(entry.title)}</span>
+              <span class="command-palette-subtitle">${escapeHtml(entry.subtitle)}</span>
+              ${entry.meta ? `<span class="command-palette-meta">${escapeHtml(entry.meta)}</span>` : ""}
+            </button>
+          </li>
+        `,
+      )
+      .join("");
+  };
+
+  const openPalette = () => {
+    const { backdrop, input } = getPaletteElements();
+    if (!backdrop || !input) return;
+    activeIndex = 0;
+    renderResults();
+    backdrop.classList.remove("invisible");
+    setTimeout(() => {
+      input.focus();
+    }, 0);
+  };
+
+  if (!window.__commandPaletteListenersBound) {
+    window.addEventListener("command-palette:open", () => {
+      openPalette();
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        openPalette();
+        return;
+      }
+
+      if (event.key === "Escape") {
+        closePalette();
+        return;
+      }
+
+      const { backdrop } = getPaletteElements();
+      if (backdrop?.classList.contains("invisible")) return;
+
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        activeIndex = (activeIndex + 1) % Math.max(currentResults.length, 1);
+        renderResults();
+      } else if (event.key === "ArrowUp") {
+        event.preventDefault();
+        activeIndex =
+          (activeIndex - 1 + Math.max(currentResults.length, 1)) % Math.max(currentResults.length, 1);
+        renderResults();
+      } else if (event.key === "Enter") {
+        event.preventDefault();
+        executeResult(activeIndex);
+      }
+    });
+
+    document.addEventListener("input", (event) => {
+      if (!(event.target instanceof HTMLInputElement)) return;
+      if (event.target.id !== "command-palette-input") return;
+      activeIndex = 0;
+      renderResults();
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!(event.target instanceof Element)) return;
+
+      const button = event.target.closest("button[data-command-index]");
+      if (button && button.closest("#command-palette-results")) {
+        const index = Number(button.getAttribute("data-command-index"));
+        executeResult(index);
+        return;
+      }
+
+      const suggestion = event.target.closest("button[data-pattern-suggestion]");
+      if (suggestion && suggestion.closest("#command-palette-suggestions")) {
+        const value = suggestion.getAttribute("data-pattern-suggestion");
+        if (value) applySuggestion(value);
+        return;
+      }
+
+      const backdrop = event.target.closest("#command-palette-backdrop");
+      if (backdrop && !event.target.closest("#command-palette")) {
+        closePalette();
+      }
+    });
+
+    window.__commandPaletteListenersBound = true;
+  }
+</script>
+
+<style is:global>
+  .command-palette-item {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    border-radius: 0.375rem;
+    padding: 0.55rem 0.75rem;
+    text-align: left;
+    transition: background-color 150ms ease-in-out;
+  }
+
+  .command-palette-item:hover,
+  .command-palette-item.active {
+    background: color-mix(in srgb, var(--color-text) 10%, transparent);
+  }
+
+  .command-palette-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .command-palette-subtitle {
+    font-size: 0.78rem;
+    opacity: 0.82;
+  }
+
+  .command-palette-meta {
+    margin-top: 0.1rem;
+    font-size: 0.7rem;
+    opacity: 0.7;
+    text-transform: lowercase;
+  }
+
+  #command-palette-tips code,
+  #command-palette kbd {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 0.72rem;
+    line-height: 1.3;
+  }
+
+  .dark #command-palette-tips code,
+  .dark #command-palette kbd {
+    border-color: rgba(148, 163, 184, 0.35);
+  }
+
+  .command-pattern-suggestion {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 0.72rem;
+    line-height: 1.3;
+    transition: background-color 150ms ease-in-out;
+  }
+
+  .command-pattern-suggestion:hover,
+  .command-pattern-suggestion:focus-visible {
+    background: color-mix(in srgb, var(--color-text) 10%, transparent);
+  }
+
+  .dark .command-pattern-suggestion {
+    border-color: rgba(148, 163, 184, 0.35);
+  }
+</style>
