@@ -134,6 +134,12 @@ devbox shell  # Enter the development environment manually
    R2_PUBLIC_URL=https://your_custom_domain.com
    ```
 
+3. Optional dev-only draft visibility for blog routes:
+   ```
+   PUBLIC_SHOW_DRAFTS_IN_DEV=true
+   ```
+   This only affects local dev (`npm run dev`) and does not expose drafts in production builds.
+
 ### Development
 
 Start the development server:

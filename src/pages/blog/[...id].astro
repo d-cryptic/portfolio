@@ -6,30 +6,33 @@ import FormattedDate from "@components/FormattedDate.astro";
 import { readingTime } from "@lib/utils";
 import BackToPrevious from "@components/BackToPrevious.astro";
 import PostNavigation from "@components/PostNavigation.astro";
+import SeriesNavigation from "@components/SeriesNavigation.astro";
 import TableOfContents from "@components/TableOfContents.astro";
 import { SITE } from "@consts";
 import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
+import { cleanBlogId, getSeriesPosts, isLocalBlogPost } from "@lib/blog-series";
+import { shouldIncludeDraftContent } from "@lib/content-visibility";
 // import Giscus from "@components/Giscus.astro";
 
 export async function getStaticPaths() {
   const posts = (await getCollection("blog"))
-    .filter((post) => !post.data.draft)
+    .filter((post) => shouldIncludeDraftContent(post.data.draft))
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
   return posts.map((post) => ({
-    params: { id: post.id.replace(/\/index\.mdx?$/, '') },
+    params: { id: cleanBlogId(post.id) },
     props: post,
   }));
 }
 type Props = CollectionEntry<"blog">;
 
 const posts = (await getCollection("blog"))
-  .filter((post) => !post.data.draft)
+  .filter((post) => shouldIncludeDraftContent(post.data.draft))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
 function getNextPost() {
   let postIndex;
   for (const post of posts) {
-    if (post.id.replace(/\/index\.mdx?$/, '') === Astro.params.id) {
+    if (cleanBlogId(post.id) === Astro.params.id) {
       postIndex = posts.indexOf(post);
       return posts[postIndex + 1];
     }
@@ -39,7 +42,7 @@ function getNextPost() {
 function getPrevPost() {
   let postIndex;
   for (const post of posts) {
-    if (post.id.replace(/\/index\.mdx?$/, '') === Astro.params.id) {
+    if (cleanBlogId(post.id) === Astro.params.id) {
       postIndex = posts.indexOf(post);
       return posts[postIndex - 1];
     }
@@ -50,8 +53,19 @@ const nextPost = getNextPost();
 const prevPost = getPrevPost();
 
 const post = Astro.props;
+const seriesPosts =
+  isLocalBlogPost(post) && post.data.series ? getSeriesPosts(posts, post.data.series) : [];
+const currentSeriesIndex = seriesPosts.findIndex(
+  (seriesPost) => cleanBlogId(seriesPost.id) === cleanBlogId(post.id),
+);
+const previousInSeries =
+  currentSeriesIndex > 0 ? seriesPosts[currentSeriesIndex - 1] : undefined;
+const nextInSeries =
+  currentSeriesIndex >= 0 && currentSeriesIndex < seriesPosts.length - 1
+    ? seriesPosts[currentSeriesIndex + 1]
+    : undefined;
 const { Content, headings } = await render(post);
-const postPath = `/blog/${post.id.replace(/\/index\.mdx?$/, "")}`;
+const postPath = `/blog/${cleanBlogId(post.id)}`;
 const postUrl = toAbsoluteUrl(postPath);
 ---
 
@@ -124,9 +138,33 @@ const postUrl = toAbsoluteUrl(postPath);
         ) : null
       }
     </div>
+    {
+      seriesPosts.length > 1 && (
+        <div class="mt-10 mb-6">
+          <SeriesNavigation
+            currentPost={post}
+            seriesPosts={seriesPosts}
+            previousInSeries={previousInSeries}
+            nextInSeries={nextInSeries}
+          />
+        </div>
+      )
+    }
     {headings.length > 0 && <TableOfContents headings={headings} />}
     <article class="animate">
       <Content />
+      {
+        seriesPosts.length > 1 && (
+          <div class="mt-16">
+            <SeriesNavigation
+              currentPost={post}
+              seriesPosts={seriesPosts}
+              previousInSeries={previousInSeries}
+              nextInSeries={nextInSeries}
+            />
+          </div>
+        )
+      }
       <div class="mt-24">
         <PostNavigation prevPost={prevPost} nextPost={nextPost} path={"blog"}/>
       </div>

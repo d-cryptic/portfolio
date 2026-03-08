@@ -1,0 +1,67 @@
+---
+import { cleanBlogId } from "@lib/blog-series";
+import type { CollectionEntry } from "astro:content";
+
+type BlogEntry = CollectionEntry<"blog">;
+
+interface Props {
+  currentPost: BlogEntry;
+  seriesPosts: BlogEntry[];
+  previousInSeries?: BlogEntry;
+  nextInSeries?: BlogEntry;
+}
+
+const { currentPost, seriesPosts, previousInSeries, nextInSeries } = Astro.props as Props;
+const currentPart = seriesPosts.findIndex(
+  (post) => cleanBlogId(post.id) === cleanBlogId(currentPost.id),
+) + 1;
+const totalParts = seriesPosts.length;
+const firstPart = seriesPosts[0];
+const seriesName = currentPost.data.series ?? "Series";
+
+const toBlogPath = (post: BlogEntry): string => `/blog/${cleanBlogId(post.id)}`;
+---
+
+<section class="rounded-lg border border-black/15 p-4 dark:border-white/20">
+  <div class="space-y-1">
+    <p class="text-xs uppercase tracking-wide text-black/60 dark:text-white/60">Series</p>
+    <p class="text-sm font-semibold text-black dark:text-white">{seriesName}</p>
+    <p class="text-sm text-black/70 dark:text-white/70">
+      Part {currentPart} of {totalParts}
+    </p>
+  </div>
+
+  <div class="mt-4 flex flex-wrap gap-2">
+    {
+      firstPart && cleanBlogId(firstPart.id) !== cleanBlogId(currentPost.id) && (
+        <a
+          href={toBlogPath(firstPart)}
+          class="rounded-md border border-black/20 px-3 py-1.5 text-sm transition-colors hover:bg-black/5 dark:border-white/25 dark:hover:bg-white/5"
+        >
+          Start from Part 1
+        </a>
+      )
+    }
+    {
+      previousInSeries && (
+        <a
+          href={toBlogPath(previousInSeries)}
+          class="rounded-md border border-black/20 px-3 py-1.5 text-sm transition-colors hover:bg-black/5 dark:border-white/25 dark:hover:bg-white/5"
+        >
+          Previous Part
+        </a>
+      )
+    }
+    {
+      nextInSeries && (
+        <a
+          href={toBlogPath(nextInSeries)}
+          class="rounded-md border border-black/20 px-3 py-1.5 text-sm transition-colors hover:bg-black/5 dark:border-white/25 dark:hover:bg-white/5"
+        >
+          Next Part
+        </a>
+      )
+    }
+  </div>
+</section>
+

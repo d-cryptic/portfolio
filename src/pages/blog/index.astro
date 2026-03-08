@@ -5,9 +5,13 @@ import Container from "@components/Container.astro";
 import ArrowCard from "@components/ArrowCard.astro";
 import { BLOG } from "@consts";
 import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
+import { isLocalBlogPost, normalizeSeriesKey } from "@lib/blog-series";
+import { shouldIncludeDraftContent } from "@lib/content-visibility";
 
 // Get all blog posts
-const allBlogPosts = await getCollection("blog", ({ data }) => !data.draft);
+const allBlogPosts = await getCollection("blog", ({ data }) =>
+  shouldIncludeDraftContent(data.draft),
+);
 
 // Sort all posts by date (newest first)
 const sortedPosts = allBlogPosts
@@ -20,8 +24,41 @@ const sortedPosts = allBlogPosts
   }))
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
+const seenSeries = new Set<string>();
+const seriesCounts = sortedPosts.reduce((acc: Record<string, number>, post) => {
+  if (!isLocalBlogPost(post) || !post.data.series) {
+    return acc;
+  }
+
+  const seriesKey = normalizeSeriesKey(post.data.series);
+  if (!seriesKey) {
+    return acc;
+  }
+
+  acc[seriesKey] = (acc[seriesKey] ?? 0) + 1;
+  return acc;
+}, {});
+
+const dedupedPosts = sortedPosts.filter((post) => {
+  if (!isLocalBlogPost(post) || !post.data.series) {
+    return true;
+  }
+
+  const seriesKey = normalizeSeriesKey(post.data.series);
+  if (!seriesKey) {
+    return true;
+  }
+
+  if (seenSeries.has(seriesKey)) {
+    return false;
+  }
+
+  seenSeries.add(seriesKey);
+  return true;
+});
+
 // Group by year
-const postsByYear = sortedPosts.reduce((acc: { [key: string]: typeof sortedPosts }, post) => {
+const postsByYear = dedupedPosts.reduce((acc: { [key: string]: typeof dedupedPosts }, post) => {
   const year = post.data.date.getFullYear().toString();
   if (!acc[year]) {
     acc[year] = [];
@@ -78,7 +115,10 @@ const years = Object.keys(postsByYear).sort((a, b) => parseInt(b) - parseInt(a))
                             body: post.body,
                             // Handle redirected posts
                             redirected: post.data.redirected || false,
-                            redirectedUrl: post.data.redirectedUrl
+                            redirectedUrl: post.data.redirectedUrl,
+                            seriesPartCount: post.data.series
+                              ? seriesCounts[normalizeSeriesKey(post.data.series)]
+                              : undefined,
                           }
                         }} />
                       </li>
