@@ -44,6 +44,12 @@ export const PROJECTS: Metadata = {
     "A collection of my adventures in code, infrastructure, and everything in between. From production systems to personal experiments.",
 };
 
+export const NOW: Metadata = {
+  TITLE: "Now",
+  DESCRIPTION:
+    "A living snapshot of what I am focused on, shipping, learning, and exploring right now.",
+};
+
 export const SOCIALS: Socials = [
   { NAME: "X (formerly Twitter)", HREF: "https://x.com/barundebnath" },
   { NAME: "GitHub", HREF: "https://github.com/d-cryptic" },
