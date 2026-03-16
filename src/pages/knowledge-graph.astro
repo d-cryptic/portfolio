@@ -153,9 +153,8 @@ const lineEdges = graph.edges
             y1={centerY}
             x2={centerX}
             y2={centerY}
-            stroke="currentColor"
+            stroke="rgba(148,163,184,0.34)"
             stroke-width="1"
-            class="text-black/22 dark:text-white/12"
             data-edge
             data-from={edge.from}
             data-to={edge.to}
@@ -177,15 +176,16 @@ const lineEdges = graph.edges
                 cy={node.y}
                 r={node.collection === "notes" ? 7 : 6}
                 data-base-r={node.collection === "notes" ? "7" : "6"}
-                class={node.collection === "notes"
-                  ? "fill-sky-300/75"
-                  : "fill-violet-300/70"}
+                fill={node.collection === "notes"
+                  ? "rgba(125,211,252,0.82)"
+                  : "rgba(196,181,253,0.8)"}
               />
               <title>{node.title}</title>
               <text
                 x={node.x + 10}
                 y={node.y + 4}
-                class="fill-current text-[11px] text-white/80"
+                fill="rgba(241,245,249,0.82)"
+                class="text-[11px]"
                 data-label
                 display={showLabelsByDefault ? "inline" : "none"}
               >
@@ -321,10 +321,11 @@ const lineEdges = graph.edges
       };
 
       const updateHoverStyles = () => {
+        const baseEdgeStroke = "rgba(148,163,184,0.34)";
         const activeEdgeStroke = () =>
           document.documentElement.classList.contains("dark")
             ? "rgba(255,255,255,0.82)"
-            : "rgba(14,103,79,0.94)";
+            : "rgba(224,242,254,0.95)";
 
         if (!hoveredNodeId) {
           simNodes.forEach((node) => {
@@ -334,7 +335,7 @@ const lineEdges = graph.edges
           simEdges.forEach(({ edge }) => {
             edge.setAttribute("opacity", "0.6");
             edge.setAttribute("stroke-width", "1");
-            edge.setAttribute("stroke", "currentColor");
+            edge.setAttribute("stroke", baseEdgeStroke);
           });
           return;
         }
@@ -358,7 +359,7 @@ const lineEdges = graph.edges
           const active = source.id === hoveredNodeId || target.id === hoveredNodeId;
           edge.setAttribute("opacity", active ? "1" : "0.1");
           edge.setAttribute("stroke-width", active ? "2.4" : "1");
-          edge.setAttribute("stroke", active ? activeEdgeStroke() : "currentColor");
+          edge.setAttribute("stroke", active ? activeEdgeStroke() : baseEdgeStroke);
         });
       };
 
