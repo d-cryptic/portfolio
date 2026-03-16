@@ -5,6 +5,7 @@ import Container from "@components/Container.astro";
 import LiveFilters from "@components/LiveFilters.astro";
 import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
 import { buildExplorerItems } from "@lib/live-filters";
+import { shouldIncludeKnowledgeContent } from "@lib/content-visibility";
 
 const blog = (await getCollection("blog"))
   .filter((post) => !post.data.draft)
@@ -15,11 +16,11 @@ const projects = (await getCollection("projects"))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
 const notes = (await getCollection("notes"))
-  .filter((note) => !note.data.draft)
+  .filter((note) => shouldIncludeKnowledgeContent({ draft: note.data.draft, tags: note.data.tags }))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
 const snippets = (await getCollection("snippets"))
-  .filter((snippet) => !snippet.data.draft)
+  .filter((snippet) => shouldIncludeKnowledgeContent({ draft: snippet.data.draft, tags: snippet.data.tags }))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
 const explorerItems = buildExplorerItems({

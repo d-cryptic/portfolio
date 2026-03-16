@@ -3,11 +3,11 @@ import { getCollection } from "astro:content";
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/Container.astro";
 import { cleanContentId } from "@lib/content-paths";
-import { shouldIncludeDraftContent } from "@lib/content-visibility";
+import { shouldIncludeKnowledgeContent } from "@lib/content-visibility";
 import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
 
 const notes = (await getCollection("notes"))
-  .filter((entry) => shouldIncludeDraftContent(entry.data.draft))
+  .filter((entry) => shouldIncludeKnowledgeContent({ draft: entry.data.draft, tags: entry.data.tags }))
   .map((entry) => ({
     title: entry.data.title,
     description: entry.data.description,

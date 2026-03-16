@@ -1,9 +1,11 @@
 ---
 import { getCollection } from "astro:content";
 import { cleanContentId } from "@lib/content-paths";
-import { shouldIncludeDraftContent } from "@lib/content-visibility";
+import { shouldIncludeKnowledgeContent } from "@lib/content-visibility";
 
-const notes = (await getCollection("notes", ({ data }) => shouldIncludeDraftContent(data.draft))).map(
+const notes = (await getCollection("notes", ({ data }) =>
+  shouldIncludeKnowledgeContent({ draft: data.draft, tags: data.tags }),
+)).map(
   (entry) => `/notes/${cleanContentId(entry.id)}`,
 );
 const fallback = "/notes";

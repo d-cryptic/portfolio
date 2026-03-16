@@ -2,11 +2,15 @@
 import { getCollection } from "astro:content";
 import Layout from "@layouts/Layout.astro";
 import { buildLinkGraph } from "@lib/content-links";
-import { shouldIncludeDraftContent } from "@lib/content-visibility";
+import { shouldIncludeKnowledgeContent } from "@lib/content-visibility";
 import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
 
-const notes = (await getCollection("notes")).filter((entry) => shouldIncludeDraftContent(entry.data.draft));
-const snippets = (await getCollection("snippets")).filter((entry) => shouldIncludeDraftContent(entry.data.draft));
+const notes = (await getCollection("notes")).filter((entry) =>
+  shouldIncludeKnowledgeContent({ draft: entry.data.draft, tags: entry.data.tags }),
+);
+const snippets = (await getCollection("snippets")).filter((entry) =>
+  shouldIncludeKnowledgeContent({ draft: entry.data.draft, tags: entry.data.tags }),
+);
 
 const graph = buildLinkGraph([...notes, ...snippets]);
 

@@ -8,14 +8,14 @@ import KnowledgeGraph from "@components/KnowledgeGraph.astro";
 import { NOTES } from "@consts";
 import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
 import { buildLinkGraph, findOrphans } from "@lib/content-links";
-import { shouldIncludeDraftContent } from "@lib/content-visibility";
+import { shouldIncludeKnowledgeContent } from "@lib/content-visibility";
 
 const notes = (await getCollection("notes"))
-  .filter((post) => shouldIncludeDraftContent(post.data.draft))
+  .filter((post) => shouldIncludeKnowledgeContent({ draft: post.data.draft, tags: post.data.tags }))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
 const snippets = (await getCollection("snippets"))
-  .filter((post) => shouldIncludeDraftContent(post.data.draft))
+  .filter((post) => shouldIncludeKnowledgeContent({ draft: post.data.draft, tags: post.data.tags }))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
 const groupedByYear = notes.reduce(
