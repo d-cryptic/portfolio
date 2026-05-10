@@ -33,6 +33,15 @@ const {
 
 const enableAnalytics = import.meta.env.PUBLIC_ENABLE_ANALYTICS === "true";
 const gtmId = import.meta.env.PUBLIC_GTM_ID;
+const hiddenFromIndexRoutes = new Set(["/wins", "/uses"]);
+const hiddenFromIndexPrefixes = ["/notes", "/snippets"];
+const currentPathname = Astro.url.pathname.replace(/\/$/, "") || "/";
+const hiddenFromIndex =
+  hiddenFromIndexRoutes.has(currentPathname) ||
+  hiddenFromIndexPrefixes.some(
+    (prefix) => currentPathname === prefix || currentPathname.startsWith(`${prefix}/`),
+  );
+const robotsNoindex = noindex || hiddenFromIndex;
 const baseSchemas = [websiteJsonLd(), personJsonLd()];
 const mergedSchema = Array.isArray(schema)
   ? [...baseSchemas, ...schema]
@@ -49,7 +58,7 @@ const mergedSchema = Array.isArray(schema)
       title={`${title} | ${SITE.TITLE}`}
       description={description}
       image={image}
-      noindex={noindex}
+      noindex={robotsNoindex}
       ogType={ogType}
       publishedTime={publishedTime}
       modifiedTime={modifiedTime}

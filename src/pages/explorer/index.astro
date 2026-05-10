@@ -5,7 +5,6 @@ import Container from "@components/Container.astro";
 import LiveFilters from "@components/LiveFilters.astro";
 import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
 import { buildExplorerItems } from "@lib/live-filters";
-import { shouldIncludeKnowledgeContent } from "@lib/content-visibility";
 
 const blog = (await getCollection("blog"))
   .filter((post) => !post.data.draft)
@@ -15,19 +14,11 @@ const projects = (await getCollection("projects"))
   .filter((project) => !project.data.draft)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
-const notes = (await getCollection("notes"))
-  .filter((note) => shouldIncludeKnowledgeContent({ draft: note.data.draft, tags: note.data.tags }))
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
-
-const snippets = (await getCollection("snippets"))
-  .filter((snippet) => shouldIncludeKnowledgeContent({ draft: snippet.data.draft, tags: snippet.data.tags }))
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
-
 const explorerItems = buildExplorerItems({
   blog,
   projects,
-  notes,
-  snippets,
+  notes: [],
+  snippets: [],
   pages: [
     {
       id: "page:home",
@@ -68,7 +59,7 @@ const explorerItems = buildExplorerItems({
 
 <Layout
   title="Content Explorer"
-  description="Filter blog posts, projects, notes, snippets, and pages by stack, role, and outcome."
+  description="Filter blog posts, projects, and pages by stack, role, and outcome."
   keywords={["content explorer", "blog filters", "projects filters", "sre"]}
   schema={[
     breadcrumbJsonLd([
@@ -90,7 +81,7 @@ const explorerItems = buildExplorerItems({
         <div class="animate space-y-2">
           <h1 class="font-semibold text-black dark:text-white">Content Explorer</h1>
           <p class="text-sm text-black/70 dark:text-white/70">
-            Filter blog, projects, notes, snippets, and pages by stack, role, and outcome.
+            Filter blog, projects, and pages by stack, role, and outcome.
           </p>
         </div>
         <LiveFilters items={explorerItems} />

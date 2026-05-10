@@ -1,13 +1,10 @@
 ---
 import Search from "astro-pagefind/components/Search";
 import { getCollection } from "astro:content";
-import { cleanContentId } from "@lib/content-paths";
 
-const [blogPosts, projectPosts, notesPosts, snippetPosts] = await Promise.all([
+const [blogPosts, projectPosts] = await Promise.all([
   getCollection("blog", ({ data }) => !data.draft),
   getCollection("projects", ({ data }) => !data.draft),
-  getCollection("notes", ({ data }) => !data.draft),
-  getCollection("snippets", ({ data }) => !data.draft),
 ]);
 
 const searchItems = [
@@ -32,28 +29,6 @@ const searchItems = [
     roles: project.data.roles || [],
     outcomes: project.data.outcomes || [],
     date: project.data.date.toISOString().slice(0, 10),
-  })),
-  ...notesPosts.map((note) => ({
-    title: note.data.title,
-    description: note.data.description,
-    url: `/notes/${cleanContentId(note.id)}`,
-    type: "notes",
-    tags: note.data.tags || [],
-    stack: note.data.stack || [],
-    roles: note.data.roles || [],
-    outcomes: note.data.outcomes || [],
-    date: note.data.date.toISOString().slice(0, 10),
-  })),
-  ...snippetPosts.map((snippet) => ({
-    title: snippet.data.title,
-    description: snippet.data.description,
-    url: `/snippets/${cleanContentId(snippet.id)}`,
-    type: "snippets",
-    tags: snippet.data.tags || [],
-    stack: snippet.data.stack || [],
-    roles: snippet.data.roles || [],
-    outcomes: snippet.data.outcomes || [],
-    date: snippet.data.date.toISOString().slice(0, 10),
   })),
   {
     title: "Content Explorer",

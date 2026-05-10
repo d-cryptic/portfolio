@@ -2,11 +2,9 @@ import { SITE } from "@consts";
 import { getCollection } from "astro:content";
 
 export async function GET() {
-  const [blogPosts, projectPosts, notesPosts, snippetPosts] = await Promise.all([
+  const [blogPosts, projectPosts] = await Promise.all([
     getCollection("blog", ({ data }) => !data.draft),
     getCollection("projects", ({ data }) => !data.draft),
-    getCollection("notes", ({ data }) => !data.draft),
-    getCollection("snippets", ({ data }) => !data.draft),
   ]);
 
   const response = {
@@ -40,8 +38,6 @@ export async function GET() {
     coverage: {
       blogPosts: blogPosts.length,
       projects: projectPosts.length,
-      notes: notesPosts.length,
-      snippets: snippetPosts.length,
       updatedAt: new Date().toISOString(),
     },
     topics: [

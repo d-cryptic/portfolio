@@ -1,6 +1,5 @@
 import { SITE } from "@consts";
 import { getCollection } from "astro:content";
-import { cleanContentId } from "@lib/content-paths";
 
 const renderSection = (
   label: string,
@@ -18,11 +17,9 @@ const renderSection = (
 };
 
 export async function GET() {
-  const [blogPosts, projects, notes, snippets] = await Promise.all([
+  const [blogPosts, projects] = await Promise.all([
     getCollection("blog", ({ data }) => !data.draft),
     getCollection("projects", ({ data }) => !data.draft),
-    getCollection("notes", ({ data }) => !data.draft),
-    getCollection("snippets", ({ data }) => !data.draft),
   ]);
 
   const lines = [
@@ -51,26 +48,6 @@ export async function GET() {
         date: project.data.date,
         url: `${SITE.URL}/projects/${project.id}`,
         tags: project.data.tags || [],
-      })),
-    ),
-    ...renderSection(
-      "Notes",
-      notes.map((note) => ({
-        title: note.data.title,
-        description: note.data.description,
-        date: note.data.date,
-        url: `${SITE.URL}/notes/${cleanContentId(note.id)}`,
-        tags: note.data.tags || [],
-      })),
-    ),
-    ...renderSection(
-      "Snippets",
-      snippets.map((snippet) => ({
-        title: snippet.data.title,
-        description: snippet.data.description,
-        date: snippet.data.date,
-        url: `${SITE.URL}/snippets/${cleanContentId(snippet.id)}`,
-        tags: snippet.data.tags || [],
       })),
     ),
   ];

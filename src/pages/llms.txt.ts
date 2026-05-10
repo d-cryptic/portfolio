@@ -2,11 +2,9 @@ import { SITE } from "@consts";
 import { getCollection } from "astro:content";
 
 export async function GET() {
-  const [blogPosts, projectPosts, notesPosts, snippetPosts] = await Promise.all([
+  const [blogPosts, projectPosts] = await Promise.all([
     getCollection("blog", ({ data }) => !data.draft),
     getCollection("projects", ({ data }) => !data.draft),
-    getCollection("notes", ({ data }) => !data.draft),
-    getCollection("snippets", ({ data }) => !data.draft),
   ]);
 
   const topBlog = blogPosts
@@ -30,8 +28,6 @@ export async function GET() {
     `- Home: ${SITE.URL}/`,
     `- Blog: ${SITE.URL}/blog`,
     `- Projects: ${SITE.URL}/projects`,
-    `- Notes: ${SITE.URL}/notes`,
-    `- Snippets: ${SITE.URL}/snippets`,
     `- Tags: ${SITE.URL}/tags`,
     `- RSS: ${SITE.URL}/rss.xml`,
     `- Sitemap: ${SITE.URL}/sitemap-index.xml`,
@@ -47,8 +43,6 @@ export async function GET() {
     `## Coverage`,
     `- Blog posts: ${blogPosts.length}`,
     `- Projects: ${projectPosts.length}`,
-    `- Notes: ${notesPosts.length}`,
-    `- Snippets: ${snippetPosts.length}`,
     "",
     "## Retrieval Guidance",
     "- Prefer canonical URLs under barundebnath.com.",

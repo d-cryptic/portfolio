@@ -25,45 +25,6 @@ import { SITE } from "@consts";
           {`/`}
         </span>
         <Link href="/explorer">explorer</Link>
-        <span>
-          {`/`}
-        </span>
-        <div class="relative">
-          <button
-            type="button"
-            id="desktop-more-button"
-            aria-haspopup="true"
-            aria-expanded="false"
-            class="inline-flex items-center gap-1 underline-offset-8 transition-colors duration-200 hover:underline focus-visible:underline"
-          >
-            more
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="mt-0.5"
-            >
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          </button>
-          <div
-            id="desktop-more-menu"
-            class="pointer-events-none absolute right-0 top-full z-20 mt-2 min-w-[9rem] rounded-md border border-black/15 bg-[var(--color-background)] p-2 opacity-0 shadow-lg transition-all duration-150 ease-in-out dark:border-white/20"
-          >
-            <nav class="flex flex-col gap-1 text-sm">
-              <Link href="/wins">wins</Link>
-              <Link href="/uses">uses</Link>
-              <Link href="/notes">notes</Link>
-              <Link href="/snippets">snippets</Link>
-            </nav>
-          </div>
-        </div>
 
         <ThemeToggle />
         <button
@@ -168,10 +129,6 @@ import { SITE } from "@consts";
             <Link href="/blog">blog</Link>
             <Link href="/projects">projects</Link>
             <Link href="/explorer">explorer</Link>
-            <Link href="/wins">wins</Link>
-            <Link href="/uses">uses</Link>
-            <Link href="/notes">notes</Link>
-            <Link href="/snippets">snippets</Link>
           </nav>
         </div>
       </div>
@@ -188,24 +145,6 @@ import { SITE } from "@consts";
   const mobileNav = document.getElementById("mobile-nav");
   const mobileNavLinks = mobileNav?.querySelectorAll("a");
   const mainContent = document.querySelector("main");
-  const desktopMoreButton = document.getElementById("desktop-more-button");
-  const desktopMoreMenu = document.getElementById("desktop-more-menu");
-  const desktopMoreLinks = desktopMoreMenu?.querySelectorAll("a");
-  let desktopMoreOpen = false;
-
-  function openDesktopMore() {
-    if (!desktopMoreMenu || !desktopMoreButton) return;
-    desktopMoreOpen = true;
-    desktopMoreMenu.classList.remove("pointer-events-none", "opacity-0");
-    desktopMoreButton.setAttribute("aria-expanded", "true");
-  }
-
-  function closeDesktopMore() {
-    if (!desktopMoreMenu || !desktopMoreButton) return;
-    desktopMoreOpen = false;
-    desktopMoreMenu.classList.add("pointer-events-none", "opacity-0");
-    desktopMoreButton.setAttribute("aria-expanded", "false");
-  }
 
   function toggleMenu() {
     if (mobileMenu?.classList.contains("hidden")) {
@@ -245,18 +184,10 @@ import { SITE } from "@consts";
 
   mobileMenuButton?.addEventListener("click", toggleMenu);
   mobileMenuClose?.addEventListener("click", toggleMenu);
-  desktopMoreButton?.addEventListener("click", (event) => {
-    event.stopPropagation();
-    if (desktopMoreOpen) closeDesktopMore();
-    else openDesktopMore();
-  });
 
   // Close menu when clicking on navigation links
   mobileNavLinks?.forEach((link) => {
     link.addEventListener("click", closeMenu);
-  });
-  desktopMoreLinks?.forEach((link) => {
-    link.addEventListener("click", closeDesktopMore);
   });
 
   // Ensure search functionality works on mobile
@@ -265,21 +196,5 @@ import { SITE } from "@consts";
   });
   magnifyingGlass?.addEventListener("click", () => {
     window.dispatchEvent(new CustomEvent("command-palette:open"));
-  });
-  document.addEventListener("click", (event) => {
-    if (!desktopMoreOpen) return;
-    if (
-      event.target instanceof Element &&
-      !event.target.closest("#desktop-more-menu") &&
-      !event.target.closest("#desktop-more-button")
-    ) {
-      closeDesktopMore();
-    }
-  });
-
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") {
-      closeDesktopMore();
-    }
   });
 </script>
