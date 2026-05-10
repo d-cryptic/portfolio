@@ -134,15 +134,6 @@
     transform: scale(0.95);
   }
 
-  /* Specific animation for theme toggle */
-  .theme-toggle:hover svg {
-    transform: rotate(15deg) scale(1.1);
-  }
-
-  .theme-toggle:active svg {
-    transform: rotate(0) scale(0.95);
-  }
-
   /* Progressive loading animation */
   .progressive-load {
     opacity: 0;

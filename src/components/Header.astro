@@ -1,7 +1,6 @@
 ---
 import Container from "@components/Container.astro";
 import Link from "@components/Link.astro";
-import ThemeToggle from "@components/ThemeToggle.astro";
 import { SITE } from "@consts";
 ---
 
@@ -26,7 +25,6 @@ import { SITE } from "@consts";
         </span>
         <Link href="/explorer">explorer</Link>
 
-        <ThemeToggle />
         <button
           id="magnifying-glass"
           aria-label="Search"
@@ -56,7 +54,6 @@ import { SITE } from "@consts";
 
       <!-- Mobile Navigation -->
       <div class="flex items-center gap-2 lg:hidden">
-        <ThemeToggle />
         <button
           id="mobile-search-button"
           aria-label="Search"

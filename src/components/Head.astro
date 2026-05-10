@@ -70,8 +70,7 @@ const jsonLd = Array.isArray(schema) ? schema : schema ? [schema] : [];
 <meta name="robots" content={robots} />
 <meta name="referrer" content="strict-origin-when-cross-origin" />
 <meta name="format-detection" content="telephone=no" />
-<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-<meta name="theme-color" content="#171717" media="(prefers-color-scheme: dark)" />
+<meta name="theme-color" content="#ffffff" />
 {keywords.length > 0 && <meta name="keywords" content={keywords.join(", ")} />}
 
 <!-- Open Graph / Facebook -->
@@ -111,7 +110,6 @@ const jsonLd = Array.isArray(schema) ? schema : schema ? [schema] : [];
     preloadTheme();
     onScroll();
     animate();
-    updateThemeButtons();
     addCopyCodeButtons();
     setGiscusTheme();
 
@@ -121,67 +119,9 @@ const jsonLd = Array.isArray(schema) ? schema : schema ? [schema] : [];
     const backToPrev = document.getElementById("back-to-prev");
     backToPrev?.addEventListener("click", () => window.history.back());
 
-    const lightThemeButton = document.getElementById("light-theme-button");
-    lightThemeButton?.addEventListener("click", () => {
-      localStorage.setItem("theme", "light");
-      toggleTheme(false);
-      updateThemeButtons();
-    });
-
-    const darkThemeButton = document.getElementById("dark-theme-button");
-    darkThemeButton?.addEventListener("click", () => {
-      localStorage.setItem("theme", "dark");
-      toggleTheme(true);
-      updateThemeButtons();
-    });
-
-    const systemThemeButton = document.getElementById("system-theme-button");
-    systemThemeButton?.addEventListener("click", () => {
-      localStorage.setItem("theme", "system");
-      toggleTheme(window.matchMedia("(prefers-color-scheme: dark)").matches);
-      updateThemeButtons();
-    });
-
-    window
-      .matchMedia("(prefers-color-scheme: dark)")
-      .addEventListener("change", (event) => {
-        if (localStorage.theme === "system") {
-          toggleTheme(event.matches);
-        }
-      });
-
     if (hasWindow && !window.__siteGlobalListenersBound) {
       document.addEventListener("scroll", onScroll);
       window.__siteGlobalListenersBound = true;
-    }
-  }
-
-  function updateThemeButtons() {
-    const theme = localStorage.getItem("theme");
-    const lightThemeButton = document.getElementById("light-theme-button");
-    const darkThemeButton = document.getElementById("dark-theme-button");
-    const systemThemeButton = document.getElementById("system-theme-button");
-
-    function removeActiveButtonTheme(button) {
-      button?.classList.remove("bg-black/5");
-      button?.classList.remove("dark:bg-white/5");
-    }
-
-    function addActiveButtonTheme(button) {
-      button?.classList.add("bg-black/5");
-      button?.classList.add("dark:bg-white/5");
-    }
-
-    removeActiveButtonTheme(lightThemeButton);
-    removeActiveButtonTheme(darkThemeButton);
-    removeActiveButtonTheme(systemThemeButton);
-
-    if (theme === "light") {
-      addActiveButtonTheme(lightThemeButton);
-    } else if (theme === "dark") {
-      addActiveButtonTheme(darkThemeButton);
-    } else {
-      addActiveButtonTheme(systemThemeButton);
     }
   }
 
@@ -208,7 +148,7 @@ const jsonLd = Array.isArray(schema) ? schema : schema ? [schema] : [];
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function toggleTheme(dark) {
+  function applyLightTheme() {
     const css = document.createElement("style");
 
     css.appendChild(
@@ -226,11 +166,9 @@ const jsonLd = Array.isArray(schema) ? schema : schema ? [schema] : [];
 
     document.head.appendChild(css);
 
-    if (dark) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
+    document.documentElement.classList.remove("dark");
+    document.documentElement.style.colorScheme = "light";
+    document.documentElement.setAttribute("data-theme", "light");
 
     window.getComputedStyle(css).opacity;
     document.head.removeChild(css);
@@ -239,13 +177,7 @@ const jsonLd = Array.isArray(schema) ? schema : schema ? [schema] : [];
   }
 
   function preloadTheme() {
-    const userTheme = localStorage.theme;
-
-    if (userTheme === "light" || userTheme === "dark") {
-      toggleTheme(userTheme === "dark");
-    } else {
-      toggleTheme(window.matchMedia("(prefers-color-scheme: dark)").matches);
-    }
+    applyLightTheme();
   }
 
   function addCopyCodeButtons() {
@@ -293,11 +225,9 @@ const jsonLd = Array.isArray(schema) ? schema : schema ? [schema] : [];
   const setGiscusTheme = () => {
     const giscus = document.querySelector(".giscus-frame");
 
-    const isDark = document.documentElement.classList.contains("dark");
-
     if (giscus) {
       const url = new URL(giscus.src);
-      url.searchParams.set("theme", isDark ? "dark" : "light");
+      url.searchParams.set("theme", "light");
       giscus.src = url.toString();
     }
   };

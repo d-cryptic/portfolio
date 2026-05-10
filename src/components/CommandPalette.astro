@@ -302,17 +302,6 @@ const searchItems = [
         window.open(resumeUrl, "_blank", "noopener,noreferrer");
       },
     },
-    {
-      title: "Toggle Theme",
-      subtitle: "Switch between light and dark",
-      keywords: ["theme", "dark", "light"],
-      run: () => {
-        const themeToggle = document.querySelector("#theme-toggle");
-        if (themeToggle instanceof HTMLButtonElement) {
-          themeToggle.click();
-        }
-      },
-    },
   ];
 
   const normalizeValue = (value) => value.toLowerCase().trim();
