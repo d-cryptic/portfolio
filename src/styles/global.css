@@ -340,7 +340,6 @@ html.scrolled #back-to-top {
 .blog-card,
 .quest-stat-card {
   position: relative;
-  display: block;
   overflow: hidden;
   border: 1px solid color-mix(in srgb, #000 15%, transparent);
   border-radius: 0.5rem;
@@ -354,6 +353,20 @@ html.scrolled #back-to-top {
     border-color 180ms ease,
     box-shadow 180ms ease,
     background-color 180ms ease;
+}
+
+.blog-card {
+  display: flex;
+  min-height: 9.75rem;
+  flex-direction: column;
+}
+
+.blog-card--compact {
+  min-height: 8.75rem;
+}
+
+.quest-stat-card {
+  display: block;
 }
 
 .blog-card:hover,
@@ -398,6 +411,25 @@ html.scrolled #back-to-top {
   font-size: 0.875rem;
   line-height: 1.5rem;
   transition: transform 180ms ease;
+}
+
+.blog-card__title {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.blog-card__description {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.blog-card__chips {
+  margin-top: auto;
+  padding-top: 0.75rem;
 }
 
 .blog-card:hover .blog-card__arrow,
