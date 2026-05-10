@@ -121,9 +121,8 @@ const mergedSchema = Array.isArray(schema)
     <Footer />
     <Pagefind />
     <CommandPalette />
-    <script is:inline>
+    <script is:inline define:vars={{ isProd: import.meta.env.PROD }}>
       if (typeof window !== "undefined" && "serviceWorker" in navigator) {
-        const isProd = import.meta.env.PROD;
         window.addEventListener("load", async () => {
           if (isProd) {
             navigator.serviceWorker.register("/sw.js").catch(() => undefined);

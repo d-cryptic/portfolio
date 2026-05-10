@@ -337,6 +337,112 @@ html.scrolled #back-to-top {
   @apply pointer-events-auto opacity-100;
 }
 
+.blog-card,
+.quest-stat-card {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, #000 15%, transparent);
+  border-radius: 0.5rem;
+  background:
+    linear-gradient(135deg, rgb(255 255 255 / 0.42), transparent 46%),
+    color-mix(in srgb, var(--color-background) 88%, #fff 12%);
+  padding: 1rem;
+  box-shadow: 0 1px 0 rgb(0 0 0 / 0.04);
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease;
+}
+
+.blog-card:hover,
+.blog-card:focus-visible,
+.quest-stat-card:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--color-primary) 45%, transparent);
+  box-shadow: 0 12px 30px rgb(7 77 59 / 0.12);
+}
+
+.blog-card__glow {
+  position: absolute;
+  inset: auto -20% -45% -20%;
+  height: 65%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--color-accent) 22%, transparent),
+    transparent 68%
+  );
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.blog-card:hover .blog-card__glow,
+.blog-card:focus-visible .blog-card__glow {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.blog-card > :not(.blog-card__glow) {
+  position: relative;
+  z-index: 1;
+}
+
+.blog-card__arrow {
+  flex: none;
+  color: var(--color-primary);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+  transition: transform 180ms ease;
+}
+
+.blog-card:hover .blog-card__arrow,
+.blog-card:focus-visible .blog-card__arrow {
+  transform: translateX(0.25rem);
+}
+
+.blog-card__chip {
+  border: 1px solid color-mix(in srgb, #000 16%, transparent);
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.025);
+  padding: 0.125rem 0.5rem;
+  color: rgb(0 0 0 / 0.68);
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+
+.blog-view-panel[hidden] {
+  display: none;
+}
+
+.blog-view-button[aria-pressed="true"] {
+  border-color: color-mix(in srgb, var(--color-primary) 50%, transparent);
+  background: color-mix(in srgb, var(--color-highlight) 65%, #fff 35%);
+  color: #000;
+}
+
+#reading-progress {
+  transform-origin: left;
+  transform: scaleX(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progressive-load,
+  .animate,
+  .blog-card,
+  .quest-stat-card,
+  .blog-card__glow,
+  .blog-card__arrow {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
 /* shiki config */
 pre {
   @apply border border-[var(--color-primary)]/15 py-5;

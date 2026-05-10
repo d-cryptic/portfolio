@@ -1,9 +1,10 @@
 ---
 import { type CollectionEntry, getCollection, render } from "astro:content";
 import Layout from "@layouts/Layout.astro";
+import BlogCard from "@components/BlogCard.astro";
 import Container from "@components/Container.astro";
 import FormattedDate from "@components/FormattedDate.astro";
-import { readingTime } from "@lib/utils";
+import { readingTime, wordCount } from "@lib/utils";
 import BackToPrevious from "@components/BackToPrevious.astro";
 import PostNavigation from "@components/PostNavigation.astro";
 import SeriesNavigation from "@components/SeriesNavigation.astro";
@@ -54,7 +55,9 @@ const prevPost = getPrevPost();
 
 const post = Astro.props;
 const seriesPosts =
-  isLocalBlogPost(post) && post.data.series ? getSeriesPosts(posts, post.data.series) : [];
+  isLocalBlogPost(post) && post.data.series
+    ? getSeriesPosts(posts, post.data.series)
+    : [];
 const currentSeriesIndex = seriesPosts.findIndex(
   (seriesPost) => cleanBlogId(seriesPost.id) === cleanBlogId(post.id),
 );
@@ -67,6 +70,23 @@ const nextInSeries =
 const { Content, headings } = await render(post);
 const postPath = `/blog/${cleanBlogId(post.id)}`;
 const postUrl = toAbsoluteUrl(postPath);
+const postTags = new Set(post.data.tags ?? []);
+const relatedPosts = posts
+  .filter((candidate) => cleanBlogId(candidate.id) !== cleanBlogId(post.id))
+  .map((candidate) => ({
+    post: candidate,
+    score: (candidate.data.tags ?? []).filter((tag) => postTags.has(tag))
+      .length,
+  }))
+  .filter((candidate) => candidate.score > 0)
+  .sort(
+    (a, b) =>
+      b.score - a.score ||
+      b.post.data.date.valueOf() - a.post.data.date.valueOf(),
+  )
+  .slice(0, 3)
+  .map((candidate) => candidate.post);
+const postWordCount = post.body ? wordCount(post.body) : 0;
 ---
 
 <Layout
@@ -104,6 +124,12 @@ const postUrl = toAbsoluteUrl(postPath);
     },
   ]}
 >
+  <div
+    class="fixed top-0 right-0 left-0 z-[60] h-1 bg-black/5 dark:bg-white/10"
+    aria-hidden="true"
+  >
+    <div id="reading-progress" class="h-full bg-[var(--color-primary)]"></div>
+  </div>
   <Container>
     <div class="animate">
       <BackToPrevious href="/blog">Back to blog</BackToPrevious>
@@ -114,11 +140,11 @@ const postUrl = toAbsoluteUrl(postPath);
           <FormattedDate date={post.data.date} />
         </div>
         &bull;
-        {post.body && (
-          <div class="font-base text-sm">
-            {readingTime(post.body)}
-          </div>
-        )}        
+        {
+          post.body && (
+            <div class="font-base text-sm">{readingTime(post.body)}</div>
+          )
+        }
       </div>
       <h1 class="animate text-3xl font-semibold text-black dark:text-white">
         {post.data.title}
@@ -129,7 +155,7 @@ const postUrl = toAbsoluteUrl(postPath);
             {post.data.tags.map((tag) => (
               <a
                 href={`/tags/${tag}`}
-                class="rounded-sm border border-black/15 px-2 py-1 text-sm whitespace-normal break-words transition-colors duration-300 ease-in-out hover:bg-black/5 hover:text-black focus-visible:bg-black/5 focus-visible:text-black dark:border-white/20 dark:hover:bg-white/5 dark:hover:text-white dark:focus-visible:bg-white/5 dark:focus-visible:text-white"
+                class="rounded-sm border border-black/15 px-2 py-1 text-sm break-words whitespace-normal transition-colors duration-300 ease-in-out hover:bg-black/5 hover:text-black focus-visible:bg-black/5 focus-visible:text-black dark:border-white/20 dark:hover:bg-white/5 dark:hover:text-white dark:focus-visible:bg-white/5 dark:focus-visible:text-white"
               >
                 {tag}
               </a>
@@ -137,6 +163,40 @@ const postUrl = toAbsoluteUrl(postPath);
           </div>
         ) : null
       }
+      <div
+        class="animate mt-5 grid gap-3 rounded-lg border border-black/15 p-4 text-sm md:grid-cols-3 dark:border-white/20"
+      >
+        <div>
+          <p
+            class="m-0 text-xs tracking-wide text-black/55 uppercase dark:text-white/55"
+          >
+            Quest Type
+          </p>
+          <p class="m-0 mt-1 font-semibold text-black dark:text-white">
+            {post.data.series ? "Series Chapter" : "Standalone Run"}
+          </p>
+        </div>
+        <div>
+          <p
+            class="m-0 text-xs tracking-wide text-black/55 uppercase dark:text-white/55"
+          >
+            Read Time
+          </p>
+          <p class="m-0 mt-1 font-semibold text-black dark:text-white">
+            {post.body ? readingTime(post.body) : "Quick read"}
+          </p>
+        </div>
+        <div>
+          <p
+            class="m-0 text-xs tracking-wide text-black/55 uppercase dark:text-white/55"
+          >
+            Words
+          </p>
+          <p class="m-0 mt-1 font-semibold text-black dark:text-white">
+            {postWordCount.toLocaleString("en-US")}
+          </p>
+        </div>
+      </div>
     </div>
     {
       seriesPosts.length > 1 && (
@@ -151,7 +211,7 @@ const postUrl = toAbsoluteUrl(postPath);
       )
     }
     {headings.length > 0 && <TableOfContents headings={headings} />}
-    <article class="animate">
+    <article class="animate" data-blog-article>
       <Content />
       {
         seriesPosts.length > 1 && (
@@ -166,11 +226,78 @@ const postUrl = toAbsoluteUrl(postPath);
         )
       }
       <div class="mt-24">
-        <PostNavigation prevPost={prevPost} nextPost={nextPost} path={"blog"}/>
+        <PostNavigation prevPost={prevPost} nextPost={nextPost} path={"blog"} />
       </div>
+      {
+        relatedPosts.length > 0 && (
+          <section class="not-prose mt-24 space-y-4">
+            <div class="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <p class="m-0 text-xs tracking-wide text-black/55 uppercase dark:text-white/55">
+                  Nearby quests
+                </p>
+                <h2 class="m-0 font-semibold text-black dark:text-white">
+                  Related posts
+                </h2>
+              </div>
+              <a href="/blog" class="text-sm">
+                Browse all posts
+              </a>
+            </div>
+            <ul class="grid gap-4 md:grid-cols-3">
+              {relatedPosts.map((relatedPost) => (
+                <li>
+                  <BlogCard post={relatedPost} compact />
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
       <div class="mt-24">
         {/* <Giscus /> */}
       </div>
     </article>
   </Container>
 </Layout>
+
+<script is:inline>
+  const progressBar = document.getElementById("reading-progress");
+  const article = document.querySelector("[data-blog-article]");
+
+  const updateReadingProgress = () => {
+    if (
+      !(progressBar instanceof HTMLElement) ||
+      !(article instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    const articleTop = article.offsetTop;
+    const articleHeight = article.scrollHeight;
+    const viewportHeight = window.innerHeight;
+    const readableDistance = Math.max(articleHeight - viewportHeight * 0.35, 1);
+    const progress = Math.min(
+      Math.max(
+        (window.scrollY - articleTop + viewportHeight * 0.2) / readableDistance,
+        0,
+      ),
+      1,
+    );
+
+    progressBar.style.transform = `scaleX(${progress})`;
+  };
+
+  if (progressBar && article) {
+    updateReadingProgress();
+    document.addEventListener("scroll", updateReadingProgress, {
+      passive: true,
+    });
+    window.addEventListener("resize", updateReadingProgress);
+  } else {
+    document.documentElement.setAttribute(
+      "data-reading-progress",
+      "unavailable",
+    );
+  }
+</script>

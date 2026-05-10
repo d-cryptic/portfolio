@@ -1,0 +1,62 @@
+---
+import type { CollectionEntry } from "astro:content";
+import FormattedDate from "@components/FormattedDate.astro";
+import { cleanBlogId, isLocalBlogPost } from "@lib/blog-series";
+
+type BlogEntry = CollectionEntry<"blog"> & {
+  data: CollectionEntry<"blog">["data"] & {
+    seriesPartCount?: number;
+  };
+};
+
+interface Props {
+  post: BlogEntry;
+  compact?: boolean;
+}
+
+const { post, compact = false } = Astro.props as Props;
+const href =
+  post.data.redirected && post.data.redirectedUrl
+    ? post.data.redirectedUrl
+    : `/blog/${cleanBlogId(post.id)}`;
+const isExternal = href.startsWith("http");
+const linkProps = isExternal
+  ? { href, target: "_blank", rel: "noopener noreferrer" }
+  : { href };
+const visibleTags = (post.data.tags ?? []).slice(0, compact ? 2 : 4);
+const seriesLabel =
+  isLocalBlogPost(post) && post.data.series
+    ? post.data.seriesPartCount && post.data.seriesPartCount > 1
+      ? `${post.data.seriesPartCount}-part series`
+      : "Series"
+    : undefined;
+---
+
+<a {...linkProps} class="blog-card group no-underline" data-post-card>
+  <span class="blog-card__glow" aria-hidden="true"></span>
+  <div class="flex items-start justify-between gap-3">
+    <div class="space-y-1">
+      <p
+        class="m-0 text-xs tracking-wide text-black/55 uppercase dark:text-white/55"
+      >
+        <FormattedDate date={post.data.date} />
+      </p>
+      <h3
+        class="m-0 text-base leading-snug font-semibold text-black dark:text-white"
+      >
+        {post.data.title}
+      </h3>
+    </div>
+    <span class="blog-card__arrow" aria-hidden="true">-></span>
+  </div>
+
+  <p class="m-0 mt-3 text-sm leading-relaxed text-black/75 dark:text-white/75">
+    {post.data.description}
+  </p>
+
+  <div class="mt-4 flex flex-wrap gap-1.5">
+    {seriesLabel && <span class="blog-card__chip">{seriesLabel}</span>}
+    {isExternal && <span class="blog-card__chip">External</span>}
+    {visibleTags.map((tag) => <span class="blog-card__chip">#{tag}</span>)}
+  </div>
+</a>
