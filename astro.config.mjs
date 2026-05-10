@@ -7,6 +7,19 @@ import { defineConfig } from "astro/config";
 import { remarkD2 } from "./src/plugins/remark-d2.js";
 import { remarkWikilinks } from "./src/plugins/remark-wikilinks.js";
 
+const hiddenRoutes = new Set([
+  "/knowledge-graph",
+  "/now",
+  "/OOF",
+  "/notes/random",
+  "/snippets/random",
+]);
+
+const includeInSitemap = (page) => {
+  const pathname = new URL(page).pathname.replace(/\/$/, "") || "/";
+  return !hiddenRoutes.has(pathname);
+};
+
 // https://astro.build/config
 export default defineConfig({
   site: "https://barundebnath.com",
@@ -31,11 +44,10 @@ export default defineConfig({
       },
     }),
     sitemap({
-      xslURL: "/sitemap.xml",
+      filter: includeInSitemap,
     }),
     mdx(),
     pagefind(),
-    sitemap(),
   ],
   vite: {
     plugins: [tailwindcss()],

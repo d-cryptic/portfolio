@@ -21,7 +21,7 @@ export async function GET() {
       llms: `${SITE.URL}/llms.txt`,
       llmsExtended: `${SITE.URL}/llms-full.txt`,
       aiGuide: `${SITE.URL}/for-ai`,
-      sitemap: `${SITE.URL}/sitemap.xml`,
+      sitemap: `${SITE.URL}/sitemap-index.xml`,
       rss: `${SITE.URL}/rss.xml`,
     },
     entities: [

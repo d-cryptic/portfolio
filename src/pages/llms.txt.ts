@@ -34,7 +34,7 @@ export async function GET() {
     `- Snippets: ${SITE.URL}/snippets`,
     `- Tags: ${SITE.URL}/tags`,
     `- RSS: ${SITE.URL}/rss.xml`,
-    `- Sitemap: ${SITE.URL}/sitemap.xml`,
+    `- Sitemap: ${SITE.URL}/sitemap-index.xml`,
     `- AI Guide: ${SITE.URL}/for-ai`,
     `- GEO Index: ${SITE.URL}/geo.json`,
     "",

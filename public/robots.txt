@@ -1,7 +1,7 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://barundebnath.com/sitemap.xml
+Sitemap: https://barundebnath.com/sitemap-index.xml
 Sitemap: https://barundebnath.com/rss.xml
 
 # Agent-first discovery endpoints
