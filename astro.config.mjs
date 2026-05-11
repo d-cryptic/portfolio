@@ -11,13 +11,21 @@ const hiddenRoutes = new Set([
   "/knowledge-graph",
   "/now",
   "/OOF",
+  "/uses",
+  "/wins",
   "/notes/random",
   "/snippets/random",
 ]);
+const hiddenRoutePrefixes = ["/notes", "/snippets"];
 
 const includeInSitemap = (page) => {
   const pathname = new URL(page).pathname.replace(/\/$/, "") || "/";
-  return !hiddenRoutes.has(pathname);
+  return (
+    !hiddenRoutes.has(pathname) &&
+    !hiddenRoutePrefixes.some(
+      (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+    )
+  );
 };
 
 // https://astro.build/config

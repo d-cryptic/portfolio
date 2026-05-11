@@ -1,5 +1,5 @@
-const CACHE_NAME = "portfolio-cache-v1";
-const OFFLINE_ASSETS = ["/", "/blog", "/notes", "/snippets"];
+const CACHE_NAME = "portfolio-cache-v2";
+const OFFLINE_ASSETS = ["/", "/blog"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

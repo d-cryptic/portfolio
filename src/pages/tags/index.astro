@@ -4,13 +4,7 @@ import Layout from "@layouts/Layout.astro";
 import Container from "@components/Container.astro";
 import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
 
-const [blogPosts, notePosts, snippetPosts] = await Promise.all([
-  getCollection("blog", ({ data }) => !data.draft),
-  getCollection("notes", ({ data }) => !data.draft),
-  getCollection("snippets", ({ data }) => !data.draft),
-]);
-
-const entries = [...blogPosts, ...notePosts, ...snippetPosts];
+const entries = await getCollection("blog", ({ data }) => !data.draft);
 const tags = [...new Set(entries.flatMap((post) => post.data.tags || []))].sort();
 ---
 
@@ -27,7 +21,7 @@ const tags = [...new Set(entries.flatMap((post) => post.data.tags || []))].sort(
       "@context": "https://schema.org",
       "@type": "CollectionPage",
       name: "Tags",
-      description: "All tags used across blog, notes, and snippets.",
+      description: "All tags used across blog posts.",
       url: toAbsoluteUrl("/tags"),
     },
   ]}

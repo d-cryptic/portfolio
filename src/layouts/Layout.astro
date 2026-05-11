@@ -33,12 +33,24 @@ const {
 
 const enableAnalytics = import.meta.env.PUBLIC_ENABLE_ANALYTICS === "true";
 const gtmId = import.meta.env.PUBLIC_GTM_ID;
+const hiddenFromIndexRoutes = new Set(["/wins", "/uses"]);
+const hiddenFromIndexPrefixes = ["/notes", "/snippets"];
+const currentPathname = Astro.url.pathname.replace(/\/$/, "") || "/";
+const hiddenFromIndex =
+  hiddenFromIndexRoutes.has(currentPathname) ||
+  hiddenFromIndexPrefixes.some(
+    (prefix) => currentPathname === prefix || currentPathname.startsWith(`${prefix}/`),
+  );
+const robotsNoindex = noindex || hiddenFromIndex;
 const baseSchemas = [websiteJsonLd(), personJsonLd()];
 const mergedSchema = Array.isArray(schema)
   ? [...baseSchemas, ...schema]
   : schema
     ? [...baseSchemas, schema]
     : baseSchemas;
+const documentTitle = title.includes(SITE.TITLE)
+  ? title
+  : `${title} | ${SITE.TITLE}`;
 ---
 
 <!doctype html>
@@ -46,46 +58,22 @@ const mergedSchema = Array.isArray(schema)
   <head>
     <link rel="sitemap" href="/sitemap-index.xml" />
     <Head
-      title={`${title} | ${SITE.TITLE}`}
+      title={documentTitle}
       description={description}
       image={image}
-      noindex={noindex}
+      noindex={robotsNoindex}
       ogType={ogType}
       publishedTime={publishedTime}
       modifiedTime={modifiedTime}
       keywords={keywords}
       schema={mergedSchema}
     />
-    <script is:inline define:vars={{ isSSR: import.meta.env.SSR }}>
-      // This script runs before the page renders to prevent FOUC
+    <script is:inline>
       (function() {
-        // Only run on client-side
         if (typeof document === 'undefined') return;
-
-        // Check for saved theme preference or use system preference
-        const getTheme = () => {
-          try {
-            if (typeof localStorage !== 'undefined' && localStorage.theme) {
-              return localStorage.theme;
-            }
-            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-          } catch (e) {
-            return 'light'; // Default to light if there's an error
-          }
-        };
-
-        // Apply theme immediately to prevent flash
-        const theme = getTheme();
-        if (theme === 'dark') {
-          document.documentElement.classList.add('dark');
-          document.documentElement.style.colorScheme = 'dark';
-        } else {
-          document.documentElement.classList.remove('dark');
-          document.documentElement.style.colorScheme = 'light';
-        }
-
-        // Store the theme in a data attribute for CSS to use
-        document.documentElement.setAttribute('data-theme', theme);
+        document.documentElement.classList.remove('dark');
+        document.documentElement.style.colorScheme = 'light';
+        document.documentElement.setAttribute('data-theme', 'light');
       })();
     </script>
     {
@@ -136,9 +124,8 @@ const mergedSchema = Array.isArray(schema)
     <Footer />
     <Pagefind />
     <CommandPalette />
-    <script is:inline>
+    <script is:inline define:vars={{ isProd: import.meta.env.PROD }}>
       if (typeof window !== "undefined" && "serviceWorker" in navigator) {
-        const isProd = import.meta.env.PROD;
         window.addEventListener("load", async () => {
           if (isProd) {
             navigator.serviceWorker.register("/sw.js").catch(() => undefined);

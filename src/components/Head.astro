@@ -58,20 +58,38 @@ const jsonLd = Array.isArray(schema) ? schema : schema ? [schema] : [];
 
 <!-- Canonical URL -->
 <link rel="canonical" href={canonicalURL} />
-<link rel="alternate" type="application/rss+xml" title={`${SITE.TITLE} RSS`} href="/rss.xml" />
-<link rel="alternate" type="text/plain" title={`${SITE.TITLE} LLM Index`} href="/llms.txt" />
-<link rel="alternate" type="application/json" title={`${SITE.TITLE} GEO Index`} href="/geo.json" />
+<link rel="author" href={SITE.URL} />
+<link
+  rel="alternate"
+  type="application/rss+xml"
+  title={`${SITE.TITLE} RSS`}
+  href="/rss.xml"
+/>
+<link
+  rel="alternate"
+  type="text/plain"
+  title={`${SITE.TITLE} LLM Index`}
+  href="/llms.txt"
+/>
+<link
+  rel="alternate"
+  type="application/json"
+  title={`${SITE.TITLE} GEO Index`}
+  href="/geo.json"
+/>
 
 <!-- Primary Meta Tags -->
 <title>{title}</title>
 <meta name="title" content={title} />
 <meta name="description" content={description} />
 <meta name="author" content={SITE.AUTHOR} />
+<meta name="creator" content={SITE.AUTHOR} />
+<meta name="publisher" content={SITE.AUTHOR} />
 <meta name="robots" content={robots} />
 <meta name="referrer" content="strict-origin-when-cross-origin" />
 <meta name="format-detection" content="telephone=no" />
-<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-<meta name="theme-color" content="#171717" media="(prefers-color-scheme: dark)" />
+<meta name="theme-color" content="#ffffff" />
+<meta name="application-name" content={SITE.TITLE} />
 {keywords.length > 0 && <meta name="keywords" content={keywords.join(", ")} />}
 
 <!-- Open Graph / Facebook -->
@@ -82,13 +100,29 @@ const jsonLd = Array.isArray(schema) ? schema : schema ? [schema] : [];
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
 <meta property="og:image" content={imageURL} />
-{publishedTime && (
-  <meta property="article:published_time" content={new Date(publishedTime).toISOString()} />
-)}
-{modifiedTime && (
-  <meta property="article:modified_time" content={new Date(modifiedTime).toISOString()} />
-)}
-{ogType === "article" && <meta property="article:author" content={SITE.AUTHOR} />}
+<meta property="og:image:secure_url" content={imageURL} />
+<meta property="og:image:alt" content={`${title} - ${SITE.TITLE}`} />
+{
+  publishedTime && (
+    <meta
+      property="article:published_time"
+      content={new Date(publishedTime).toISOString()}
+    />
+  )
+}
+{
+  modifiedTime && (
+    <meta
+      property="article:modified_time"
+      content={new Date(modifiedTime).toISOString()}
+    />
+  )
+}
+{
+  ogType === "article" && (
+    <meta property="article:author" content={SITE.AUTHOR} />
+  )
+}
 
 <!-- Twitter -->
 <meta property="twitter:card" content="summary_large_image" />
@@ -96,11 +130,17 @@ const jsonLd = Array.isArray(schema) ? schema : schema ? [schema] : [];
 <meta property="twitter:title" content={title} />
 <meta property="twitter:description" content={description} />
 <meta property="twitter:image" content={imageURL} />
+<meta property="twitter:image:alt" content={`${title} - ${SITE.TITLE}`} />
+<meta property="twitter:site" content={SITE.X_HANDLE} />
 <meta property="twitter:creator" content={SITE.X_HANDLE} />
 
 {
   jsonLd.map((entry) => (
-    <script type="application/ld+json" set:html={JSON.stringify(entry)} />
+    <script
+      is:inline
+      type="application/ld+json"
+      set:html={JSON.stringify(entry)}
+    />
   ))
 }
 
@@ -111,7 +151,6 @@ const jsonLd = Array.isArray(schema) ? schema : schema ? [schema] : [];
     preloadTheme();
     onScroll();
     animate();
-    updateThemeButtons();
     addCopyCodeButtons();
     setGiscusTheme();
 
@@ -121,67 +160,9 @@ const jsonLd = Array.isArray(schema) ? schema : schema ? [schema] : [];
     const backToPrev = document.getElementById("back-to-prev");
     backToPrev?.addEventListener("click", () => window.history.back());
 
-    const lightThemeButton = document.getElementById("light-theme-button");
-    lightThemeButton?.addEventListener("click", () => {
-      localStorage.setItem("theme", "light");
-      toggleTheme(false);
-      updateThemeButtons();
-    });
-
-    const darkThemeButton = document.getElementById("dark-theme-button");
-    darkThemeButton?.addEventListener("click", () => {
-      localStorage.setItem("theme", "dark");
-      toggleTheme(true);
-      updateThemeButtons();
-    });
-
-    const systemThemeButton = document.getElementById("system-theme-button");
-    systemThemeButton?.addEventListener("click", () => {
-      localStorage.setItem("theme", "system");
-      toggleTheme(window.matchMedia("(prefers-color-scheme: dark)").matches);
-      updateThemeButtons();
-    });
-
-    window
-      .matchMedia("(prefers-color-scheme: dark)")
-      .addEventListener("change", (event) => {
-        if (localStorage.theme === "system") {
-          toggleTheme(event.matches);
-        }
-      });
-
     if (hasWindow && !window.__siteGlobalListenersBound) {
       document.addEventListener("scroll", onScroll);
       window.__siteGlobalListenersBound = true;
-    }
-  }
-
-  function updateThemeButtons() {
-    const theme = localStorage.getItem("theme");
-    const lightThemeButton = document.getElementById("light-theme-button");
-    const darkThemeButton = document.getElementById("dark-theme-button");
-    const systemThemeButton = document.getElementById("system-theme-button");
-
-    function removeActiveButtonTheme(button) {
-      button?.classList.remove("bg-black/5");
-      button?.classList.remove("dark:bg-white/5");
-    }
-
-    function addActiveButtonTheme(button) {
-      button?.classList.add("bg-black/5");
-      button?.classList.add("dark:bg-white/5");
-    }
-
-    removeActiveButtonTheme(lightThemeButton);
-    removeActiveButtonTheme(darkThemeButton);
-    removeActiveButtonTheme(systemThemeButton);
-
-    if (theme === "light") {
-      addActiveButtonTheme(lightThemeButton);
-    } else if (theme === "dark") {
-      addActiveButtonTheme(darkThemeButton);
-    } else {
-      addActiveButtonTheme(systemThemeButton);
     }
   }
 
@@ -208,7 +189,7 @@ const jsonLd = Array.isArray(schema) ? schema : schema ? [schema] : [];
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function toggleTheme(dark) {
+  function applyLightTheme() {
     const css = document.createElement("style");
 
     css.appendChild(
@@ -226,11 +207,9 @@ const jsonLd = Array.isArray(schema) ? schema : schema ? [schema] : [];
 
     document.head.appendChild(css);
 
-    if (dark) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
+    document.documentElement.classList.remove("dark");
+    document.documentElement.style.colorScheme = "light";
+    document.documentElement.setAttribute("data-theme", "light");
 
     window.getComputedStyle(css).opacity;
     document.head.removeChild(css);
@@ -239,13 +218,7 @@ const jsonLd = Array.isArray(schema) ? schema : schema ? [schema] : [];
   }
 
   function preloadTheme() {
-    const userTheme = localStorage.theme;
-
-    if (userTheme === "light" || userTheme === "dark") {
-      toggleTheme(userTheme === "dark");
-    } else {
-      toggleTheme(window.matchMedia("(prefers-color-scheme: dark)").matches);
-    }
+    applyLightTheme();
   }
 
   function addCopyCodeButtons() {
@@ -293,11 +266,9 @@ const jsonLd = Array.isArray(schema) ? schema : schema ? [schema] : [];
   const setGiscusTheme = () => {
     const giscus = document.querySelector(".giscus-frame");
 
-    const isDark = document.documentElement.classList.contains("dark");
-
     if (giscus) {
       const url = new URL(giscus.src);
-      url.searchParams.set("theme", isDark ? "dark" : "light");
+      url.searchParams.set("theme", "light");
       giscus.src = url.toString();
     }
   };

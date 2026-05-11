@@ -5,7 +5,6 @@ import Container from "@components/Container.astro";
 import LiveFilters from "@components/LiveFilters.astro";
 import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
 import { buildExplorerItems } from "@lib/live-filters";
-import { shouldIncludeKnowledgeContent } from "@lib/content-visibility";
 
 const blog = (await getCollection("blog"))
   .filter((post) => !post.data.draft)
@@ -15,60 +14,61 @@ const projects = (await getCollection("projects"))
   .filter((project) => !project.data.draft)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
-const notes = (await getCollection("notes"))
-  .filter((note) => shouldIncludeKnowledgeContent({ draft: note.data.draft, tags: note.data.tags }))
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
-
-const snippets = (await getCollection("snippets"))
-  .filter((snippet) => shouldIncludeKnowledgeContent({ draft: snippet.data.draft, tags: snippet.data.tags }))
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const pages = [
+  {
+    id: "page:home",
+    title: "Home",
+    description: "Overview page with current highlights and featured content.",
+    href: "/",
+    contentType: "Pages",
+    date: new Date("2025-11-01"),
+    stack: ["Astro", "Tailwind CSS"],
+    roles: ["SRE", "Platform Engineer"],
+    outcomes: ["SEO"],
+  },
+  {
+    id: "page:for-ai",
+    title: "AI / Agent Guide",
+    description:
+      "Indexing guide and retrieval rules for assistants and agents.",
+    href: "/for-ai",
+    contentType: "Pages",
+    date: new Date("2025-11-01"),
+    stack: ["Astro", "MDX"],
+    roles: ["Systems Engineer"],
+    outcomes: ["SEO", "Data"],
+  },
+  {
+    id: "page:tags",
+    title: "Tag Directory",
+    description: "Browse topics and discover related posts by tag.",
+    href: "/tags",
+    contentType: "Pages",
+    date: new Date("2025-11-01"),
+    stack: ["Astro"],
+    roles: ["Software Engineer"],
+    outcomes: ["Data"],
+  },
+];
 
 const explorerItems = buildExplorerItems({
   blog,
   projects,
-  notes,
-  snippets,
-  pages: [
-    {
-      id: "page:home",
-      title: "Home",
-      description: "Overview page with current highlights and featured content.",
-      href: "/",
-      contentType: "Pages",
-      date: new Date("2025-11-01"),
-      stack: ["Astro", "Tailwind CSS"],
-      roles: ["SRE", "Platform Engineer"],
-      outcomes: ["SEO"],
-    },
-    {
-      id: "page:for-ai",
-      title: "AI / Agent Guide",
-      description: "Indexing guide and retrieval rules for assistants and agents.",
-      href: "/for-ai",
-      contentType: "Pages",
-      date: new Date("2025-11-01"),
-      stack: ["Astro", "MDX"],
-      roles: ["Systems Engineer"],
-      outcomes: ["SEO", "Data"],
-    },
-    {
-      id: "page:tags",
-      title: "Tag Directory",
-      description: "Browse topics and discover related posts by tag.",
-      href: "/tags",
-      contentType: "Pages",
-      date: new Date("2025-11-01"),
-      stack: ["Astro"],
-      roles: ["Software Engineer"],
-      outcomes: ["Data"],
-    },
-  ],
+  notes: [],
+  snippets: [],
+  pages,
 });
+
+const explorerStats = [
+  { label: "Posts", value: blog.length },
+  { label: "Projects", value: projects.length },
+  { label: "Pages", value: pages.length },
+];
 ---
 
 <Layout
   title="Content Explorer"
-  description="Filter blog posts, projects, notes, snippets, and pages by stack, role, and outcome."
+  description="Filter blog posts, projects, and pages by stack, role, and outcome."
   keywords={["content explorer", "blog filters", "projects filters", "sre"]}
   schema={[
     breadcrumbJsonLd([
@@ -86,15 +86,127 @@ const explorerItems = buildExplorerItems({
 >
   <Container>
     <aside data-pagefind-ignore>
-      <div class="space-y-8">
-        <div class="animate space-y-2">
-          <h1 class="font-semibold text-black dark:text-white">Content Explorer</h1>
-          <p class="text-sm text-black/70 dark:text-white/70">
-            Filter blog, projects, notes, snippets, and pages by stack, role, and outcome.
-          </p>
+      <div class="explorer-page">
+        <div class="explorer-hero animate">
+          <div class="explorer-hero__copy">
+            <p class="explorer-hero__kicker">Site Map Console</p>
+            <h1>Explorer</h1>
+            <p>
+              Search posts, projects, and utility pages by topic, stack, role,
+              outcome, or date.
+            </p>
+          </div>
+          <div
+            class="explorer-hero__stats"
+            aria-label="Explorer content counts"
+          >
+            {
+              explorerStats.map((stat) => (
+                <div>
+                  <span>{stat.label}</span>
+                  <strong>{stat.value}</strong>
+                </div>
+              ))
+            }
+          </div>
         </div>
         <LiveFilters items={explorerItems} />
       </div>
     </aside>
   </Container>
 </Layout>
+
+<style>
+  .explorer-page {
+    display: grid;
+    gap: clamp(1.25rem, 4vw, 2.25rem);
+  }
+
+  .explorer-hero {
+    display: grid;
+    gap: 1rem;
+    border: 1px solid color-mix(in srgb, var(--color-text) 16%, transparent);
+    border-radius: 0.5rem;
+    background:
+      linear-gradient(
+          90deg,
+          color-mix(in srgb, var(--color-text) 4%, transparent) 1px,
+          transparent 1px
+        )
+        0 0 / 2rem 2rem,
+      linear-gradient(
+          0deg,
+          color-mix(in srgb, var(--color-text) 4%, transparent) 1px,
+          transparent 1px
+        )
+        0 0 / 2rem 2rem,
+      color-mix(in srgb, var(--color-background) 96%, white);
+    padding: clamp(1rem, 4vw, 1.5rem);
+  }
+
+  .explorer-hero__kicker {
+    margin: 0 0 0.35rem;
+    color: var(--color-primary);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .explorer-hero h1 {
+    margin: 0;
+    color: var(--color-text);
+    font-size: clamp(2.25rem, 9vw, 4.75rem);
+    font-weight: 800;
+    letter-spacing: 0;
+    line-height: 0.95;
+  }
+
+  .explorer-hero__copy > p:last-child {
+    max-width: 39rem;
+    margin: 0.85rem 0 0;
+    color: color-mix(in srgb, var(--color-text) 70%, transparent);
+    line-height: 1.65;
+  }
+
+  .explorer-hero__stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.55rem;
+  }
+
+  .explorer-hero__stats div {
+    border: 1px solid color-mix(in srgb, var(--color-text) 15%, transparent);
+    border-radius: 0.4rem;
+    background: color-mix(in srgb, var(--color-background) 86%, white);
+    padding: 0.75rem;
+  }
+
+  .explorer-hero__stats span {
+    display: block;
+    color: color-mix(in srgb, var(--color-text) 55%, transparent);
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .explorer-hero__stats strong {
+    display: block;
+    margin-top: 0.2rem;
+    color: var(--color-text);
+    font-size: 1.4rem;
+  }
+
+  @media (min-width: 760px) {
+    .explorer-hero {
+      grid-template-columns: minmax(0, 1fr) 16rem;
+      align-items: end;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .explorer-hero__stats {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

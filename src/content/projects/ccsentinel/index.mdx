@@ -1,0 +1,46 @@
+---
+title: "CCSentinel"
+description: "Cross-platform Claude Code account, profile, and session manager for isolating project contexts and switching accounts from the terminal."
+date: "2026-05-01"
+draft: false
+demoURL: "https://ccsentinel.heybarun.com"
+repoURL: "https://github.com/d-cryptic/ccsentinel"
+thumbnail: "/images/projects/ccsentinel.png"
+tags:
+  - rust
+  - developer-tools
+  - cli
+  - desktop
+stack:
+  - Rust
+  - TypeScript
+  - Tauri
+  - Homebrew
+  - Cargo
+  - Raycast
+  - Alfred
+outcomes:
+  - Per-project Claude Code session isolation
+  - OAuth, API key, Bedrock, and Vertex AI profile support
+  - Usage-aware account pipelines and live terminal dashboard
+---
+
+![CCSentinel landing page screenshot](/images/projects/ccsentinel.png)
+
+## What it is
+
+CCSentinel is a CLI and desktop workflow for managing Claude Code accounts, profiles, and isolated sessions. The landing page frames the core value clearly: switch Claude accounts instantly, build account pipelines, and keep project contexts separated.
+
+It supports OAuth and API-key based profiles, plus provider-oriented setups such as AWS Bedrock and Google Vertex AI. Each project session gets its own configuration directory, history, environment overlays, and merged settings.
+
+## What I built
+
+- Built the Rust CLI for account/profile switching and session isolation.
+- Added a pipeline model for rotating through profiles based on usage thresholds.
+- Implemented per-session environment overlays and layered settings resolution.
+- Added developer workflow integrations for shells, tmux, Starship, Raycast, and Alfred.
+- Packaged the tool for distribution through Cargo, Homebrew, and desktop workflows.
+
+## Why it matters
+
+Claude Code is useful across work, personal, and client projects, but account and session state can get messy fast. CCSentinel makes that state explicit, reproducible, and isolated so switching context does not risk leaking settings or history between projects.

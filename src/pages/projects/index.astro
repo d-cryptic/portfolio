@@ -2,13 +2,20 @@
 import { getCollection } from "astro:content";
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/Container.astro";
-import ArrowCard from "@components/ArrowCard.astro";
+import ProjectCard from "@components/ProjectCard.astro";
 import { PROJECTS } from "@consts";
-import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
+import { toContentPath } from "@lib/content-paths";
+import { breadcrumbJsonLd, itemListJsonLd, toAbsoluteUrl } from "@lib/seo";
 
 const projects = (await getCollection("projects"))
   .filter((project) => !project.data.draft)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const projectListItems = projects.map((project) => ({
+  name: project.data.title,
+  description: project.data.description,
+  url: toAbsoluteUrl(toContentPath("projects", project.id)),
+}));
 ---
 
 <Layout
@@ -27,6 +34,7 @@ const projects = (await getCollection("projects"))
       description: PROJECTS.DESCRIPTION,
       url: toAbsoluteUrl("/projects"),
     },
+    itemListJsonLd("Featured projects", projectListItems),
   ]}
 >
   <Container>
@@ -35,11 +43,11 @@ const projects = (await getCollection("projects"))
         <div class="animate font-semibold text-black dark:text-white">
           Projects
         </div>
-        <ul class="animate not-prose flex flex-col gap-4">
+        <ul class="animate not-prose grid gap-4 sm:grid-cols-2">
           {
             projects.map((project) => (
               <li>
-                <ArrowCard entry={project} />
+                <ProjectCard project={project} />
               </li>
             ))
           }

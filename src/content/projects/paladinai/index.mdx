@@ -1,0 +1,67 @@
+---
+title: "PaladinAI"
+description: "AI-powered monitoring and incident response platform that connects Prometheus, Grafana, Loki, and Alertmanager with graph memory and natural-language investigation."
+date: "2025-10-01"
+draft: false
+demoURL: "https://getpaladin.dev"
+repoURL: "https://github.com/d-cryptic/paladinai"
+thumbnail: "/images/projects/paladinai.png"
+tags:
+  - ai
+  - observability
+  - incident-response
+  - platform-engineering
+stack:
+  - Python
+  - FastAPI
+  - LangGraph
+  - LangChain
+  - OpenAI
+  - Mem0AI
+  - Next.js
+  - TypeScript
+  - MongoDB
+  - Neo4j
+  - Qdrant
+  - Docker
+  - Prometheus
+  - Grafana
+  - Loki
+  - Alertmanager
+outcomes:
+  - Internal hackathon winner
+  - Multi-interface Web UI, CLI, and API
+  - Graph and vector memory for persistent incident context
+---
+
+![PaladinAI landing page screenshot](/images/projects/paladinai.png)
+
+## Product demo
+
+<div class="project-video">
+  <iframe
+    src="https://www.loom.com/embed/8bdf923be32a429e83afcd0e19d842e8"
+    title="PaladinAI demo video"
+    frameborder="0"
+    webkitallowfullscreen
+    mozallowfullscreen
+    allowfullscreen
+  ></iframe>
+</div>
+
+## What it is
+
+PaladinAI is an open-source incident response platform for asking operational questions in plain English. The product positioning from the landing page is direct: natural-language incident response, intelligent memory, and real-time monitoring analysis in one platform.
+
+The system is built around three access paths: Web UI, CLI, and API. Under the hood, it connects to Prometheus metrics, Loki logs, Grafana dashboards, and Alertmanager rules, then stores findings in Neo4j and Qdrant so incident context survives beyond a single chat.
+
+## What I built
+
+- Built the monitoring and incident analysis flow around Prometheus, Grafana, Loki, and Alertmanager.
+- Designed the agent workflow with LangGraph, LangChain, OpenAI, and memory layers.
+- Added graph and vector-backed context using Neo4j, Qdrant, MongoDB, and Mem0AI.
+- Shipped multiple interfaces so the same incident engine could be used from Web UI, CLI, and API.
+
+## Why it matters
+
+Operational debugging usually breaks across too many tools: metrics in one place, logs in another, dashboards elsewhere, and tribal knowledge in someone's head. PaladinAI turns that into a single investigation surface that can query, remember, and explain the system state.

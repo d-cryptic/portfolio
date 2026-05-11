@@ -1,0 +1,23 @@
+---
+interface Props {
+  label: string;
+  value: string;
+  detail: string;
+}
+
+const { label, value, detail } = Astro.props as Props;
+---
+
+<div class="quest-stat-card">
+  <p
+    class="m-0 text-xs tracking-wide text-black/55 uppercase dark:text-white/55"
+  >
+    {label}
+  </p>
+  <p class="m-0 mt-2 text-lg font-semibold text-black dark:text-white">
+    {value}
+  </p>
+  <p class="m-0 mt-1 text-sm leading-relaxed text-black/70 dark:text-white/70">
+    {detail}
+  </p>
+</div>

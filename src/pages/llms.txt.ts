@@ -1,37 +1,46 @@
-import { SITE } from "@consts";
+import { RESUME_URL, SITE } from "@consts";
 import { getCollection } from "astro:content";
+import { toContentPath } from "@lib/content-paths";
 
 export async function GET() {
-  const [blogPosts, projectPosts, notesPosts, snippetPosts] = await Promise.all([
+  const [blogPosts, projectPosts] = await Promise.all([
     getCollection("blog", ({ data }) => !data.draft),
     getCollection("projects", ({ data }) => !data.draft),
-    getCollection("notes", ({ data }) => !data.draft),
-    getCollection("snippets", ({ data }) => !data.draft),
   ]);
 
   const topBlog = blogPosts
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
     .slice(0, 10)
-    .map((post) => `- ${post.data.title}: ${SITE.URL}/blog/${post.id.replace(/\/index\.mdx?$/, "")}`);
+    .map(
+      (post) =>
+        `- ${post.data.title}: ${SITE.URL}${toContentPath("blog", post.id)}`,
+    );
 
   const topProjects = projectPosts
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
     .slice(0, 8)
-    .map((project) => `- ${project.data.title}: ${SITE.URL}/projects/${project.id}`);
+    .map(
+      (project) =>
+        `- ${project.data.title}: ${SITE.URL}${toContentPath("projects", project.id)}`,
+    );
 
   const lines = [
     `# ${SITE.TITLE} - LLM Index`,
     "",
     `Site: ${SITE.URL}`,
     `Description: ${SITE.DESCRIPTION}`,
-    "Primary topics: SRE, platform engineering, systems, DevOps, productivity",
+    `Resume: ${RESUME_URL}`,
+    "Primary topics: full-stack engineering, AI engineering, SRE, platform engineering, reliability, scalability, systems",
+    "",
+    "## Entity",
+    `- Name: ${SITE.AUTHOR}`,
+    "- Role: Founding Engineer; Full-stack, AI, SRE, and Platform Engineering",
+    "- Focus: product engineering, AI workflows, scalable data systems, infrastructure reliability",
     "",
     "## Key URLs",
     `- Home: ${SITE.URL}/`,
     `- Blog: ${SITE.URL}/blog`,
     `- Projects: ${SITE.URL}/projects`,
-    `- Notes: ${SITE.URL}/notes`,
-    `- Snippets: ${SITE.URL}/snippets`,
     `- Tags: ${SITE.URL}/tags`,
     `- RSS: ${SITE.URL}/rss.xml`,
     `- Sitemap: ${SITE.URL}/sitemap-index.xml`,
@@ -47,8 +56,6 @@ export async function GET() {
     `## Coverage`,
     `- Blog posts: ${blogPosts.length}`,
     `- Projects: ${projectPosts.length}`,
-    `- Notes: ${notesPosts.length}`,
-    `- Snippets: ${snippetPosts.length}`,
     "",
     "## Retrieval Guidance",
     "- Prefer canonical URLs under barundebnath.com.",

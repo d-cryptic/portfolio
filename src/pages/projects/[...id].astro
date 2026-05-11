@@ -15,7 +15,9 @@ export async function getStaticPaths() {
     .filter((post) => !post.data.draft)
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
   return projects.map((project) => ({
-    params: { id: project.id },
+    params: {
+      id: project.id.replace(/\/index\.mdx?$/, "").replace(/\.mdx?$/, ""),
+    },
     props: project,
   }));
 }
@@ -23,13 +25,17 @@ type Props = CollectionEntry<"projects">;
 
 const project = Astro.props;
 const { Content, headings } = await render(project);
-const projectPath = `/projects/${project.id}`;
+const cleanProjectId = project.id
+  .replace(/\/index\.mdx?$/, "")
+  .replace(/\.mdx?$/, "");
+const projectPath = `/projects/${cleanProjectId}`;
 const projectUrl = toAbsoluteUrl(projectPath);
 ---
 
 <Layout
   title={project.data.title}
   description={project.data.description}
+  image={project.data.thumbnail}
   ogType="article"
   publishedTime={project.data.date}
   modifiedTime={project.data.date}
@@ -54,6 +60,11 @@ const projectUrl = toAbsoluteUrl(projectPath);
       url: projectUrl,
       mainEntityOfPage: projectUrl,
       codeRepository: project.data.repoURL || undefined,
+      image: project.data.thumbnail
+        ? toAbsoluteUrl(project.data.thumbnail)
+        : undefined,
+      programmingLanguage: project.data.stack,
+      keywords: [...project.data.tags, ...project.data.stack].join(", "),
     },
   ]}
 >
@@ -67,11 +78,11 @@ const projectUrl = toAbsoluteUrl(projectPath);
           <FormattedDate date={project.data.date} />
         </div>
         &bull;
-        {project.body && (
-          <div class="font-base text-sm">
-            {readingTime(project.body)}
-          </div>
-        )}     
+        {
+          project.body && (
+            <div class="font-base text-sm">{readingTime(project.body)}</div>
+          )
+        }
       </div>
       <h1 class="text-3xl font-semibold text-black dark:text-white">
         {project.data.title}

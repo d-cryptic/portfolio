@@ -1,20 +1,18 @@
 ---
 import Search from "astro-pagefind/components/Search";
 import { getCollection } from "astro:content";
-import { cleanContentId } from "@lib/content-paths";
+import { toContentPath } from "@lib/content-paths";
 
-const [blogPosts, projectPosts, notesPosts, snippetPosts] = await Promise.all([
+const [blogPosts, projectPosts] = await Promise.all([
   getCollection("blog", ({ data }) => !data.draft),
   getCollection("projects", ({ data }) => !data.draft),
-  getCollection("notes", ({ data }) => !data.draft),
-  getCollection("snippets", ({ data }) => !data.draft),
 ]);
 
 const searchItems = [
   ...blogPosts.map((post) => ({
     title: post.data.title,
     description: post.data.description,
-    url: `/blog/${post.id.replace(/\/index\.mdx?$/, "")}`,
+    url: toContentPath("blog", post.id),
     type: "blog",
     tags: post.data.tags || [],
     stack: post.data.stack || [],
@@ -25,35 +23,13 @@ const searchItems = [
   ...projectPosts.map((project) => ({
     title: project.data.title,
     description: project.data.description,
-    url: `/projects/${project.id}`,
+    url: toContentPath("projects", project.id),
     type: "projects",
     tags: project.data.tags || [],
     stack: project.data.stack || [],
     roles: project.data.roles || [],
     outcomes: project.data.outcomes || [],
     date: project.data.date.toISOString().slice(0, 10),
-  })),
-  ...notesPosts.map((note) => ({
-    title: note.data.title,
-    description: note.data.description,
-    url: `/notes/${cleanContentId(note.id)}`,
-    type: "notes",
-    tags: note.data.tags || [],
-    stack: note.data.stack || [],
-    roles: note.data.roles || [],
-    outcomes: note.data.outcomes || [],
-    date: note.data.date.toISOString().slice(0, 10),
-  })),
-  ...snippetPosts.map((snippet) => ({
-    title: snippet.data.title,
-    description: snippet.data.description,
-    url: `/snippets/${cleanContentId(snippet.id)}`,
-    type: "snippets",
-    tags: snippet.data.tags || [],
-    stack: snippet.data.stack || [],
-    roles: snippet.data.roles || [],
-    outcomes: snippet.data.outcomes || [],
-    date: snippet.data.date.toISOString().slice(0, 10),
   })),
   {
     title: "Content Explorer",
@@ -94,7 +70,7 @@ const searchItems = [
 <aside data-pagefind-ignore>
   <div
     id="backdrop"
-    class="bg-[rgba(0, 0, 0, 0.5] invisible hidden fixed top-0 left-0 z-50 flex h-screen w-full justify-center p-6 backdrop-blur-xs"
+    class="bg-[rgba(0, 0, 0, 0.5] invisible fixed top-0 left-0 z-50 flex hidden h-screen w-full justify-center p-6 backdrop-blur-xs"
   >
     <div
       id="pagefind-container"
@@ -105,7 +81,10 @@ const searchItems = [
         className="pagefind-ui"
         uiOptions={{ showImages: false, excerptLength: 15, resetStyles: false }}
       />
-      <div id="search-tips" class="pt-2 text-xs text-black/65 dark:text-white/65">
+      <div
+        id="search-tips"
+        class="pt-2 text-xs text-black/65 dark:text-white/65"
+      >
         <span class="tips-label">Tip:</span>
         <code>#tag</code>
         <code>@type</code>
@@ -163,8 +142,22 @@ const searchItems = [
 
   function tokenize(query) {
     const parsed = {
-      include: { types: [], tags: [], stack: [], roles: [], outcomes: [], terms: [] },
-      exclude: { types: [], tags: [], stack: [], roles: [], outcomes: [], terms: [] },
+      include: {
+        types: [],
+        tags: [],
+        stack: [],
+        roles: [],
+        outcomes: [],
+        terms: [],
+      },
+      exclude: {
+        types: [],
+        tags: [],
+        stack: [],
+        roles: [],
+        outcomes: [],
+        terms: [],
+      },
       since: "",
       until: "",
     };
@@ -259,15 +252,23 @@ const searchItems = [
       .filter((item) => {
         const itemType = normalizeType(normalizeValue(item.type || ""));
         const itemTags = (item.tags || []).map((tag) => normalizeValue(tag));
-        const itemStack = (item.stack || []).map((value) => normalizeValue(value));
-        const itemRoles = (item.roles || []).map((value) => normalizeValue(value));
-        const itemOutcomes = (item.outcomes || []).map((value) => normalizeValue(value));
+        const itemStack = (item.stack || []).map((value) =>
+          normalizeValue(value),
+        );
+        const itemRoles = (item.roles || []).map((value) =>
+          normalizeValue(value),
+        );
+        const itemOutcomes = (item.outcomes || []).map((value) =>
+          normalizeValue(value),
+        );
         const itemDate = parseDate(item.date);
 
         const matchesOrEmpty = (selected, values) =>
-          selected.length === 0 || selected.some((value) => values.includes(value));
+          selected.length === 0 ||
+          selected.some((value) => values.includes(value));
         const hasExcluded = (selected, values) =>
-          selected.length > 0 && selected.some((value) => values.includes(value));
+          selected.length > 0 &&
+          selected.some((value) => values.includes(value));
 
         if (!matchesOrEmpty(include.types, [itemType])) return false;
         if (!matchesOrEmpty(include.tags, itemTags)) return false;
@@ -294,11 +295,15 @@ const searchItems = [
           ...(item.outcomes || []),
         ].join(" ");
 
-        const hasAllTerms = include.terms.every((term) => fuzzyScore(searchableText, term) >= 0);
+        const hasAllTerms = include.terms.every(
+          (term) => fuzzyScore(searchableText, term) >= 0,
+        );
         if (!hasAllTerms) {
           return false;
         }
-        const hasExcludedTerm = exclude.terms.some((term) => fuzzyScore(searchableText, term) >= 0);
+        const hasExcludedTerm = exclude.terms.some(
+          (term) => fuzzyScore(searchableText, term) >= 0,
+        );
         if (hasExcludedTerm) {
           return false;
         }
@@ -319,7 +324,11 @@ const searchItems = [
 
         const score =
           (include.terms.length > 0
-            ? include.terms.reduce((sum, term) => sum + Math.max(0, fuzzyScore(searchableText, term)), 0)
+            ? include.terms.reduce(
+                (sum, term) =>
+                  sum + Math.max(0, fuzzyScore(searchableText, term)),
+                0,
+              )
             : 20) +
           include.tags.length * 20 +
           include.types.length * 20 +
@@ -367,7 +376,10 @@ const searchItems = [
               <div class="semantic-suggestion-meta">
                 <span>@${item.type}</span>
                 <span>${item.date}</span>
-                ${(item.tags || []).slice(0, 3).map((tag) => `<span>#${tag}</span>`).join("")}
+                ${(item.tags || [])
+                  .slice(0, 3)
+                  .map((tag) => `<span>#${tag}</span>`)
+                  .join("")}
               </div>
             </a>
           `,
@@ -402,12 +414,14 @@ const searchItems = [
       if (currentSuggestions.length === 0) return;
       if (event.key === "ArrowDown") {
         event.preventDefault();
-        activeSuggestionIndex = (activeSuggestionIndex + 1) % currentSuggestions.length;
+        activeSuggestionIndex =
+          (activeSuggestionIndex + 1) % currentSuggestions.length;
         renderSemanticSuggestions(semanticSearchInput.value || "", true);
       } else if (event.key === "ArrowUp") {
         event.preventDefault();
         activeSuggestionIndex =
-          (activeSuggestionIndex - 1 + currentSuggestions.length) % currentSuggestions.length;
+          (activeSuggestionIndex - 1 + currentSuggestions.length) %
+          currentSuggestions.length;
         renderSemanticSuggestions(semanticSearchInput.value || "", true);
       } else if (event.key === "Enter") {
         event.preventDefault();
@@ -639,14 +653,19 @@ const searchItems = [
   }
 
   #search .pagefind-ui__results {
-    border-top: 1px solid color-mix(in srgb, var(--pagefind-ui-border) 70%, transparent);
+    border-top: 1px solid
+      color-mix(in srgb, var(--pagefind-ui-border) 70%, transparent);
     margin-top: 0.5rem;
   }
 
   #search .pagefind-ui__result {
     padding-top: 0.9rem;
     padding-bottom: 0.9rem;
-    border-bottom-color: color-mix(in srgb, var(--pagefind-ui-border) 70%, transparent);
+    border-bottom-color: color-mix(
+      in srgb,
+      var(--pagefind-ui-border) 70%,
+      transparent
+    );
   }
 
   #search mark {
@@ -674,7 +693,8 @@ const searchItems = [
   #search-tips code {
     color: var(--pagefind-ui-primary);
     background: color-mix(in srgb, var(--pagefind-ui-tag) 35%, transparent);
-    border: 1px solid color-mix(in srgb, var(--pagefind-ui-border) 50%, transparent);
+    border: 1px solid
+      color-mix(in srgb, var(--pagefind-ui-border) 50%, transparent);
     border-radius: 4px;
     padding: 0.08rem 0.3rem;
     font-size: 0.72rem;
@@ -714,7 +734,11 @@ const searchItems = [
     border: 1px solid var(--pagefind-ui-border);
     border-radius: 6px;
     overflow: hidden;
-    background-color: color-mix(in srgb, var(--pagefind-ui-background) 85%, #000 15%);
+    background-color: color-mix(
+      in srgb,
+      var(--pagefind-ui-background) 85%,
+      #000 15%
+    );
   }
 
   .semantic-suggestion-item {
@@ -731,11 +755,19 @@ const searchItems = [
   }
 
   .semantic-suggestion-item:hover {
-    background-color: color-mix(in srgb, var(--pagefind-ui-border) 20%, transparent);
+    background-color: color-mix(
+      in srgb,
+      var(--pagefind-ui-border) 20%,
+      transparent
+    );
   }
 
   .semantic-suggestion-item.active {
-    background-color: color-mix(in srgb, var(--pagefind-ui-border) 25%, transparent);
+    background-color: color-mix(
+      in srgb,
+      var(--pagefind-ui-border) 25%,
+      transparent
+    );
   }
 
   .semantic-suggestion-title {

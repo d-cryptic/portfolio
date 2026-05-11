@@ -3,28 +3,21 @@ import { getCollection } from "astro:content";
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/Container.astro";
 import ArrowCard from "@components/ArrowCard.astro";
+import BlogCard from "@components/BlogCard.astro";
+import FormattedDate from "@components/FormattedDate.astro";
 import { BLOG } from "@consts";
-import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
-import { isLocalBlogPost, normalizeSeriesKey } from "@lib/blog-series";
-import { shouldIncludeDraftContent } from "@lib/content-visibility";
+import { getBlogThumbnail } from "@lib/content-images";
+import { breadcrumbJsonLd, itemListJsonLd, toAbsoluteUrl } from "@lib/seo";
+import {
+  cleanBlogId,
+  isLocalBlogPost,
+  normalizeSeriesKey,
+} from "@lib/blog-series";
 
-// Get all blog posts
-const allBlogPosts = await getCollection("blog", ({ data }) =>
-  shouldIncludeDraftContent(data.draft),
-);
+const sortedPosts = (
+  await getCollection("blog", ({ data }) => !data.draft)
+).sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
-// Sort all posts by date (newest first)
-const sortedPosts = allBlogPosts
-  .map(post => ({
-    ...post,
-    data: {
-      ...post.data,
-      // Add any additional processing here if needed
-    }
-  }))
-  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
-
-const seenSeries = new Set<string>();
 const seriesCounts = sortedPosts.reduce((acc: Record<string, number>, post) => {
   if (!isLocalBlogPost(post) || !post.data.series) {
     return acc;
@@ -39,44 +32,114 @@ const seriesCounts = sortedPosts.reduce((acc: Record<string, number>, post) => {
   return acc;
 }, {});
 
-const dedupedPosts = sortedPosts.filter((post) => {
-  if (!isLocalBlogPost(post) || !post.data.series) {
+const seenSeries = new Set<string>();
+const posts = sortedPosts
+  .filter((post) => {
+    if (!isLocalBlogPost(post) || !post.data.series) {
+      return true;
+    }
+
+    const seriesKey = normalizeSeriesKey(post.data.series);
+    if (!seriesKey) {
+      return true;
+    }
+
+    if (seenSeries.has(seriesKey)) {
+      return false;
+    }
+
+    seenSeries.add(seriesKey);
     return true;
-  }
-
-  const seriesKey = normalizeSeriesKey(post.data.series);
-  if (!seriesKey) {
-    return true;
-  }
-
-  if (seenSeries.has(seriesKey)) {
-    return false;
-  }
-
-  seenSeries.add(seriesKey);
-  return true;
-});
-
-// Group by year
-const postsByYear = dedupedPosts.reduce((acc: { [key: string]: typeof dedupedPosts }, post) => {
-  const year = post.data.date.getFullYear().toString();
-  if (!acc[year]) {
-    acc[year] = [];
-  }
-  acc[year].push({
+  })
+  .map((post) => ({
     ...post,
-    // Add any additional properties needed by ArrowCard
-  });
+    data: {
+      ...post.data,
+      seriesPartCount: post.data.series
+        ? seriesCounts[normalizeSeriesKey(post.data.series)]
+        : undefined,
+    },
+    thumbnail: getBlogThumbnail(post.id, post.body),
+  }));
+
+const postsByYear = posts.reduce((acc: Record<string, typeof posts>, post) => {
+  const year = post.data.date.getFullYear().toString();
+  acc[year] ??= [];
+  acc[year].push(post);
   return acc;
 }, {});
 
-const years = Object.keys(postsByYear).sort((a, b) => parseInt(b) - parseInt(a));
+const years = Object.keys(postsByYear).sort((a, b) => Number(b) - Number(a));
+
+const seriesGroupsByKey = sortedPosts.reduce(
+  (
+    acc: Record<
+      string,
+      {
+        name: string;
+        posts: typeof sortedPosts;
+        latestDate: Date;
+      }
+    >,
+    post,
+  ) => {
+    if (!isLocalBlogPost(post) || !post.data.series) {
+      return acc;
+    }
+
+    const seriesKey = normalizeSeriesKey(post.data.series);
+    if (!seriesKey) {
+      return acc;
+    }
+
+    acc[seriesKey] ??= {
+      name: post.data.series,
+      posts: [],
+      latestDate: post.data.date,
+    };
+    acc[seriesKey].posts = [...acc[seriesKey].posts, post];
+
+    if (post.data.date.getTime() > acc[seriesKey].latestDate.getTime()) {
+      acc[seriesKey].latestDate = post.data.date;
+    }
+
+    return acc;
+  },
+  {},
+);
+
+const seriesGroups = Object.values(seriesGroupsByKey)
+  .map((group) => ({
+    ...group,
+    posts: [...group.posts].sort((a, b) => {
+      const aOrder = a.data.seriesOrder ?? Number.MAX_SAFE_INTEGER;
+      const bOrder = b.data.seriesOrder ?? Number.MAX_SAFE_INTEGER;
+
+      if (aOrder !== bOrder) {
+        return aOrder - bOrder;
+      }
+
+      return a.data.date.getTime() - b.data.date.getTime();
+    }),
+  }))
+  .sort((a, b) => b.latestDate.getTime() - a.latestDate.getTime());
+
+const blogListItems = sortedPosts.slice(0, 12).map((post) => ({
+  name: post.data.title,
+  description: post.data.description,
+  url: toAbsoluteUrl(`/blog/${cleanBlogId(post.id)}`),
+}));
 ---
 
 <Layout
   title={BLOG.TITLE}
   description={BLOG.DESCRIPTION}
-  keywords={["SRE blog", "platform engineering", "systems posts", "DevOps articles"]}
+  keywords={[
+    "SRE blog",
+    "platform engineering",
+    "systems posts",
+    "DevOps articles",
+  ]}
   schema={[
     breadcrumbJsonLd([
       { name: "Home", path: "/" },
@@ -89,47 +152,167 @@ const years = Object.keys(postsByYear).sort((a, b) => parseInt(b) - parseInt(a))
       description: BLOG.DESCRIPTION,
       url: toAbsoluteUrl("/blog"),
     },
+    itemListJsonLd("Recent blog posts", blogListItems),
   ]}
 >
   <Container>
-    <aside data-pagefind-ignore>
-      <div class="space-y-10">
-        <div class="space-y-4">
-          {
-            years.map((year) => (
-              <section class="animate space-y-4 mt-8">
-                <div class="font-semibold text-black dark:text-white">
-                  {year}
-                </div>
-                <div>
-                  <ul class="not-prose flex flex-col gap-4">
-                    {postsByYear[year].map((post) => (
-                      <li>
-                        <ArrowCard entry={{
-                          id: post.id,
-                          slug: post.slug,
-                          collection: post.collection,
-                          data: {
-                            ...post.data,
-                            // Ensure all required fields are present
-                            body: post.body,
-                            // Handle redirected posts
-                            redirected: post.data.redirected || false,
-                            redirectedUrl: post.data.redirectedUrl,
-                            seriesPartCount: post.data.series
-                              ? seriesCounts[normalizeSeriesKey(post.data.series)]
-                              : undefined,
-                          }
-                        }} />
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </section>
-            ))
-          }
+    <section class="space-y-6" data-pagefind-ignore>
+      <h1 class="sr-only">Blog</h1>
+      <div class="flex justify-end">
+        <div
+          class="inline-flex rounded-lg border border-black/15 bg-black/[0.025] p-1 dark:border-white/20 dark:bg-white/[0.03]"
+          aria-label="Blog view"
+        >
+          <button
+            type="button"
+            class="blog-view-button rounded-md border border-transparent px-3 py-1.5 text-sm transition-colors"
+            data-blog-view-button="list"
+            aria-pressed="true"
+          >
+            List
+          </button>
+          <button
+            type="button"
+            class="blog-view-button rounded-md border border-transparent px-3 py-1.5 text-sm transition-colors"
+            data-blog-view-button="gallery"
+            aria-pressed="false"
+          >
+            Gallery
+          </button>
+          <button
+            type="button"
+            class="blog-view-button rounded-md border border-transparent px-3 py-1.5 text-sm transition-colors"
+            data-blog-view-button="series"
+            aria-pressed="false"
+          >
+            Series
+          </button>
         </div>
       </div>
-    </aside>
+
+      <div class="blog-view-panel space-y-8" data-blog-view-panel="list">
+        {
+          years.map((year) => (
+            <section class="animate space-y-4">
+              <div class="font-semibold text-black dark:text-white">{year}</div>
+              <ul class="not-prose flex flex-col gap-4">
+                {postsByYear[year].map((post) => (
+                  <li>
+                    <ArrowCard
+                      entry={{
+                        id: post.id,
+                        slug: post.slug,
+                        collection: post.collection,
+                        data: {
+                          ...post.data,
+                          body: post.body,
+                          redirected: post.data.redirected || false,
+                          redirectedUrl: post.data.redirectedUrl,
+                        },
+                      }}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))
+        }
+      </div>
+
+      <div class="blog-view-panel" data-blog-view-panel="gallery" hidden>
+        <ul class="not-prose grid gap-3 sm:grid-cols-2">
+          {
+            posts.map((post) => (
+              <li>
+                <BlogCard post={post} thumbnail={post.thumbnail} />
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div
+        class="blog-view-panel space-y-4"
+        data-blog-view-panel="series"
+        hidden
+      >
+        {
+          seriesGroups.map((group) => (
+            <article class="not-prose rounded-lg border border-black/15 bg-black/[0.015] p-4 dark:border-white/20 dark:bg-white/[0.025]">
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="m-0 text-xs tracking-wide text-black/55 uppercase dark:text-white/55">
+                    {group.posts.length}{" "}
+                    {group.posts.length === 1 ? "chapter" : "chapters"}
+                  </p>
+                  <h2 class="m-0 mt-1 text-base font-semibold text-black dark:text-white">
+                    {group.name}
+                  </h2>
+                </div>
+                <a
+                  class="hover:border-primary hover:text-primary focus-visible:border-primary focus-visible:text-primary rounded-md border border-black/15 px-3 py-1.5 text-sm no-underline transition-colors dark:border-white/20"
+                  href={`/blog/${cleanBlogId(group.posts[0].id)}`}
+                >
+                  Start
+                </a>
+              </div>
+
+              <ol class="mt-4 space-y-2">
+                {group.posts.map((post, index) => (
+                  <li>
+                    <a
+                      class="group hover:border-primary/50 focus-visible:border-primary/50 flex items-center justify-between gap-4 rounded-md border border-black/10 px-3 py-2 no-underline transition-colors hover:bg-black/[0.025] focus-visible:bg-black/[0.025] dark:border-white/15 dark:hover:bg-white/[0.04] dark:focus-visible:bg-white/[0.04]"
+                      href={`/blog/${cleanBlogId(post.id)}`}
+                    >
+                      <span class="min-w-0">
+                        <span class="block text-xs text-black/55 uppercase dark:text-white/55">
+                          Part {post.data.seriesOrder ?? index + 1}
+                        </span>
+                        <span class="block truncate font-semibold text-black dark:text-white">
+                          {post.data.title}
+                        </span>
+                        <span class="block truncate text-sm text-black/65 dark:text-white/65">
+                          {post.data.description}
+                        </span>
+                      </span>
+                      <span class="shrink-0 text-xs text-black/50 dark:text-white/50">
+                        <FormattedDate date={post.data.date} />
+                      </span>
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </article>
+          ))
+        }
+      </div>
+    </section>
   </Container>
+
+  <script is:inline>
+    const viewButtons = document.querySelectorAll("[data-blog-view-button]");
+    const viewPanels = document.querySelectorAll("[data-blog-view-panel]");
+
+    const setBlogView = (view) => {
+      const nextView = ["gallery", "series"].includes(view) ? view : "list";
+
+      viewButtons.forEach((button) => {
+        const isActive =
+          button.getAttribute("data-blog-view-button") === nextView;
+        button.setAttribute("aria-pressed", String(isActive));
+      });
+
+      viewPanels.forEach((panel) => {
+        panel.hidden = panel.getAttribute("data-blog-view-panel") !== nextView;
+      });
+    };
+
+    viewButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        setBlogView(button.getAttribute("data-blog-view-button"));
+      });
+    });
+
+    setBlogView("list");
+  </script>
 </Layout>

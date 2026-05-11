@@ -1,16 +1,31 @@
-import { SITE } from "@consts";
+import { RESUME_URL, SITE } from "@consts";
 import { getCollection } from "astro:content";
-import { cleanContentId } from "@lib/content-paths";
+import { toContentPath } from "@lib/content-paths";
 
 const renderSection = (
   label: string,
-  entries: Array<{ title: string; description: string; date: Date; url: string; tags: string[] }>,
+  entries: Array<{
+    title: string;
+    description: string;
+    date: Date;
+    url: string;
+    tags: string[];
+    stack: string[];
+    roles: string[];
+    outcomes: string[];
+  }>,
 ) => {
   const sorted = entries.sort((a, b) => b.date.valueOf() - a.date.valueOf());
   const body = sorted.map(
     (entry) =>
       `- title: ${entry.title}\n  url: ${entry.url}\n  date: ${entry.date.toISOString()}\n  tags: ${
         entry.tags.length > 0 ? entry.tags.join(", ") : "none"
+      }\n  stack: ${
+        entry.stack.length > 0 ? entry.stack.join(", ") : "none"
+      }\n  roles: ${
+        entry.roles.length > 0 ? entry.roles.join(", ") : "none"
+      }\n  outcomes: ${
+        entry.outcomes.length > 0 ? entry.outcomes.join(", ") : "none"
       }\n  description: ${entry.description}`,
   );
 
@@ -18,11 +33,9 @@ const renderSection = (
 };
 
 export async function GET() {
-  const [blogPosts, projects, notes, snippets] = await Promise.all([
+  const [blogPosts, projects] = await Promise.all([
     getCollection("blog", ({ data }) => !data.draft),
     getCollection("projects", ({ data }) => !data.draft),
-    getCollection("notes", ({ data }) => !data.draft),
-    getCollection("snippets", ({ data }) => !data.draft),
   ]);
 
   const lines = [
@@ -30,8 +43,15 @@ export async function GET() {
     "",
     `source: ${SITE.URL}`,
     "format: markdown-like plain text",
+    `resume: ${RESUME_URL}`,
     `ai-guide: ${SITE.URL}/for-ai`,
     `geo-index: ${SITE.URL}/geo.json`,
+    "",
+    "## Entity Summary",
+    `name: ${SITE.AUTHOR}`,
+    "roles: Founding Engineer, Full-stack Engineer, AI Engineer, SRE, Platform Engineer",
+    "focus: product engineering, AI workflows, scalable data systems, observability, infrastructure reliability",
+    "canonical: https://barundebnath.com/",
     "",
     ...renderSection(
       "Blog Posts",
@@ -39,8 +59,11 @@ export async function GET() {
         title: post.data.title,
         description: post.data.description,
         date: post.data.date,
-        url: `${SITE.URL}/blog/${post.id.replace(/\/index\.mdx?$/, "")}`,
+        url: `${SITE.URL}${toContentPath("blog", post.id)}`,
         tags: post.data.tags || [],
+        stack: post.data.stack || [],
+        roles: post.data.roles || [],
+        outcomes: post.data.outcomes || [],
       })),
     ),
     ...renderSection(
@@ -49,28 +72,11 @@ export async function GET() {
         title: project.data.title,
         description: project.data.description,
         date: project.data.date,
-        url: `${SITE.URL}/projects/${project.id}`,
+        url: `${SITE.URL}${toContentPath("projects", project.id)}`,
         tags: project.data.tags || [],
-      })),
-    ),
-    ...renderSection(
-      "Notes",
-      notes.map((note) => ({
-        title: note.data.title,
-        description: note.data.description,
-        date: note.data.date,
-        url: `${SITE.URL}/notes/${cleanContentId(note.id)}`,
-        tags: note.data.tags || [],
-      })),
-    ),
-    ...renderSection(
-      "Snippets",
-      snippets.map((snippet) => ({
-        title: snippet.data.title,
-        description: snippet.data.description,
-        date: snippet.data.date,
-        url: `${SITE.URL}/snippets/${cleanContentId(snippet.id)}`,
-        tags: snippet.data.tags || [],
+        stack: project.data.stack || [],
+        roles: project.data.roles || [],
+        outcomes: project.data.outcomes || [],
       })),
     ),
   ];
