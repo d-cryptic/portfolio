@@ -1,0 +1,60 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+type ProjectEntry = CollectionEntry<"projects">;
+
+interface Props {
+  project: ProjectEntry;
+}
+
+const { project } = Astro.props as Props;
+const cleanProjectId = project.id
+  .replace(/\/index\.mdx?$/, "")
+  .replace(/\.mdx?$/, "");
+const href = `/projects/${cleanProjectId}`;
+const thumbnail = project.data.thumbnail;
+const visibleOutcomes = (project.data.outcomes ?? []).slice(0, 2);
+const visibleStack = (project.data.stack ?? []).slice(0, 3);
+---
+
+<a href={href} class="project-card group no-underline">
+  {
+    thumbnail && (
+      <div class="project-card__media">
+        <img
+          src={thumbnail}
+          alt={`${project.data.title} screenshot`}
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+    )
+  }
+  <div class="project-card__body">
+    <div class="flex items-start justify-between gap-3">
+      <h3
+        class="project-card__title m-0 text-base leading-snug font-semibold text-black dark:text-white"
+      >
+        {project.data.title}
+      </h3>
+      <span class="project-card__arrow" aria-hidden="true">-></span>
+    </div>
+    <p
+      class="project-card__description m-0 mt-2 text-sm leading-relaxed text-black/75 dark:text-white/75"
+    >
+      {project.data.description}
+    </p>
+    <div class="project-card__chips flex flex-wrap gap-1.5">
+      {
+        visibleStack.map((item) => (
+          <span class="project-card__chip">{item}</span>
+        ))
+      }
+      {
+        visibleOutcomes.map((item) => (
+          <span class="project-card__chip">{item}</span>
+        ))
+      }
+    </div>
+  </div>
+</a>

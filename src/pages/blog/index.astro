@@ -6,6 +6,7 @@ import ArrowCard from "@components/ArrowCard.astro";
 import BlogCard from "@components/BlogCard.astro";
 import FormattedDate from "@components/FormattedDate.astro";
 import { BLOG } from "@consts";
+import { getBlogThumbnail } from "@lib/content-images";
 import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
 import {
   cleanBlogId,
@@ -58,6 +59,7 @@ const posts = sortedPosts
         ? seriesCounts[normalizeSeriesKey(post.data.series)]
         : undefined,
     },
+    thumbnail: getBlogThumbnail(post.id, post.body),
   }));
 
 const postsByYear = posts.reduce((acc: Record<string, typeof posts>, post) => {
@@ -215,7 +217,7 @@ const seriesGroups = Object.values(seriesGroupsByKey)
           {
             posts.map((post) => (
               <li>
-                <BlogCard post={post} />
+                <BlogCard post={post} thumbnail={post.thumbnail} />
               </li>
             ))
           }

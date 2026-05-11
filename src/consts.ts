@@ -13,7 +13,7 @@ export const SITE: Site = {
 };
 
 export const RESUME_URL =
-  "https://drive.google.com/file/d/1qpCeTwHtvS2UFqIznY_P8QKHBEedbnOL/view?usp=drive_link";
+  "https://drive.google.com/file/d/1N2OSsfeN-1DMxmA8wmUwY30aZIqkkdZE/view?usp=sharing";
 
 export const HOME: Metadata = {
   TITLE: "Barun Debnath | SRE & Systems Explorer",

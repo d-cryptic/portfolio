@@ -8,7 +8,8 @@
     "build": "astro check && astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "check:links": "node scripts/check-internal-links.mjs"
+    "check:links": "node scripts/check-internal-links.mjs",
+    "generate:blog-thumbnails": "node scripts/generate-blog-thumbnails.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",

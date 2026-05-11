@@ -39,21 +39,27 @@ export const oofPageData = {
 
 export const winsPageData = {
   intro:
-    "A compact timeline of wins since the last update and what is coming up next.",
-  winsSinceLastUpdate: [
-    "Shipped a dedicated now page with structured sections and cleaner navigation.",
-    "Improved homepage communication with concise opportunity highlights.",
-    "Established reusable data files for personal content pages.",
-  ],
-  events: [
-    "Upcoming conferences in systems, infrastructure, and AI engineering.",
-    "Meetups around SRE, platform engineering, and scaling discussions.",
-    "Potential short travel windows aligned with technical events.",
-  ],
+    "A recent speaking win on scaling real-time attribution systems with ClickHouse.",
+  featuredTalk: {
+    eyebrow: "ClickHouse Bangalore User Group",
+    title:
+      "25x Cheaper Infrastructure, 8x Cheaper Pricing: Real-Time Attribution With ClickHouse as the Backbone",
+    description:
+      "Real-time attribution systems are analytical workloads: high-volume event ingestion, time-window queries, and heavy aggregations. This session covers how we rebuilt Linkrunner's attribution system from PostgreSQL to ClickHouse, reduced infrastructure cost by roughly 25x, and unlocked pricing around 8x cheaper than competitors.",
+    event:
+      "Agentic AI Meets Real-Time Data: Building the Intelligence Layer of Tomorrow",
+    date: "Saturday, Apr 18, 2026",
+    time: "10:00 AM - 2:00 PM IST",
+    location: "AWFIS Residency Square, Bengaluru",
+    speakers:
+      "Darshil Rathod, Co-founder & CTO @ Linkrunner, and Barun Debnath, Founding Engineer @ Linkrunner",
+    url: "https://www.meetup.com/clickhouse-bangalore-user-group/events/313739871/",
+  },
 };
 
 export const usesPageData = {
-  intro: "The tools and setup I currently rely on for coding, writing, and operations.",
+  intro:
+    "The tools and setup I currently rely on for coding, writing, and operations.",
   hardware: [
     "MacBook setup for day-to-day development.",
     "Reliable external display for longer focused sessions.",

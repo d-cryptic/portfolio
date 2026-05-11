@@ -1,7 +1,7 @@
 import { defineCollection, z } from "astro:content";
 
 const blog = defineCollection({
-  type: 'content',
+  type: "content",
   schema: z.object({
     title: z.string(),
     description: z.string(),
@@ -19,7 +19,7 @@ const blog = defineCollection({
 });
 
 const notes = defineCollection({
-  type: 'content',
+  type: "content",
   schema: z.object({
     title: z.string(),
     description: z.string(),
@@ -30,7 +30,10 @@ const notes = defineCollection({
     stack: z.array(z.string()).optional().default([]),
     roles: z.array(z.string()).optional().default([]),
     outcomes: z.array(z.string()).optional().default([]),
-    maturity: z.enum(["seed", "growing", "evergreen", "archived"]).optional().default("seed"),
+    maturity: z
+      .enum(["seed", "growing", "evergreen", "archived"])
+      .optional()
+      .default("seed"),
     aliases: z.array(z.string()).optional().default([]),
     relatedNotes: z.array(z.string()).optional().default([]),
     relatedSnippets: z.array(z.string()).optional().default([]),
@@ -47,7 +50,7 @@ const notes = defineCollection({
 });
 
 const snippets = defineCollection({
-  type: 'content',
+  type: "content",
   schema: z.object({
     title: z.string(),
     description: z.string(),
@@ -60,7 +63,10 @@ const snippets = defineCollection({
     outcomes: z.array(z.string()).optional().default([]),
     language: z.string().optional().default("text"),
     runnerUrl: z.string().url().optional(),
-    maturity: z.enum(["seed", "growing", "evergreen", "archived"]).optional().default("growing"),
+    maturity: z
+      .enum(["seed", "growing", "evergreen", "archived"])
+      .optional()
+      .default("growing"),
     relatedNotes: z.array(z.string()).optional().default([]),
     relatedSnippets: z.array(z.string()).optional().default([]),
     changelog: z
@@ -76,7 +82,7 @@ const snippets = defineCollection({
 });
 
 const projects = defineCollection({
-  type: 'content',
+  type: "content",
   schema: z.object({
     title: z.string(),
     description: z.string(),
@@ -84,6 +90,7 @@ const projects = defineCollection({
     draft: z.boolean().optional().default(false),
     demoURL: z.string().url().optional(),
     repoURL: z.string().url().optional(),
+    thumbnail: z.string().optional(),
     tags: z.array(z.string()).optional().default([]),
     stack: z.array(z.string()).optional().default([]),
     roles: z.array(z.string()).optional().default([]),

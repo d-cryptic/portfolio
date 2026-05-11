@@ -12,9 +12,10 @@ type BlogEntry = CollectionEntry<"blog"> & {
 interface Props {
   post: BlogEntry;
   compact?: boolean;
+  thumbnail?: string;
 }
 
-const { post, compact = false } = Astro.props as Props;
+const { post, compact = false, thumbnail } = Astro.props as Props;
 const href =
   post.data.redirected && post.data.redirectedUrl
     ? post.data.redirectedUrl
@@ -43,31 +44,45 @@ const seriesLabel =
   data-post-card
 >
   <span class="blog-card__glow" aria-hidden="true"></span>
-  <div class="flex items-start justify-between gap-3">
-    <div class="min-w-0 space-y-1">
-      <p
-        class="m-0 text-xs tracking-wide text-black/55 uppercase dark:text-white/55"
-      >
-        <FormattedDate date={post.data.date} />
-      </p>
-      <h3
-        class="blog-card__title m-0 text-base leading-snug font-semibold text-black dark:text-white"
-      >
-        {post.data.title}
-      </h3>
+  {
+    thumbnail && (
+      <div class="blog-card__media">
+        <img
+          src={thumbnail}
+          alt={`${post.data.title} thumbnail`}
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+    )
+  }
+  <div class="blog-card__body">
+    <div class="flex items-start justify-between gap-3">
+      <div class="min-w-0 space-y-1">
+        <p
+          class="m-0 text-xs tracking-wide text-black/55 uppercase dark:text-white/55"
+        >
+          <FormattedDate date={post.data.date} />
+        </p>
+        <h3
+          class="blog-card__title m-0 text-base leading-snug font-semibold text-black dark:text-white"
+        >
+          {post.data.title}
+        </h3>
+      </div>
+      <span class="blog-card__arrow" aria-hidden="true">-></span>
     </div>
-    <span class="blog-card__arrow" aria-hidden="true">-></span>
-  </div>
 
-  <p
-    class="blog-card__description m-0 mt-3 text-sm leading-relaxed text-black/75 dark:text-white/75"
-  >
-    {post.data.description}
-  </p>
+    <p
+      class="blog-card__description m-0 mt-3 text-sm leading-relaxed text-black/75 dark:text-white/75"
+    >
+      {post.data.description}
+    </p>
 
-  <div class="blog-card__chips flex flex-wrap gap-1.5">
-    {seriesLabel && <span class="blog-card__chip">{seriesLabel}</span>}
-    {isExternal && <span class="blog-card__chip">External</span>}
-    {visibleTags.map((tag) => <span class="blog-card__chip">#{tag}</span>)}
+    <div class="blog-card__chips flex flex-wrap gap-1.5">
+      {seriesLabel && <span class="blog-card__chip">{seriesLabel}</span>}
+      {isExternal && <span class="blog-card__chip">External</span>}
+      {visibleTags.map((tag) => <span class="blog-card__chip">#{tag}</span>)}
+    </div>
   </div>
 </a>
