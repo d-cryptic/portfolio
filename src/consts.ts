@@ -3,7 +3,7 @@ import type { Metadata, Site, Socials } from "@types";
 export const SITE: Site = {
   TITLE: "Barun Debnath",
   DESCRIPTION:
-    "SRE by day, manga enthusiast by night. Exploring systems, technology, and life with a beginner's mindset (Shoshin).",
+    "Full-stack and AI engineer with SRE/platform instincts, building scalable systems, reliable infrastructure, and production-grade developer tools.",
   URL: "https://barundebnath.com",
   AUTHOR: "Barun Debnath",
   X_HANDLE: "@barundebnath",
@@ -16,9 +16,9 @@ export const RESUME_URL =
   "https://drive.google.com/file/d/1N2OSsfeN-1DMxmA8wmUwY30aZIqkkdZE/view?usp=sharing";
 
 export const HOME: Metadata = {
-  TITLE: "Barun Debnath | SRE & Systems Explorer",
+  TITLE: "Barun Debnath | Full-stack, AI & Platform Engineer",
   DESCRIPTION:
-    "🚀 Exploring the world of SRE, Systems, and Platform Engineering, one incident at a time. When not debugging, you'll find me with mangas, coffee, and that perfect setup quest.",
+    "Building full-stack products, AI systems, and reliable platforms across Go, TypeScript, ClickHouse, Kafka, Kubernetes, and cloud infrastructure.",
 };
 
 export const BLOG: Metadata = {

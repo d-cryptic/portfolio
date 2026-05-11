@@ -10,19 +10,25 @@ export async function GET() {
   const topBlog = blogPosts
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
     .slice(0, 10)
-    .map((post) => `- ${post.data.title}: ${SITE.URL}/blog/${post.id.replace(/\/index\.mdx?$/, "")}`);
+    .map(
+      (post) =>
+        `- ${post.data.title}: ${SITE.URL}/blog/${post.id.replace(/\/index\.mdx?$/, "")}`,
+    );
 
   const topProjects = projectPosts
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
     .slice(0, 8)
-    .map((project) => `- ${project.data.title}: ${SITE.URL}/projects/${project.id}`);
+    .map(
+      (project) =>
+        `- ${project.data.title}: ${SITE.URL}/projects/${project.id}`,
+    );
 
   const lines = [
     `# ${SITE.TITLE} - LLM Index`,
     "",
     `Site: ${SITE.URL}`,
     `Description: ${SITE.DESCRIPTION}`,
-    "Primary topics: SRE, platform engineering, systems, DevOps, productivity",
+    "Primary topics: full-stack engineering, AI engineering, SRE, platform engineering, reliability, scalability, systems",
     "",
     "## Key URLs",
     `- Home: ${SITE.URL}/`,

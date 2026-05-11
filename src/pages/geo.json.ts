@@ -27,7 +27,13 @@ export async function GET() {
         id: "person:barun-debnath",
         type: "Person",
         name: SITE.AUTHOR,
-        roles: ["Founding Engineer", "SRE", "Platform Engineer"],
+        roles: [
+          "Founding Engineer",
+          "Full-stack Engineer",
+          "AI Engineer",
+          "SRE",
+          "Platform Engineer",
+        ],
         profiles: [
           "https://x.com/barundebnath",
           "https://github.com/d-cryptic",
@@ -41,6 +47,8 @@ export async function GET() {
       updatedAt: new Date().toISOString(),
     },
     topics: [
+      "full-stack engineering",
+      "AI engineering",
       "site reliability engineering",
       "platform engineering",
       "systems engineering",

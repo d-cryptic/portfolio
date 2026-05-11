@@ -1,0 +1,458 @@
+---
+import Link from "@components/Link.astro";
+import { loreSlides } from "@data/home-lore";
+---
+
+<section class="animate lore-section" data-lore-carousel>
+  <div class="lore-heading">
+    <div>
+      <p>Lore</p>
+      <h2>
+        Know more about me
+        <span aria-hidden="true">📜</span>
+      </h2>
+    </div>
+    <div class="lore-controls" aria-label="Lore carousel controls">
+      <button type="button" data-lore-prev aria-label="Previous lore slide">
+        ←
+      </button>
+      <button type="button" data-lore-next aria-label="Next lore slide">
+        →
+      </button>
+    </div>
+  </div>
+
+  <div class="lore-frame">
+    <div class="lore-track">
+      {
+        loreSlides.map((slide) => (
+          <article class="lore-slide">
+            <p class="lore-eyebrow">{slide.eyebrow}</p>
+            <h3>{slide.title}</h3>
+            <p class="lore-body">{slide.body}</p>
+
+            {"stats" in slide && slide.stats ? (
+              <div class="lore-stats">
+                {slide.stats.map((stat) => (
+                  <div>
+                    <span>{stat.label}</span>
+                    <strong>{stat.value}</strong>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+
+            {"groups" in slide && slide.groups ? (
+              <div class="lore-skill-grid">
+                {slide.groups.map((group) => (
+                  <div>
+                    <h4>{group.name}</h4>
+                    <div>
+                      {group.skills.map((skill) => (
+                        <span>{skill}</span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+
+            {"github" in slide && slide.github ? (
+              <div class="lore-github">
+                <div class="lore-github-link">
+                  <Link href={slide.github.profileUrl} external>
+                    View GitHub profile
+                  </Link>
+                </div>
+                <div class="lore-github-stats">
+                  {slide.github.stats.map((stat) => (
+                    <div>
+                      <span>{stat.label}</span>
+                      <strong>{stat.value}</strong>
+                    </div>
+                  ))}
+                </div>
+                <div
+                  class="lore-github-languages"
+                  aria-label="GitHub languages"
+                >
+                  {slide.github.languages.map((language) => (
+                    <span>{language}</span>
+                  ))}
+                </div>
+                <img
+                  src={slide.github.graphImage}
+                  alt="GitHub contribution activity graph for d-cryptic"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+            ) : null}
+          </article>
+        ))
+      }
+    </div>
+  </div>
+
+  <div class="lore-dots" aria-label="Lore slide selector">
+    {
+      loreSlides.map((slide, index) => (
+        <button
+          type="button"
+          data-lore-dot
+          aria-label={`Show ${slide.title}`}
+          aria-current={index === 0 ? "true" : "false"}
+        />
+      ))
+    }
+  </div>
+</section>
+
+<script>
+  const carousel = document.querySelector("[data-lore-carousel]");
+
+  if (carousel instanceof HTMLElement) {
+    const frame = carousel.querySelector(".lore-frame");
+    const track = carousel.querySelector(".lore-track");
+    const slides = Array.from(carousel.querySelectorAll(".lore-slide"));
+    const previousButton = carousel.querySelector("[data-lore-prev]");
+    const nextButton = carousel.querySelector("[data-lore-next]");
+    const dots = Array.from(carousel.querySelectorAll("[data-lore-dot]"));
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let activeIndex = 0;
+    let timerId: number | undefined;
+
+    const showSlide = (index: number): void => {
+      if (!(track instanceof HTMLElement) || slides.length === 0) {
+        return;
+      }
+
+      activeIndex = (index + slides.length) % slides.length;
+      track.style.transform = `translateX(-${activeIndex * 100}%)`;
+
+      if (frame instanceof HTMLElement) {
+        frame.style.height = `${slides[activeIndex].scrollHeight}px`;
+      }
+
+      dots.forEach((dot, dotIndex) => {
+        dot.setAttribute(
+          "aria-current",
+          dotIndex === activeIndex ? "true" : "false",
+        );
+      });
+    };
+
+    const stopAutoSlide = (): void => {
+      if (timerId !== undefined) {
+        window.clearInterval(timerId);
+        timerId = undefined;
+      }
+    };
+
+    const startAutoSlide = (): void => {
+      stopAutoSlide();
+
+      if (reduceMotion.matches || slides.length <= 1) {
+        return;
+      }
+
+      timerId = window.setInterval(() => {
+        showSlide(activeIndex + 1);
+      }, 7000);
+    };
+
+    previousButton?.addEventListener("click", () => {
+      showSlide(activeIndex - 1);
+      startAutoSlide();
+    });
+
+    nextButton?.addEventListener("click", () => {
+      showSlide(activeIndex + 1);
+      startAutoSlide();
+    });
+
+    dots.forEach((dot, index) => {
+      dot.addEventListener("click", () => {
+        showSlide(index);
+        startAutoSlide();
+      });
+    });
+
+    carousel.addEventListener("mouseenter", stopAutoSlide);
+    carousel.addEventListener("mouseleave", startAutoSlide);
+    carousel.addEventListener("focusin", stopAutoSlide);
+    carousel.addEventListener("focusout", startAutoSlide);
+    window.addEventListener("resize", () => showSlide(activeIndex));
+    reduceMotion.addEventListener("change", startAutoSlide);
+
+    carousel.querySelectorAll("img").forEach((image) => {
+      image.addEventListener("load", () => showSlide(activeIndex));
+    });
+
+    showSlide(0);
+    startAutoSlide();
+  }
+</script>
+
+<style>
+  .lore-section {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .lore-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .lore-heading p,
+  .lore-eyebrow {
+    margin: 0;
+    color: color-mix(in srgb, var(--color-text) 55%, transparent);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .lore-heading h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.25rem 0 0;
+    color: var(--color-text);
+    font-size: 1.35rem;
+    font-weight: 800;
+  }
+
+  .lore-heading h2 span {
+    font-size: 1.2rem;
+  }
+
+  .lore-controls {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .lore-controls button {
+    display: grid;
+    width: 2.25rem;
+    height: 2.25rem;
+    place-items: center;
+    border: 1px solid color-mix(in srgb, var(--color-text) 16%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-background) 92%, white);
+    color: var(--color-primary);
+    font-weight: 900;
+    transition:
+      border-color 160ms ease,
+      transform 160ms ease;
+  }
+
+  .lore-controls button:hover,
+  .lore-controls button:focus-visible {
+    border-color: var(--color-primary);
+    transform: translateY(-1px);
+  }
+
+  .lore-frame {
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--color-text) 14%, transparent);
+    border-radius: 0.5rem;
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--color-primary) 7%, transparent),
+        transparent 38%
+      ),
+      color-mix(in srgb, var(--color-background) 94%, white);
+    transition: height 240ms ease;
+  }
+
+  .lore-track {
+    display: flex;
+    align-items: flex-start;
+    transition: transform 420ms ease;
+  }
+
+  .lore-slide {
+    display: grid;
+    min-width: 100%;
+    align-content: start;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .lore-slide h3 {
+    margin: 0;
+    max-width: 38rem;
+    color: var(--color-text);
+    font-size: 1.35rem;
+    font-weight: 800;
+    line-height: 1.25;
+  }
+
+  .lore-body {
+    max-width: 42rem;
+    margin: 0;
+    color: color-mix(in srgb, var(--color-text) 74%, transparent);
+    line-height: 1.65;
+  }
+
+  .lore-stats {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  }
+
+  .lore-stats div {
+    border: 1px solid color-mix(in srgb, var(--color-text) 12%, transparent);
+    border-radius: 0.45rem;
+    padding: 0.75rem;
+    background: color-mix(in srgb, var(--color-background) 82%, white);
+  }
+
+  .lore-stats span {
+    display: block;
+    color: color-mix(in srgb, var(--color-text) 55%, transparent);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+  }
+
+  .lore-stats strong {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--color-text);
+    font-size: 1.15rem;
+  }
+
+  .lore-skill-grid {
+    display: grid;
+    gap: 0.85rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lore-skill-grid h4 {
+    margin: 0 0 0.45rem;
+    color: var(--color-text);
+    font-size: 0.95rem;
+  }
+
+  .lore-skill-grid div div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .lore-skill-grid span {
+    border: 1px solid color-mix(in srgb, var(--color-text) 14%, transparent);
+    border-radius: 999px;
+    padding: 0.22rem 0.55rem;
+    color: color-mix(in srgb, var(--color-text) 72%, transparent);
+    font-size: 0.8rem;
+  }
+
+  .lore-github {
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  .lore-github-link {
+    justify-self: start;
+  }
+
+  .lore-github-stats {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .lore-github-stats div {
+    border: 1px solid color-mix(in srgb, var(--color-text) 12%, transparent);
+    border-radius: 0.45rem;
+    background: color-mix(in srgb, var(--color-background) 84%, white);
+    padding: 0.7rem;
+  }
+
+  .lore-github-stats span {
+    display: block;
+    color: color-mix(in srgb, var(--color-text) 55%, transparent);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+  }
+
+  .lore-github-stats strong {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--color-text);
+    font-size: 1.25rem;
+  }
+
+  .lore-github-languages {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .lore-github-languages span {
+    border: 1px solid color-mix(in srgb, var(--color-primary) 28%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+    color: color-mix(in srgb, var(--color-text) 76%, transparent);
+    padding: 0.22rem 0.55rem;
+    font-size: 0.8rem;
+  }
+
+  .lore-github img {
+    width: 100%;
+    min-height: 8rem;
+    border: 1px solid color-mix(in srgb, var(--color-text) 12%, transparent);
+    border-radius: 0.45rem;
+    background: color-mix(in srgb, var(--color-background) 82%, white);
+  }
+
+  .lore-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.4rem;
+  }
+
+  .lore-dots button {
+    width: 0.55rem;
+    height: 0.55rem;
+    border: 1px solid color-mix(in srgb, var(--color-text) 24%, transparent);
+    border-radius: 999px;
+    background: transparent;
+    padding: 0;
+  }
+
+  .lore-dots button[aria-current="true"] {
+    border-color: var(--color-primary);
+    background: var(--color-primary);
+  }
+
+  @media (max-width: 640px) {
+    .lore-heading {
+      align-items: start;
+    }
+
+    .lore-stats,
+    .lore-skill-grid,
+    .lore-github-stats {
+      grid-template-columns: 1fr;
+    }
+
+    .lore-slide {
+      padding: 0.85rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lore-track,
+    .lore-frame,
+    .lore-controls button {
+      transition: none;
+    }
+  }
+</style>
