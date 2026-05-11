@@ -12,7 +12,7 @@ import type { CollectionEntry } from "astro:content";
 import Callout from "@components/Callout.astro";
 import QuestStatCard from "@components/QuestStatCard.astro";
 import { getBlogThumbnail } from "@lib/content-images";
-import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
+import { breadcrumbJsonLd, profilePageJsonLd, toAbsoluteUrl } from "@lib/seo";
 import { nowPageData } from "@data/now";
 import { winsPageData } from "@data/personal-pages";
 
@@ -100,15 +100,28 @@ const workExperiences = [
     "Systems Engineering",
     "DevOps",
     "Barun Debnath",
+    "Go",
+    "TypeScript",
+    "ClickHouse",
+    "Kafka",
+    "Kubernetes",
   ]}
   schema={[
     breadcrumbJsonLd([{ name: "Home", path: "/" }]),
+    profilePageJsonLd(),
     {
       "@context": "https://schema.org",
       "@type": "WebPage",
       name: HOME.TITLE,
       description: HOME.DESCRIPTION,
       url: toAbsoluteUrl("/"),
+      about: [
+        "Full-stack engineering",
+        "AI engineering",
+        "Platform engineering",
+        "Site reliability engineering",
+      ],
+      primaryImageOfPage: "https://assets.barundebnath.com/about-me%20(1).png",
     },
   ]}
 >

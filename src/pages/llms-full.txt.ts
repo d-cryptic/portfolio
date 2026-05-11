@@ -1,4 +1,4 @@
-import { SITE } from "@consts";
+import { RESUME_URL, SITE } from "@consts";
 import { getCollection } from "astro:content";
 import { toContentPath } from "@lib/content-paths";
 
@@ -10,6 +10,9 @@ const renderSection = (
     date: Date;
     url: string;
     tags: string[];
+    stack: string[];
+    roles: string[];
+    outcomes: string[];
   }>,
 ) => {
   const sorted = entries.sort((a, b) => b.date.valueOf() - a.date.valueOf());
@@ -17,6 +20,12 @@ const renderSection = (
     (entry) =>
       `- title: ${entry.title}\n  url: ${entry.url}\n  date: ${entry.date.toISOString()}\n  tags: ${
         entry.tags.length > 0 ? entry.tags.join(", ") : "none"
+      }\n  stack: ${
+        entry.stack.length > 0 ? entry.stack.join(", ") : "none"
+      }\n  roles: ${
+        entry.roles.length > 0 ? entry.roles.join(", ") : "none"
+      }\n  outcomes: ${
+        entry.outcomes.length > 0 ? entry.outcomes.join(", ") : "none"
       }\n  description: ${entry.description}`,
   );
 
@@ -34,8 +43,15 @@ export async function GET() {
     "",
     `source: ${SITE.URL}`,
     "format: markdown-like plain text",
+    `resume: ${RESUME_URL}`,
     `ai-guide: ${SITE.URL}/for-ai`,
     `geo-index: ${SITE.URL}/geo.json`,
+    "",
+    "## Entity Summary",
+    `name: ${SITE.AUTHOR}`,
+    "roles: Founding Engineer, Full-stack Engineer, AI Engineer, SRE, Platform Engineer",
+    "focus: product engineering, AI workflows, scalable data systems, observability, infrastructure reliability",
+    "canonical: https://barundebnath.com/",
     "",
     ...renderSection(
       "Blog Posts",
@@ -45,6 +61,9 @@ export async function GET() {
         date: post.data.date,
         url: `${SITE.URL}${toContentPath("blog", post.id)}`,
         tags: post.data.tags || [],
+        stack: post.data.stack || [],
+        roles: post.data.roles || [],
+        outcomes: post.data.outcomes || [],
       })),
     ),
     ...renderSection(
@@ -55,6 +74,9 @@ export async function GET() {
         date: project.data.date,
         url: `${SITE.URL}${toContentPath("projects", project.id)}`,
         tags: project.data.tags || [],
+        stack: project.data.stack || [],
+        roles: project.data.roles || [],
+        outcomes: project.data.outcomes || [],
       })),
     ),
   ];

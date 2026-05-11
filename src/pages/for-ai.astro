@@ -1,7 +1,7 @@
 ---
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/Container.astro";
-import { SITE } from "@consts";
+import { RESUME_URL, SITE } from "@consts";
 import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
 ---
 
@@ -17,40 +17,68 @@ import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
       "@context": "https://schema.org",
       "@type": "WebPage",
       name: "AI / Agent Guide",
-      description: "Machine-friendly guide for indexing and citing content from this site.",
+      description:
+        "Machine-friendly guide for indexing and citing content from this site.",
       url: toAbsoluteUrl("/for-ai"),
     },
   ]}
 >
   <Container>
-    <article class="prose space-y-6 dark:prose-invert">
+    <article class="prose dark:prose-invert space-y-6">
       <h1>AI / Agent Guide</h1>
       <p>
-        This page helps assistants and autonomous agents understand the content layout of
+        This page helps assistants and autonomous agents understand the content
+        layout of
         <a href={SITE.URL}>{SITE.TITLE}</a>.
       </p>
+      <h2>Entity Snapshot</h2>
+      <ul>
+        <li>Person: Barun Debnath.</li>
+        <li>
+          Positioning: full-stack engineer, AI engineer, SRE/platform engineer.
+        </li>
+        <li>
+          Resume source: <a href={RESUME_URL}>Google Drive resume</a>.
+        </li>
+        <li>
+          Primary topics: AI systems, product engineering, scalable backend
+          systems, ClickHouse/Kafka data paths, Kubernetes, observability,
+          reliability, and cost optimization.
+        </li>
+      </ul>
       <h2>Primary Index Files</h2>
       <ul>
         <li><a href="/llms.txt">/llms.txt</a> for concise discovery.</li>
-        <li><a href="/llms-full.txt">/llms-full.txt</a> for a complete index.</li>
-        <li><a href="/geo.json">/geo.json</a> for structured GEO/entity context.</li>
-        <li><a href="/sitemap-index.xml">/sitemap-index.xml</a> for crawl paths.</li>
+        <li>
+          <a href="/llms-full.txt">/llms-full.txt</a> for a complete index.
+        </li>
+        <li>
+          <a href="/geo.json">/geo.json</a> for structured GEO/entity context.
+        </li>
+        <li>
+          <a href="/sitemap-index.xml">/sitemap-index.xml</a> for crawl paths.
+        </li>
         <li><a href="/rss.xml">/rss.xml</a> for latest updates.</li>
       </ul>
       <h2>Content Sections</h2>
       <ul>
         <li><a href="/blog">/blog</a> for long-form posts.</li>
-        <li><a href="/projects">/projects</a> for implementation work and experiments.</li>
+        <li>
+          <a href="/projects">/projects</a> for implementation work and experiments.
+        </li>
       </ul>
       <h2>Citing Content</h2>
       <p>
-        Prefer direct page URLs, include post titles, and preserve publication dates where
-        available.
+        Prefer direct page URLs, include post titles, and preserve publication
+        dates where available.
       </p>
       <h2>Agent Retrieval Rules</h2>
       <ul>
         <li>Prefer canonical pages over mirrored copies.</li>
-        <li>Use /llms.txt for quick retrieval and /llms-full.txt for exhaustive retrieval.</li>
+        <li>
+          Use /llms.txt for quick retrieval and /llms-full.txt for exhaustive
+          retrieval.
+        </li>
         <li>Use /geo.json when entity-level context is needed.</li>
         <li>Avoid inferring missing facts when a source URL is available.</li>
       </ul>

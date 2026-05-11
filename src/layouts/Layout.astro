@@ -48,6 +48,9 @@ const mergedSchema = Array.isArray(schema)
   : schema
     ? [...baseSchemas, schema]
     : baseSchemas;
+const documentTitle = title.includes(SITE.TITLE)
+  ? title
+  : `${title} | ${SITE.TITLE}`;
 ---
 
 <!doctype html>
@@ -55,7 +58,7 @@ const mergedSchema = Array.isArray(schema)
   <head>
     <link rel="sitemap" href="/sitemap-index.xml" />
     <Head
-      title={`${title} | ${SITE.TITLE}`}
+      title={documentTitle}
       description={description}
       image={image}
       noindex={robotsNoindex}

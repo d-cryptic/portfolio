@@ -7,7 +7,7 @@ import BlogCard from "@components/BlogCard.astro";
 import FormattedDate from "@components/FormattedDate.astro";
 import { BLOG } from "@consts";
 import { getBlogThumbnail } from "@lib/content-images";
-import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
+import { breadcrumbJsonLd, itemListJsonLd, toAbsoluteUrl } from "@lib/seo";
 import {
   cleanBlogId,
   isLocalBlogPost,
@@ -123,6 +123,12 @@ const seriesGroups = Object.values(seriesGroupsByKey)
     }),
   }))
   .sort((a, b) => b.latestDate.getTime() - a.latestDate.getTime());
+
+const blogListItems = sortedPosts.slice(0, 12).map((post) => ({
+  name: post.data.title,
+  description: post.data.description,
+  url: toAbsoluteUrl(`/blog/${cleanBlogId(post.id)}`),
+}));
 ---
 
 <Layout
@@ -146,6 +152,7 @@ const seriesGroups = Object.values(seriesGroupsByKey)
       description: BLOG.DESCRIPTION,
       url: toAbsoluteUrl("/blog"),
     },
+    itemListJsonLd("Recent blog posts", blogListItems),
   ]}
 >
   <Container>

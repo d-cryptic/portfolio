@@ -10,6 +10,7 @@ import PostNavigation from "@components/PostNavigation.astro";
 import SeriesNavigation from "@components/SeriesNavigation.astro";
 import TableOfContents from "@components/TableOfContents.astro";
 import { SITE } from "@consts";
+import { getBlogThumbnail } from "@lib/content-images";
 import { breadcrumbJsonLd, toAbsoluteUrl } from "@lib/seo";
 import { cleanBlogId, getSeriesPosts, isLocalBlogPost } from "@lib/blog-series";
 import { shouldIncludeDraftContent } from "@lib/content-visibility";
@@ -87,11 +88,13 @@ const relatedPosts = posts
   .slice(0, 3)
   .map((candidate) => candidate.post);
 const postWordCount = post.body ? wordCount(post.body) : 0;
+const postImage = getBlogThumbnail(post.id, post.body);
 ---
 
 <Layout
   title={post.data.title}
   description={post.data.description}
+  image={postImage}
   ogType="article"
   publishedTime={post.data.date}
   modifiedTime={post.data.date}
@@ -119,6 +122,7 @@ const postWordCount = post.body ? wordCount(post.body) : 0;
       },
       mainEntityOfPage: postUrl,
       url: postUrl,
+      image: postImage ? toAbsoluteUrl(postImage) : undefined,
       keywords: (post.data.tags || []).join(", "),
       inLanguage: "en",
     },

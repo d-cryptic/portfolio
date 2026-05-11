@@ -1,4 +1,4 @@
-import { SITE } from "@consts";
+import { RESUME_URL, SITE, SOCIALS } from "@consts";
 
 type JsonLd = Record<string, unknown>;
 
@@ -18,14 +18,26 @@ export const websiteJsonLd = (): JsonLd => {
       name: SITE.AUTHOR,
       url: SITE.URL,
     },
-    potentialAction: {
-      "@type": "SearchAction",
-      target: `${SITE.URL}/blog?query={search_term_string}`,
-      "query-input": "required name=search_term_string",
-    },
     inLanguage: "en",
   };
 };
+
+const sameAs = SOCIALS.map((social) => social.HREF).filter(
+  (href) => href !== SITE.URL,
+);
+const knowsAbout = [
+  "Full-stack engineering",
+  "AI engineering",
+  "Site reliability engineering",
+  "Platform engineering",
+  "Distributed systems",
+  "Kubernetes",
+  "ClickHouse",
+  "Kafka",
+  "Observability",
+  "Cloud infrastructure",
+  "Cost optimization",
+];
 
 export const personJsonLd = (): JsonLd => {
   return {
@@ -34,17 +46,62 @@ export const personJsonLd = (): JsonLd => {
     name: SITE.AUTHOR,
     url: SITE.URL,
     email: SITE.EMAIL,
-    sameAs: [
-      "https://x.com/barundebnath",
-      "https://github.com/d-cryptic",
-      "https://www.linkedin.com/in/barundebnath",
-      "https://medium.barundebnath.com",
+    image: toAbsoluteUrl("https://assets.barundebnath.com/about-me%20(1).png"),
+    sameAs,
+    jobTitle: "Founding Engineer, Full-stack / AI / Platform Engineer",
+    knowsAbout,
+    hasOccupation: {
+      "@type": "Occupation",
+      name: "Software Engineer",
+      occupationLocation: {
+        "@type": "City",
+        name: "Bangalore, India",
+      },
+      skills: knowsAbout.join(", "),
+    },
+    subjectOf: [
+      {
+        "@type": "CreativeWork",
+        name: `${SITE.AUTHOR} Resume`,
+        url: RESUME_URL,
+      },
     ],
-    jobTitle: "Founding Engineer, SRE / Platform Engineer",
   };
 };
 
-export const breadcrumbJsonLd = (items: Array<{ name: string; path: string }>): JsonLd => {
+export const profilePageJsonLd = (): JsonLd => {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    name: SITE.AUTHOR,
+    url: SITE.URL,
+    description: SITE.DESCRIPTION,
+    mainEntity: personJsonLd(),
+    inLanguage: "en",
+  };
+};
+
+export const itemListJsonLd = (
+  name: string,
+  items: Array<{ name: string; url: string; description?: string }>,
+): JsonLd => {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name,
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      url: item.url,
+      name: item.name,
+      description: item.description,
+    })),
+  };
+};
+
+export const breadcrumbJsonLd = (
+  items: Array<{ name: string; path: string }>,
+): JsonLd => {
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",

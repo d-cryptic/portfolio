@@ -1,5 +1,6 @@
-import { SITE } from "@consts";
+import { RESUME_URL, SITE } from "@consts";
 import { getCollection } from "astro:content";
+import { toContentPath } from "@lib/content-paths";
 
 export async function GET() {
   const [blogPosts, projectPosts] = await Promise.all([
@@ -12,7 +13,7 @@ export async function GET() {
     .slice(0, 10)
     .map(
       (post) =>
-        `- ${post.data.title}: ${SITE.URL}/blog/${post.id.replace(/\/index\.mdx?$/, "")}`,
+        `- ${post.data.title}: ${SITE.URL}${toContentPath("blog", post.id)}`,
     );
 
   const topProjects = projectPosts
@@ -20,7 +21,7 @@ export async function GET() {
     .slice(0, 8)
     .map(
       (project) =>
-        `- ${project.data.title}: ${SITE.URL}/projects/${project.id}`,
+        `- ${project.data.title}: ${SITE.URL}${toContentPath("projects", project.id)}`,
     );
 
   const lines = [
@@ -28,7 +29,13 @@ export async function GET() {
     "",
     `Site: ${SITE.URL}`,
     `Description: ${SITE.DESCRIPTION}`,
+    `Resume: ${RESUME_URL}`,
     "Primary topics: full-stack engineering, AI engineering, SRE, platform engineering, reliability, scalability, systems",
+    "",
+    "## Entity",
+    `- Name: ${SITE.AUTHOR}`,
+    "- Role: Founding Engineer; Full-stack, AI, SRE, and Platform Engineering",
+    "- Focus: product engineering, AI workflows, scalable data systems, infrastructure reliability",
     "",
     "## Key URLs",
     `- Home: ${SITE.URL}/`,
