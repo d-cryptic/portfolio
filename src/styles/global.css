@@ -299,6 +299,23 @@
     overflow-wrap: anywhere;
     word-break: break-word;
   }
+
+  article .project-video {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    margin: 1.5rem 0;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--color-text) 16%, transparent);
+    border-radius: 0.5rem;
+    background: color-mix(in srgb, var(--color-text) 4%, transparent);
+  }
+
+  article .project-video iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
 }
 
 .animate {

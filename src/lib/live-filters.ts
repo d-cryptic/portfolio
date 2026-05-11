@@ -1,4 +1,6 @@
 import type { CollectionEntry } from "astro:content";
+import { toContentPath } from "@lib/content-paths";
+
 type ContentCollection = "blog" | "projects" | "notes" | "snippets";
 
 type FilterableData = {
@@ -62,8 +64,9 @@ const toLabel = (value: string): string => {
     .replace(/\b\w/g, (match) => match.toUpperCase());
 };
 
-const normalizeValues = (values: string[]): string[] =>
-  [...new Set(values.map((value) => toLabel(value)).filter(Boolean))];
+const normalizeValues = (values: string[]): string[] => [
+  ...new Set(values.map((value) => toLabel(value)).filter(Boolean)),
+];
 
 const slugify = (value: string): string =>
   value
@@ -74,15 +77,37 @@ const slugify = (value: string): string =>
 const outcomeTagMap: Record<string, string[]> = {
   performance: ["performance", "optimization", "scalability", "load-testing"],
   seo: ["seo", "search", "metadata"],
-  infra: ["infra", "infrastructure", "devops", "platform", "sre", "servers", "nats", "docker", "kubernetes"],
+  infra: [
+    "infra",
+    "infrastructure",
+    "devops",
+    "platform",
+    "sre",
+    "servers",
+    "nats",
+    "docker",
+    "kubernetes",
+  ],
   data: ["data", "analytics", "database", "sql", "clickhouse"],
 };
 
 const roleTagMap: Record<string, string[]> = {
   sre: ["sre", "reliability", "incident", "ops"],
-  "Platform Engineer": ["platform", "devops", "infrastructure", "kubernetes", "docker"],
+  "Platform Engineer": [
+    "platform",
+    "devops",
+    "infrastructure",
+    "kubernetes",
+    "docker",
+  ],
   "Software Engineer": ["python", "c++", "git", "oss"],
-  "Systems Engineer": ["linux", "systems", "architecture", "servers", "messaging"],
+  "Systems Engineer": [
+    "linux",
+    "systems",
+    "architecture",
+    "servers",
+    "messaging",
+  ],
 };
 
 const stackTagMap: Record<string, string[]> = {
@@ -114,11 +139,8 @@ const inferFromTags = (
   return result;
 };
 
-const getEntryUrl = (entry: FilterableEntry): string => {
-  const cleanId =
-    entry.collection === "blog" ? entry.id.replace(/\/index\.mdx?$/, "") : entry.id;
-  return `/${entry.collection}/${cleanId}`;
-};
+const getEntryUrl = (entry: FilterableEntry): string =>
+  toContentPath(entry.collection, entry.id);
 
 const getCollectionLabel = (collection: ContentCollection): string => {
   const map: Record<ContentCollection, string> = {
@@ -162,7 +184,9 @@ const mapEntryToExplorerItem = (entry: FilterableEntry): ExplorerItem => {
   };
 };
 
-export const buildExplorerItems = (input: BuildExplorerInput): ExplorerItem[] => {
+export const buildExplorerItems = (
+  input: BuildExplorerInput,
+): ExplorerItem[] => {
   const contentItems = [
     ...input.blog.map(mapEntryToExplorerItem),
     ...input.projects.map(mapEntryToExplorerItem),

@@ -1,9 +1,16 @@
 import { SITE } from "@consts";
 import { getCollection } from "astro:content";
+import { toContentPath } from "@lib/content-paths";
 
 const renderSection = (
   label: string,
-  entries: Array<{ title: string; description: string; date: Date; url: string; tags: string[] }>,
+  entries: Array<{
+    title: string;
+    description: string;
+    date: Date;
+    url: string;
+    tags: string[];
+  }>,
 ) => {
   const sorted = entries.sort((a, b) => b.date.valueOf() - a.date.valueOf());
   const body = sorted.map(
@@ -36,7 +43,7 @@ export async function GET() {
         title: post.data.title,
         description: post.data.description,
         date: post.data.date,
-        url: `${SITE.URL}/blog/${post.id.replace(/\/index\.mdx?$/, "")}`,
+        url: `${SITE.URL}${toContentPath("blog", post.id)}`,
         tags: post.data.tags || [],
       })),
     ),
@@ -46,7 +53,7 @@ export async function GET() {
         title: project.data.title,
         description: project.data.description,
         date: project.data.date,
-        url: `${SITE.URL}/projects/${project.id}`,
+        url: `${SITE.URL}${toContentPath("projects", project.id)}`,
         tags: project.data.tags || [],
       })),
     ),

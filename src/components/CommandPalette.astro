@@ -1,6 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 import { SITE, RESUME_URL } from "@consts";
+import { toContentPath } from "@lib/content-paths";
 
 const [blogPosts, projectPosts] = await Promise.all([
   getCollection("blog", ({ data }) => !data.draft),
@@ -11,7 +12,7 @@ const searchItems = [
   ...blogPosts.map((post) => ({
     title: post.data.title,
     description: post.data.description,
-    url: `/blog/${post.id.replace(/\/index\.mdx?$/, "")}`,
+    url: toContentPath("blog", post.id),
     type: "blog",
     tags: post.data.tags || [],
     stack: post.data.stack || [],
@@ -22,7 +23,7 @@ const searchItems = [
   ...projectPosts.map((project) => ({
     title: project.data.title,
     description: project.data.description,
-    url: `/projects/${project.id}`,
+    url: toContentPath("projects", project.id),
     type: "projects",
     tags: project.data.tags || [],
     stack: project.data.stack || [],
@@ -69,7 +70,7 @@ const searchItems = [
 <aside data-pagefind-ignore>
   <div
     id="command-palette-backdrop"
-    class="invisible hidden fixed inset-0 z-50 bg-black/30 p-4 backdrop-blur-xs md:p-8"
+    class="invisible fixed inset-0 z-50 hidden bg-black/30 p-4 backdrop-blur-xs md:p-8"
   >
     <div
       id="command-palette"
@@ -85,7 +86,10 @@ const searchItems = [
         class="w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm text-inherit outline-none focus-visible:border-black/35 dark:border-white/20 dark:focus-visible:border-white/40"
         autocomplete="off"
       />
-      <div id="command-palette-tips" class="pt-2 text-xs text-black/65 dark:text-white/65">
+      <div
+        id="command-palette-tips"
+        class="pt-2 text-xs text-black/65 dark:text-white/65"
+      >
         <span class="tips-label">Tip:</span>
         <code>#tag</code>
         <code>@type</code>
@@ -99,7 +103,8 @@ const searchItems = [
         <span class="tips-text">and exclusions with</span>
         <code>-</code>
       </div>
-      <div id="command-palette-suggestions" class="mt-2 flex flex-wrap gap-1.5"></div>
+      <div id="command-palette-suggestions" class="mt-2 flex flex-wrap gap-1.5">
+      </div>
       <ul id="command-palette-results" class="mt-3 max-h-72 overflow-auto"></ul>
       <div class="pt-2 text-right text-xs text-black/70 dark:text-white/70">
         Press <kbd>Esc</kbd> or click anywhere to close
@@ -108,7 +113,10 @@ const searchItems = [
   </div>
 </aside>
 
-<script is:inline define:vars={{ email: SITE.EMAIL, resumeUrl: RESUME_URL, searchItems }}>
+<script
+  is:inline
+  define:vars={{ email: SITE.EMAIL, resumeUrl: RESUME_URL, searchItems }}
+>
   let activeIndex = 0;
   let currentResults = [];
 
@@ -141,12 +149,13 @@ const searchItems = [
   const saveViewModes = (modes) => {
     try {
       localStorage.setItem(VIEW_MODE_STORAGE_KEY, JSON.stringify(modes));
-    } catch {
-    }
+    } catch {}
   };
 
   const getActiveViewModes = () =>
-    VIEW_MODE_VALUES.filter((mode) => document.body.classList.contains(VIEW_MODE_CLASS_MAP[mode]));
+    VIEW_MODE_VALUES.filter((mode) =>
+      document.body.classList.contains(VIEW_MODE_CLASS_MAP[mode]),
+    );
 
   const applyViewModes = (modes) => {
     for (const mode of VIEW_MODE_VALUES) {
@@ -156,7 +165,9 @@ const searchItems = [
   };
 
   const setViewModes = (modes) => {
-    const uniqueModes = [...new Set(modes)].filter((mode) => VIEW_MODE_VALUES.includes(mode));
+    const uniqueModes = [...new Set(modes)].filter((mode) =>
+      VIEW_MODE_VALUES.includes(mode),
+    );
     applyViewModes(uniqueModes);
     saveViewModes(uniqueModes);
   };
@@ -170,7 +181,10 @@ const searchItems = [
   };
 
   const syncFullscreenModeClass = () => {
-    document.body.classList.toggle("mode-fullscreen", Boolean(document.fullscreenElement));
+    document.body.classList.toggle(
+      "mode-fullscreen",
+      Boolean(document.fullscreenElement),
+    );
   };
 
   const enterFullscreen = async () => {
@@ -245,7 +259,9 @@ const searchItems = [
         try {
           await enterFullscreen();
         } catch {
-          window.alert("Unable to enter fullscreen mode. Try again from a direct key/click action.");
+          window.alert(
+            "Unable to enter fullscreen mode. Try again from a direct key/click action.",
+          );
         }
       },
     },
@@ -329,14 +345,20 @@ const searchItems = [
   };
 
   const uniqueSortedValues = (values) =>
-    [...new Set(values.map((value) => normalizeValue(value)).filter(Boolean))].sort();
+    [
+      ...new Set(values.map((value) => normalizeValue(value)).filter(Boolean)),
+    ].sort();
 
   const suggestionIndex = {
-    types: uniqueSortedValues(searchItems.map((item) => normalizeType(item.type || ""))),
+    types: uniqueSortedValues(
+      searchItems.map((item) => normalizeType(item.type || "")),
+    ),
     tags: uniqueSortedValues(searchItems.flatMap((item) => item.tags || [])),
     stack: uniqueSortedValues(searchItems.flatMap((item) => item.stack || [])),
     roles: uniqueSortedValues(searchItems.flatMap((item) => item.roles || [])),
-    outcomes: uniqueSortedValues(searchItems.flatMap((item) => item.outcomes || [])),
+    outcomes: uniqueSortedValues(
+      searchItems.flatMap((item) => item.outcomes || []),
+    ),
   };
 
   const operatorHints = [
@@ -354,8 +376,22 @@ const searchItems = [
 
   function tokenize(query) {
     const parsed = {
-      include: { types: [], tags: [], stack: [], roles: [], outcomes: [], terms: [] },
-      exclude: { types: [], tags: [], stack: [], roles: [], outcomes: [], terms: [] },
+      include: {
+        types: [],
+        tags: [],
+        stack: [],
+        roles: [],
+        outcomes: [],
+        terms: [],
+      },
+      exclude: {
+        types: [],
+        tags: [],
+        stack: [],
+        roles: [],
+        outcomes: [],
+        terms: [],
+      },
       since: "",
       until: "",
     };
@@ -429,15 +465,23 @@ const searchItems = [
       .filter((item) => {
         const itemType = normalizeType(normalizeValue(item.type || ""));
         const itemTags = (item.tags || []).map((tag) => normalizeValue(tag));
-        const itemStack = (item.stack || []).map((value) => normalizeValue(value));
-        const itemRoles = (item.roles || []).map((value) => normalizeValue(value));
-        const itemOutcomes = (item.outcomes || []).map((value) => normalizeValue(value));
+        const itemStack = (item.stack || []).map((value) =>
+          normalizeValue(value),
+        );
+        const itemRoles = (item.roles || []).map((value) =>
+          normalizeValue(value),
+        );
+        const itemOutcomes = (item.outcomes || []).map((value) =>
+          normalizeValue(value),
+        );
         const itemDate = parseDate(item.date);
 
         const matchesOrEmpty = (selected, values) =>
-          selected.length === 0 || selected.some((value) => values.includes(value));
+          selected.length === 0 ||
+          selected.some((value) => values.includes(value));
         const hasExcluded = (selected, values) =>
-          selected.length > 0 && selected.some((value) => values.includes(value));
+          selected.length > 0 &&
+          selected.some((value) => values.includes(value));
 
         if (!matchesOrEmpty(include.types, [itemType])) return false;
         if (!matchesOrEmpty(include.tags, itemTags)) return false;
@@ -464,10 +508,14 @@ const searchItems = [
           ...(item.outcomes || []),
         ].join(" ");
 
-        const hasAllTerms = include.terms.every((term) => fuzzyScore(searchableText, term) >= 0);
+        const hasAllTerms = include.terms.every(
+          (term) => fuzzyScore(searchableText, term) >= 0,
+        );
         if (!hasAllTerms) return false;
 
-        const hasExcludedTerm = exclude.terms.some((term) => fuzzyScore(searchableText, term) >= 0);
+        const hasExcludedTerm = exclude.terms.some(
+          (term) => fuzzyScore(searchableText, term) >= 0,
+        );
         if (hasExcludedTerm) return false;
 
         return true;
@@ -488,7 +536,8 @@ const searchItems = [
         const score =
           (include.terms.length > 0
             ? include.terms.reduce(
-                (sum, term) => sum + Math.max(0, fuzzyScore(searchableText, term)),
+                (sum, term) =>
+                  sum + Math.max(0, fuzzyScore(searchableText, term)),
                 0,
               )
             : 20) +
@@ -510,7 +559,9 @@ const searchItems = [
     if (!normalized) return actions;
 
     return actions.filter((entry) => {
-      const haystack = [entry.title, entry.subtitle, ...entry.keywords].join(" ").toLowerCase();
+      const haystack = [entry.title, entry.subtitle, ...entry.keywords]
+        .join(" ")
+        .toLowerCase();
       return haystack.includes(normalized);
     });
   }
@@ -579,7 +630,9 @@ const searchItems = [
     const separatorIndex = currentToken.indexOf(":");
     if (separatorIndex !== -1) {
       const key = normalizeValue(currentToken.slice(0, separatorIndex));
-      const valuePrefix = normalizeValue(currentToken.slice(separatorIndex + 1));
+      const valuePrefix = normalizeValue(
+        currentToken.slice(separatorIndex + 1),
+      );
       const byKey = {
         type: suggestionIndex.types,
         tag: suggestionIndex.tags,
@@ -777,7 +830,10 @@ const searchItems = [
       }
 
       const { backdrop } = getPaletteElements();
-      if (backdrop?.classList.contains("hidden") || backdrop?.classList.contains("invisible")) {
+      if (
+        backdrop?.classList.contains("hidden") ||
+        backdrop?.classList.contains("invisible")
+      ) {
         return;
       }
 
@@ -788,7 +844,8 @@ const searchItems = [
       } else if (event.key === "ArrowUp") {
         event.preventDefault();
         activeIndex =
-          (activeIndex - 1 + Math.max(currentResults.length, 1)) % Math.max(currentResults.length, 1);
+          (activeIndex - 1 + Math.max(currentResults.length, 1)) %
+          Math.max(currentResults.length, 1);
         updateActiveResultState();
       } else if (event.key === "Enter") {
         event.preventDefault();
@@ -813,7 +870,9 @@ const searchItems = [
         return;
       }
 
-      const suggestion = event.target.closest("button[data-pattern-suggestion]");
+      const suggestion = event.target.closest(
+        "button[data-pattern-suggestion]",
+      );
       if (suggestion && suggestion.closest("#command-palette-suggestions")) {
         const value = suggestion.getAttribute("data-pattern-suggestion");
         if (value) applySuggestion(value);
