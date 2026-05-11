@@ -201,17 +201,17 @@ const workExperiences = [
       <div class="space-y-16">
         <!-- Work Experience Section -->
         <section class="progressive-load" style="--load-order: 2">
-          <article class="space-y-4">
-            <p>
+          <article class="space-y-5">
+            <div>
               <Callout type="work">
                 <b>What I've Been Up To</b>
               </Callout>
-            </p>
+            </div>
             <div class="work-section-copy">
               Selected work across full-stack engineering, AI systems, platform
               reliability, and scalable infrastructure.
             </div>
-            <div class="animate -mt-10">
+            <div class="animate">
               <div class="not-prose experience-panel">
                 <div class="experience-header" aria-hidden="true">
                   <span>Designation</span>
@@ -470,7 +470,7 @@ const workExperiences = [
   }
 
   .work-section-copy {
-    margin-top: -1.75rem;
+    max-width: 42rem;
     color: color-mix(in srgb, var(--color-text) 72%, transparent);
     line-height: 1.6;
   }
