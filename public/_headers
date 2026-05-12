@@ -7,6 +7,23 @@
   Permissions-Policy: geolocation=(), microphone=(), camera=()
   Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://us.i.posthog.com https://giscus.app https://www.googletagmanager.com https://static.cloudflareinsights.com; connect-src 'self' https://us.i.posthog.com https://giscus.app https://www.googletagmanager.com https://static.cloudflareinsights.com; frame-src https://giscus.app https://www.googletagmanager.com; font-src 'self' data:; worker-src 'self' blob:;
 
+/
+  Link: </index.md>; rel="alternate"; type="text/markdown"
+  Vary: Accept
+
+/index.html
+  Link: </index.md>; rel="alternate"; type="text/markdown"
+  Vary: Accept
+
+/index.md
+  Content-Type: text/markdown; charset=utf-8
+  X-Markdown-Tokens: 193
+  X-Robots-Tag: noindex
+  Vary: Accept
+  X-Content-Type-Options: nosniff
+  X-AEO-Version: 1.0
+  Cache-Control: public, max-age=3600
+
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
 
