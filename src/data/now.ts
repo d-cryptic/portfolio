@@ -115,6 +115,16 @@ export const nowPageData = {
   ] as NowSection[],
   changeLog: [
     {
+      date: "2026-10-30",
+      latestUpdate:
+        "Became a Kubestronaut with 14 Linux Foundation badges and refreshed the portfolio to show them.",
+      updates: [
+        "Added a Badges earned section with Credly-verified certifications.",
+        "Refreshed work history and profile metadata.",
+        "Added doing2done to projects.",
+      ],
+    },
+    {
       date: "2026-03-08",
       latestUpdate:
         "Added the first complete public now page with focused sections, open-to highlights, and changelog format.",

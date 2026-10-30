@@ -43,8 +43,8 @@ Full-stack and AI engineer with SRE/platform instincts, building scalable system
 
 ## Current Work
 
-- Founding Engineer at LinkRunner
-- Focus areas: Go, ClickHouse, Kafka, GKE, Redis, attribution pipelines, platform reliability, and infrastructure cost reduction
+- Platform / Infra Engineer · Kubestronaut, with 14 Linux Foundation / CNCF badges (https://www.credly.com/users/barun-debnath)
+- Focus areas: Go, ClickHouse, Kafka, Kubernetes, GitOps, Redis, platform reliability, and infrastructure cost reduction
 
 ## Selected Experience
 
