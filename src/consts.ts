@@ -50,6 +50,12 @@ export const NOW: Metadata = {
     "A living snapshot of what I am focused on, shipping, learning, and exploring right now.",
 };
 
+export const CERTIFICATIONS: Metadata = {
+  TITLE: "Certifications",
+  DESCRIPTION:
+    "Kubestronaut with 14 verified Linux Foundation and CNCF badges across Kubernetes, security, service mesh, GitOps, and observability.",
+};
+
 export const OOF: Metadata = {
   TITLE: "OOF",
   DESCRIPTION:
@@ -73,5 +79,6 @@ export const SOCIALS: Socials = [
   { NAME: "GitHub", HREF: "https://github.com/d-cryptic" },
   { NAME: "LinkedIn", HREF: "https://www.linkedin.com/in/barundebnath" },
   { NAME: "Medium", HREF: "https://medium.barundebnath.com" },
+  { NAME: "Credly", HREF: "https://www.credly.com/users/barun-debnath" },
   { NAME: "Website", HREF: "https://barundebnath.com" },
 ];

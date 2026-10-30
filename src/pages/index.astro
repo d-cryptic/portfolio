@@ -11,6 +11,7 @@ import { getCollection } from "astro:content";
 import type { CollectionEntry } from "astro:content";
 import Callout from "@components/Callout.astro";
 import QuestStatCard from "@components/QuestStatCard.astro";
+import CertificationBadges from "@components/CertificationBadges.astro";
 import { getBlogThumbnail } from "@lib/content-images";
 import { breadcrumbJsonLd, profilePageJsonLd, toAbsoluteUrl } from "@lib/seo";
 import { nowPageData } from "@data/now";
@@ -41,11 +42,12 @@ const workExperiences = [
     designation: "Founding Engineer",
     organization: "LinkRunner",
     href: "https://linkrunner.io/",
-    duration: "Nov'25 - Present",
+    duration: "Nov'25 - Jun'26",
     highlights: [
       "Rebuilt real-time attribution pipelines around Go, Kafka, ClickHouse, and Redis for high-volume event ingestion.",
       "Delivered major infra cost reductions across analytics, Kubernetes workloads, logging, and cloud migration work.",
       "Led platform reliability work across GKE, GitOps, ClickHouse operations, Redis recovery paths, and compliance evidence.",
+      "Presented the ClickHouse rebuild publicly at the ClickHouse Bangalore User Group.",
     ],
     chips: ["Go", "ClickHouse", "Kafka", "GKE", "Redis", "Cost"],
   },
@@ -105,6 +107,8 @@ const workExperiences = [
     "ClickHouse",
     "Kafka",
     "Kubernetes",
+    "Kubestronaut",
+    "CNCF",
   ]}
   schema={[
     breadcrumbJsonLd([{ name: "Home", path: "/" }]),
@@ -192,7 +196,7 @@ const workExperiences = [
             </div>
           </div>
         </div>
-        <div class="grid gap-3 md:grid-cols-3">
+        <div class="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
           <QuestStatCard
             label="Current Arc"
             value="Full-stack x AI"
@@ -202,6 +206,11 @@ const workExperiences = [
             label="Main Class"
             value="Platform-minded builder"
             detail="Go, TypeScript, ClickHouse, Kafka, Kubernetes, and production debugging."
+          />
+          <QuestStatCard
+            label="Achievement"
+            value="Kubestronaut"
+            detail="All five CNCF Kubernetes certs, plus Istio, Cilium, Argo, Kyverno, OpenTelemetry, and more."
           />
           <QuestStatCard
             label="Side Quest"
@@ -280,6 +289,8 @@ const workExperiences = [
         </section>
 
         <LoreCarousel />
+
+        <CertificationBadges />
 
         <section class="animate space-y-6">
           <div class="flex flex-wrap items-end justify-between gap-3">

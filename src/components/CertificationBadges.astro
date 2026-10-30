@@ -1,0 +1,415 @@
+---
+import Link from "@components/Link.astro";
+import {
+  CREDLY_PROFILE_URL,
+  certificationFilters,
+  certifications,
+  credlyBadgeUrl,
+  formatBadgeDate,
+  kubestronaut,
+} from "@data/certifications";
+
+interface Props {
+  showHeading?: boolean;
+}
+
+const { showHeading = true } = Astro.props as Props;
+
+const tiles = certifications.filter((cert) => cert.id !== kubestronaut.id);
+const countFor = (key: string): number =>
+  key === "all" ? tiles.length : tiles.filter((c) => c.group === key).length;
+
+const describe = (cert: (typeof certifications)[number]): string => {
+  const expiry = cert.expiresOn
+    ? `expires ${formatBadgeDate(cert.expiresOn)}`
+    : "does not expire";
+  return `${cert.name}, ${cert.level} level, issued ${formatBadgeDate(cert.issuedOn)}, ${expiry}. Opens the Credly badge in a new tab.`;
+};
+---
+
+<section class="animate cert-section space-y-6" data-cert-section>
+  {
+    showHeading && (
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p class="mb-1 text-xs tracking-wide text-black/55 uppercase dark:text-white/55">
+            Achievements
+          </p>
+          <h2 class="font-semibold text-black dark:text-white">
+            Badges earned <span aria-hidden="true">🏅</span>
+          </h2>
+        </div>
+        <p class="max-w-md text-sm leading-relaxed text-black/70 dark:text-white/70">
+          Verified Linux Foundation and CNCF credentials, issued through
+          Credly.
+        </p>
+      </div>
+    )
+  }
+
+  <a
+    class="cert-hero no-underline"
+    href={credlyBadgeUrl(kubestronaut.id)}
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label={`${kubestronaut.name} badge, ${kubestronaut.level} level, issued ${formatBadgeDate(kubestronaut.issuedOn)}. Opens the Credly badge in a new tab.`}
+  >
+    <img
+      src={kubestronaut.image}
+      alt={`${kubestronaut.name} badge`}
+      width="160"
+      height="160"
+      loading="lazy"
+      decoding="async"
+    />
+    <div class="cert-hero__body">
+      <p class="cert-hero__eyebrow">Legendary rank &middot; {kubestronaut.level}</p>
+      <h3>Kubestronaut</h3>
+      <p>
+        Holds all five CNCF Kubernetes certifications: KCNA, KCSA, CKA, CKAD,
+        and CKS. Awarded {formatBadgeDate(kubestronaut.issuedOn)}.
+      </p>
+      <span class="cert-hero__cta" aria-hidden="true">View on Credly -></span>
+    </div>
+  </a>
+
+  <div class="cert-toolbar">
+    <div class="cert-filters" role="group" aria-label="Filter badges">
+      {
+        certificationFilters.map((filter) => (
+          <button
+            type="button"
+            class="cert-chip"
+            data-cert-filter={filter.key}
+            aria-pressed={filter.key === "all" ? "true" : "false"}
+          >
+            {filter.label} <span class="cert-chip__count">{countFor(filter.key)}</span>
+          </button>
+        ))
+      }
+    </div>
+    <p class="cert-status" role="status" aria-live="polite" data-cert-status>
+      Showing {tiles.length} of {tiles.length} badges
+    </p>
+  </div>
+
+  <ul class="not-prose cert-grid">
+    {
+      tiles.map((cert) => (
+        <li class="cert-tile" data-cert-group={cert.group}>
+          <a
+            href={credlyBadgeUrl(cert.id)}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={describe(cert)}
+            class="no-underline"
+          >
+            <img
+              src={cert.image}
+              alt={`${cert.name} badge`}
+              width="96"
+              height="96"
+              loading="lazy"
+              decoding="async"
+            />
+            <span class="cert-tile__name">{cert.shortName}</span>
+            <span class="cert-tile__level">{cert.level}</span>
+            <span class="cert-tile__details" aria-hidden="true">
+              <strong>{cert.name}</strong>
+              <span>Issued {formatBadgeDate(cert.issuedOn)}</span>
+              <span>
+                {cert.expiresOn
+                  ? `Expires ${formatBadgeDate(cert.expiresOn)}`
+                  : "No expiry"}
+              </span>
+            </span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+
+  <p class="text-sm text-black/70 dark:text-white/70">
+    Full, verifiable list on <Link href={CREDLY_PROFILE_URL} external
+      >Credly</Link
+    >.
+  </p>
+</section>
+
+<style>
+  .cert-hero {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.1rem;
+    border: 1px solid color-mix(in srgb, var(--color-primary) 55%, transparent);
+    border-radius: 0.5rem;
+    background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+    color: var(--color-text);
+    transition:
+      border-color 160ms ease,
+      background-color 160ms ease,
+      transform 160ms ease;
+  }
+
+  .cert-hero:hover,
+  .cert-hero:focus-visible {
+    border-color: var(--color-primary);
+    background: color-mix(in srgb, var(--color-primary) 14%, transparent);
+    transform: translateY(-2px);
+  }
+
+  .cert-hero img {
+    width: 7rem;
+    height: 7rem;
+    object-fit: contain;
+  }
+
+  .cert-hero__body {
+    display: grid;
+    gap: 0.35rem;
+    min-width: 0;
+  }
+
+  .cert-hero__body h3,
+  .cert-hero__body p {
+    margin: 0;
+  }
+
+  .cert-hero__body h3 {
+    color: var(--color-text);
+    font-size: 1.4rem;
+    font-weight: 800;
+  }
+
+  .cert-hero__body p {
+    color: color-mix(in srgb, var(--color-text) 75%, transparent);
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
+
+  .cert-hero__body .cert-hero__eyebrow {
+    color: var(--color-primary);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .cert-hero__cta {
+    color: var(--color-primary);
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+
+  .cert-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .cert-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .cert-chip {
+    min-height: 2.25rem;
+    padding: 0.25rem 0.8rem;
+    border: 1px solid color-mix(in srgb, var(--color-text) 25%, transparent);
+    border-radius: 999px;
+    background: transparent;
+    color: color-mix(in srgb, var(--color-text) 80%, transparent);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition:
+      background-color 160ms ease,
+      border-color 160ms ease,
+      color 160ms ease;
+  }
+
+  .cert-chip:hover {
+    border-color: var(--color-primary);
+  }
+
+  .cert-chip[aria-pressed="true"] {
+    border-color: var(--color-primary);
+    background: color-mix(in srgb, var(--color-primary) 16%, transparent);
+    color: var(--color-text);
+    font-weight: 700;
+  }
+
+  .cert-chip__count {
+    margin-left: 0.2rem;
+    opacity: 0.65;
+    font-size: 0.75rem;
+  }
+
+  .cert-chip:focus-visible,
+  .cert-tile a:focus-visible,
+  .cert-hero:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 3px;
+  }
+
+  .cert-status {
+    margin: 0;
+    color: color-mix(in srgb, var(--color-text) 60%, transparent);
+    font-size: 0.8rem;
+  }
+
+  .cert-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .cert-tile[hidden] {
+    display: none;
+  }
+
+  .cert-tile a {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 0.25rem;
+    height: 100%;
+    padding: 0.9rem 0.5rem 0.75rem;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--color-text) 18%, transparent);
+    border-radius: 0.5rem;
+    color: var(--color-text);
+    text-align: center;
+    transition:
+      border-color 160ms ease,
+      transform 160ms ease;
+  }
+
+  .cert-tile a:hover,
+  .cert-tile a:focus-visible {
+    border-color: var(--color-primary);
+    transform: translateY(-2px);
+  }
+
+  .cert-tile img {
+    width: 5rem;
+    height: 5rem;
+    object-fit: contain;
+  }
+
+  .cert-tile__name {
+    font-size: 0.95rem;
+    font-weight: 800;
+  }
+
+  .cert-tile__level {
+    color: var(--color-primary);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .cert-tile__details {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: 0.2rem;
+    padding: 0.5rem;
+    background: color-mix(in srgb, var(--color-background) 94%, transparent);
+    font-size: 0.72rem;
+    line-height: 1.35;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 160ms ease;
+  }
+
+  .cert-tile__details strong {
+    font-size: 0.74rem;
+  }
+
+  .cert-tile a:hover .cert-tile__details,
+  .cert-tile a:focus-visible .cert-tile__details {
+    opacity: 1;
+  }
+
+  @media (hover: none) {
+    .cert-tile__details {
+      display: none;
+    }
+  }
+
+  @media (min-width: 480px) {
+    .cert-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 768px) {
+    .cert-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 480px) {
+    .cert-hero {
+      grid-template-columns: minmax(0, 1fr);
+      justify-items: center;
+      text-align: center;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cert-hero,
+    .cert-chip,
+    .cert-tile a,
+    .cert-tile__details {
+      transition: none;
+    }
+
+    .cert-hero:hover,
+    .cert-hero:focus-visible,
+    .cert-tile a:hover,
+    .cert-tile a:focus-visible {
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>("[data-cert-section]").forEach((section) => {
+    const chips = section.querySelectorAll<HTMLButtonElement>(
+      "[data-cert-filter]",
+    );
+    const tiles = section.querySelectorAll<HTMLElement>("[data-cert-group]");
+    const status = section.querySelector<HTMLElement>("[data-cert-status]");
+
+    chips.forEach((chip) => {
+      chip.addEventListener("click", () => {
+        const filter = chip.dataset.certFilter ?? "all";
+        let visible = 0;
+
+        chips.forEach((other) =>
+          other.setAttribute("aria-pressed", String(other === chip)),
+        );
+        tiles.forEach((tile) => {
+          const show = filter === "all" || tile.dataset.certGroup === filter;
+          tile.hidden = !show;
+          if (show) visible += 1;
+        });
+        if (status) {
+          status.textContent = `Showing ${visible} of ${tiles.length} badges`;
+        }
+      });
+    });
+  });
+</script>

@@ -1,0 +1,65 @@
+---
+import Layout from "@layouts/Layout.astro";
+import Container from "@components/Container.astro";
+import CertificationBadges from "@components/CertificationBadges.astro";
+import { CERTIFICATIONS } from "@consts";
+import {
+  certifications,
+  credlyBadgeUrl,
+  CREDLY_PROFILE_URL,
+} from "@data/certifications";
+import { breadcrumbJsonLd, itemListJsonLd, toAbsoluteUrl } from "@lib/seo";
+
+const certificationItems = certifications.map((cert) => ({
+  name: cert.name,
+  url: credlyBadgeUrl(cert.id),
+  description: `${cert.level} level, issued ${cert.issuedOn}${
+    cert.expiresOn ? `, expires ${cert.expiresOn}` : ""
+  }.`,
+}));
+---
+
+<Layout
+  title={CERTIFICATIONS.TITLE}
+  description={CERTIFICATIONS.DESCRIPTION}
+  keywords={[
+    "Kubestronaut",
+    "CKA",
+    "CKAD",
+    "CKS",
+    "CNCF certifications",
+    "Linux Foundation",
+    "Barun Debnath",
+  ]}
+  schema={[
+    breadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "Certifications", path: "/certifications" },
+    ]),
+    {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      name: CERTIFICATIONS.TITLE,
+      description: CERTIFICATIONS.DESCRIPTION,
+      url: toAbsoluteUrl("/certifications"),
+      sameAs: CREDLY_PROFILE_URL,
+    },
+    itemListJsonLd("Certifications", certificationItems),
+  ]}
+>
+  <Container>
+    <aside data-pagefind-ignore>
+      <div class="space-y-10">
+        <div class="animate space-y-2">
+          <h1 class="font-semibold text-black dark:text-white">
+            Certifications
+          </h1>
+          <p class="text-sm text-black/70 dark:text-white/70">
+            {CERTIFICATIONS.DESCRIPTION}
+          </p>
+        </div>
+        <CertificationBadges showHeading={false} />
+      </div>
+    </aside>
+  </Container>
+</Layout>
