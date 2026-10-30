@@ -51,7 +51,7 @@ export const personJsonLd = (): JsonLd => {
     name: SITE.AUTHOR,
     url: SITE.URL,
     email: SITE.EMAIL,
-    image: toAbsoluteUrl("https://assets.barundebnath.com/about-me%20(1).png"),
+    image: toAbsoluteUrl("/images/about-me.webp"),
     sameAs,
     jobTitle: "Independent Infrastructure & SRE Consultant · Kubestronaut",
     knowsAbout,
