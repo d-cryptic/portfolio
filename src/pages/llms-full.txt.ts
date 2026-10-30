@@ -50,7 +50,7 @@ export async function GET() {
     "## Entity Summary",
     `name: ${SITE.AUTHOR}`,
     "roles: Independent Infrastructure & SRE Consultant, Kubestronaut, Full-stack Engineer, AI Engineer, SRE",
-    "current: Independent Infrastructure & SRE Consultant since Jun 2026, consulting for a YC '24 AI startup and a platform serving Fortune 500 companies",
+    "current: Independent Infrastructure & SRE Consultant since Jun 2026, YC-backed startup and enterprise clients serving the Fortune 500",
     "certifications: Kubestronaut, CKA, CKAD, CKS, KCSA, KCNA, ICA, CNPA, KCA, CCA, OTCA, CAPA, CGOA, PCA (https://www.credly.com/users/barun-debnath)",
     "focus: product engineering, AI workflows, scalable data systems, observability, infrastructure reliability",
     "canonical: https://barundebnath.com/",

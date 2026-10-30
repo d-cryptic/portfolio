@@ -84,7 +84,7 @@ export async function GET() {
           url: social.HREF,
         })),
         currentRole:
-          "Independent Infrastructure & SRE Consultant (since Jun 2026), consulting for a YC '24 AI startup and a platform serving Fortune 500 companies",
+          "Independent Infrastructure & SRE Consultant (since Jun 2026), YC-backed startup and enterprise clients serving the Fortune 500",
         resume: RESUME_URL,
         location: "Bangalore, India",
         skills,

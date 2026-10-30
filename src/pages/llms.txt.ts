@@ -34,7 +34,7 @@ export async function GET() {
     "",
     "## Entity",
     `- Name: ${SITE.AUTHOR}`,
-    "- Role: Independent Infrastructure & SRE Consultant · Kubestronaut (since Jun 2026), consulting for a YC '24 AI startup and a platform serving Fortune 500 companies; also Full-stack, AI, SRE, and Platform Engineering",
+    "- Role: Independent Infrastructure & SRE Consultant · Kubestronaut (since Jun 2026), YC-backed startup and enterprise clients serving the Fortune 500; also Full-stack, AI, SRE, and Platform Engineering",
     "- Certifications: Kubestronaut and 14 Linux Foundation / CNCF badges (verify: https://www.credly.com/users/barun-debnath)",
     "- Focus: product engineering, AI workflows, scalable data systems, infrastructure reliability",
     "",

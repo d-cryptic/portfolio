@@ -43,7 +43,7 @@ Full-stack and AI engineer with SRE/platform instincts, building scalable system
 
 ## Current Work
 
-- Independent Infrastructure & SRE Consultant since Jun 2026, consulting for a YC '24 AI startup and a platform serving Fortune 500 companies
+- Independent Infrastructure & SRE Consultant since Jun 2026, YC-backed startup and enterprise clients serving the Fortune 500
 - Kubestronaut, with 14 Linux Foundation / CNCF badges (https://www.credly.com/users/barun-debnath)
 - Focus areas: Go, ClickHouse, Kafka, Kubernetes, GitOps, Redis, platform reliability, and infrastructure cost reduction
 
