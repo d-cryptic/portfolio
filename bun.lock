@@ -1,5 +1,6 @@
 {
   "lockfileVersion": 1,
+  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "astro-micro",
@@ -8,6 +9,9 @@
         "@astrojs/mdx": "^4.2.3",
         "@astrojs/rss": "^4.0.11",
         "@astrojs/sitemap": "^3.3.0",
+        "@dualmark/astro": "^0.5.2",
+        "@dualmark/converters": "^0.5.2",
+        "@dualmark/core": "^0.5.2",
         "@fontsource/geist-mono": "^5.2.5",
         "@fontsource/geist-sans": "^5.2.5",
         "@fontsource/ibm-plex-mono": "^5.2.5",
@@ -79,6 +83,12 @@
     "@chevrotain/types": ["@chevrotain/types@11.0.3", "", {}, "sha512-gsiM3G8b58kZC2HaWR50gu6Y1440cHiJ+i3JUvcp/35JchYejb2+5MVeJK0iKThYpAa/P2PYFV4hoi44HD+aHQ=="],
 
     "@chevrotain/utils": ["@chevrotain/utils@11.0.3", "", {}, "sha512-YslZMgtJUyuMbZ+aKvfF3x1f5liK4mWNxghFRv7jqRR9C3R3fAOGTTKvxXDa2Y1s9zSbcpuO0cAxDYsc9SrXoQ=="],
+
+    "@dualmark/astro": ["@dualmark/astro@0.5.2", "", { "dependencies": { "@dualmark/converters": "0.5.2", "@dualmark/core": "0.5.2" }, "peerDependencies": { "astro": "^5.0.0" } }, "sha512-B7s22z9QL1YODY+R99loJB+Qfv727J3KmnZcoIwwGwSDa7IKC5bk0mOSOcUM3A7EiXAgu3qFf8aDHPe3EltyAQ=="],
+
+    "@dualmark/converters": ["@dualmark/converters@0.5.2", "", { "dependencies": { "@dualmark/core": "0.5.2" } }, "sha512-1flaynO76ZEqwheQ32yW8KEV8bGujili2rmswDrHCrIl0FgrwBa/HgfVeXGKfomCYkgaTzuBqAKKt/Hdl/RODQ=="],
+
+    "@dualmark/core": ["@dualmark/core@0.5.2", "", {}, "sha512-03IeIV3mgx40hpKryB7sX0xig/u3rTcBQ0Q3n+hEzMqeX86s8X3bVVPJGBF4adGatMdtxGY1YN6IsCLQ4WRXMA=="],
 
     "@emmetio/abbreviation": ["@emmetio/abbreviation@2.3.3", "", { "dependencies": { "@emmetio/scanner": "^1.0.4" } }, "sha512-mgv58UrU3rh4YgbE/TzgLQwJ3pFsHHhCLqY20aJq+9comytTXUDNGG/SMtSeMJdkpxgXSXunBGLD8Boka3JyVA=="],
 
