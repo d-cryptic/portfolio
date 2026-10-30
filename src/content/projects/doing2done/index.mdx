@@ -1,0 +1,45 @@
+---
+title: "doing2done"
+description: "macOS tool that turns handwritten Apple Notes into smart TickTick todos and a private, searchable VitePress note vault."
+date: "2026-07-12"
+draft: false
+repoURL: "https://github.com/d-cryptic/doing2done"
+tags:
+  - python
+  - productivity
+  - automation
+  - macos
+stack:
+  - Python
+  - TypeScript
+  - VitePress
+  - TickTick API
+  - Cloudflare Pages
+  - Cloudflare Access
+  - launchd
+outcomes:
+  - Handwritten Apple Notes become routed, deduped TickTick todos
+  - Private note vault with search, tags, backlinks, and daily briefs
+  - Pluggable todo providers: TickTick, Apple Reminders, or Markdown
+---
+
+## What it is
+
+doing2done turns handwritten Apple Notes into smart todos and a private, hosted note vault. Scribble on an iPad with Apple Pencil, and about thirty minutes later the todos are in your task app and the note is searchable in your vault. Ink in, done out.
+
+Handwriting is read on-device with Apple Vision. A cheap LLM classifies each note into todos, a title, tags, and a TL;DR. Diagrams are kept at full resolution and transcribed alongside.
+
+## What I built
+
+- Ingest pipeline that reads Apple Notes directly from NoteStore and classifies them into todos and Markdown.
+- TickTick integration that routes todos into existing lists, dedupes them, handles due times and subtasks, and reconciles completions.
+- A VitePress vault deployed to Cloudflare Pages and gated by Cloudflare Access, with search, a tag index, related-note backlinks, and daily notes with overdue rollover.
+- A provider-agnostic todo layer behind a `TodoProvider` protocol, with TickTick, Apple Reminders, and Markdown backends.
+- An eval harness with golden cases that catches regressions such as hallucinated todos or bad time parsing.
+- A launchd scheduler for ingest, daily briefs, and deploys, plus a `d2d` CLI for everything else.
+
+## Design notes
+
+- Reads happen on-device, so handwriting never leaves the Mac for OCR.
+- Dedup state lives in SQLite and is backed up to R2, since losing it would duplicate every todo.
+- The vault is private by default, and individual notes can be shared through revocable, unguessable links.
