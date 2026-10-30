@@ -37,7 +37,24 @@ const projects = [...allProjects]
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
   .slice(0, SITE.NUM_PROJECTS_ON_HOMEPAGE);
 
-const workExperiences = [
+const workExperiences: {
+  designation: string;
+  organization: string;
+  href?: string;
+  duration: string;
+  highlights: string[];
+  chips: string[];
+}[] = [
+  {
+    designation: "Infrastructure & SRE Consultant",
+    organization: "Independent",
+    duration: "Jun'26 - Present",
+    highlights: [
+      "Consulting on infrastructure and SRE for a YC '24 AI startup.",
+      "Consulting for a platform serving Fortune 500 companies on reliability and platform engineering.",
+    ],
+    chips: ["Kubernetes", "SRE", "Platform", "Reliability", "Cost"],
+  },
   {
     designation: "Founding Engineer",
     organization: "LinkRunner",
@@ -199,8 +216,8 @@ const workExperiences = [
         <div class="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
           <QuestStatCard
             label="Current Arc"
-            value="Full-stack x AI"
-            detail="Shipping product experiences, agents, APIs, and the infra they depend on."
+            value="Infra & SRE consulting"
+            detail="Independent consultant for a YC '24 AI startup and a platform serving Fortune 500 companies."
           />
           <QuestStatCard
             label="Main Class"
@@ -247,9 +264,13 @@ const workExperiences = [
                       <details class="experience-item" open={index === 0}>
                         <summary>
                           <span>{experience.designation}</span>
-                          <Link href={experience.href} external>
-                            {experience.organization}
-                          </Link>
+                          {experience.href ? (
+                            <Link href={experience.href} external>
+                              {experience.organization}
+                            </Link>
+                          ) : (
+                            <span>{experience.organization}</span>
+                          )}
                           <span>{experience.duration}</span>
                           <span class="experience-toggle" aria-hidden="true">
                             +

@@ -74,7 +74,7 @@ export async function GET() {
         type: "Person",
         name: SITE.AUTHOR,
         roles: [
-          "Platform / Infra Engineer · Kubestronaut",
+          "Independent Infrastructure & SRE Consultant · Kubestronaut",
           "Full-stack Engineer",
           "AI Engineer",
           "SRE",
@@ -83,6 +83,8 @@ export async function GET() {
           label: social.NAME,
           url: social.HREF,
         })),
+        currentRole:
+          "Independent Infrastructure & SRE Consultant (since Jun 2026), consulting for a YC '24 AI startup and a platform serving Fortune 500 companies",
         resume: RESUME_URL,
         location: "Bangalore, India",
         skills,

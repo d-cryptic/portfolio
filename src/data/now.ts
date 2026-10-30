@@ -13,6 +13,7 @@ export const nowPageData = {
   intro:
     "A public snapshot of what I am focused on right now. I update this page as priorities and routines evolve.",
   focusedOn: [
+    "Independent infrastructure and SRE consulting for a YC '24 AI startup and a platform serving Fortune 500 companies.",
     "Building production-grade platform systems with clear operational guardrails.",
     "Improving reliability and developer workflows for fast shipping without regressions.",
     "Maintaining a consistent writing and learning cadence.",
@@ -59,6 +60,7 @@ export const nowPageData = {
     {
       title: "What I’m Focused On",
       items: [
+        "Independent infrastructure and SRE consulting for a YC '24 AI startup and a platform serving Fortune 500 companies.",
         "Building production-grade platform systems with clear operational guardrails.",
         "Improving reliability and developer workflows for fast shipping without regressions.",
         "Maintaining a consistent writing and learning cadence.",
@@ -114,6 +116,15 @@ export const nowPageData = {
     },
   ] as NowSection[],
   changeLog: [
+    {
+      date: "2026-10-30",
+      latestUpdate:
+        "Now working as an independent Infrastructure & SRE consultant for a YC '24 AI startup and a platform serving Fortune 500 companies.",
+      updates: [
+        "Updated the experience timeline and profile metadata with the current role.",
+        "LinkRunner is now listed as a past role (Nov'25 - Jun'26).",
+      ],
+    },
     {
       date: "2026-10-30",
       latestUpdate:

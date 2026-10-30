@@ -53,7 +53,7 @@ export const personJsonLd = (): JsonLd => {
     email: SITE.EMAIL,
     image: toAbsoluteUrl("https://assets.barundebnath.com/about-me%20(1).png"),
     sameAs,
-    jobTitle: "Platform / Infra Engineer · Kubestronaut",
+    jobTitle: "Independent Infrastructure & SRE Consultant · Kubestronaut",
     knowsAbout,
     hasOccupation: {
       "@type": "Occupation",
